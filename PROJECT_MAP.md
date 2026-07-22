@@ -8,7 +8,7 @@ Chi tiết & nguyên tắc: `docs/superpowers/specs/2026-07-22-ai-news-aggregato
 
 ## Tình trạng
 - [x] Cột mốc 1: collector Hacker News + arXiv, in ra console.
-- [ ] Cột mốc 2: tóm tắt AI song ngữ (Claude Haiku).
+- [~] Cột mốc 2: tóm tắt AI song ngữ (Claude Haiku) — code xong, chờ API key để test.
 - [ ] Cột mốc 3: đủ 6 nguồn + dedupe + ghi Supabase.
 - [ ] Cột mốc 4: frontend Next.js.
 - [ ] Cột mốc 5: GitHub Actions chạy tự động.
@@ -19,9 +19,12 @@ Chi tiết & nguyên tắc: `docs/superpowers/specs/2026-07-22-ai-news-aggregato
 | `collect.js` | Điểm chạy chính: gọi các collector, gộp, in console. |
 | `collectors/hackernews.js` | Thu thập tin AI từ HN qua Algolia HN Search API. |
 | `collectors/arxiv.js` | Thu thập bài mới từ arXiv (cs.AI, cs.LG, cs.RO) qua Atom API. |
+| `summarize/summarizer.js` | Tóm tắt AI song ngữ (VI+EN) bằng Claude Haiku (`claude-haiku-4-5`), structured outputs. `summarizeItem` / `summarizeMany`. |
+| `summarize-test.js` | Test cột mốc 2: thu vài tin rồi tóm tắt, in ra để xem chất lượng. |
 | `lib/config.js` | Cấu hình chung: từ khoá AI, chuyên mục arXiv, giới hạn số tin, cửa sổ thời gian. |
 | `lib/http.js` | fetch dùng chung: timeout, User-Agent; helper `fetchJson` / `fetchText`. |
-| `package.json` | Node ESM (`type: module`); script `npm run collect`. |
+| `.env` | Chứa `ANTHROPIC_API_KEY` (KHÔNG commit). Mẫu: `.env.example`. |
+| `package.json` | Node ESM (`type: module`); scripts `npm run collect`, `npm run summarize`. |
 
 ## Khuôn dữ liệu chung (interface giữa các module)
 Mọi collector trả về mảng object: `{ source, sourceId, title, url, author, publishedAt, score, extra }`.

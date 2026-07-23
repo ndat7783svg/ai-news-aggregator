@@ -2,7 +2,10 @@ name: Thu thập & tóm tắt tin
 
 on:
   schedule:
-    - cron: "*/30 * * * *" # chạy mỗi 30 phút (giờ UTC)
+    # Mỗi 30 phút, nhưng ở phút LẺ (:13 và :43) thay vì :00/:30.
+    # Phút tròn là giờ cao điểm của GitHub -> scheduled workflow hay bị bỏ qua.
+    # Phút lẻ/thấp điểm giúp lịch chạy đều đặn hơn nhiều.
+    - cron: "13,43 * * * *"
   workflow_dispatch: {} # cho phép bấm chạy tay trong tab Actions
 
 # Không cho 2 lần chạy chồng lên nhau.

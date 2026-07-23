@@ -11,7 +11,7 @@ Chi tiết & nguyên tắc: `docs/superpowers/specs/2026-07-22-ai-news-aggregato
 - [x] Cột mốc 2: tóm tắt AI song ngữ (Claude Haiku) — đã test OK.
 - [x] Cột mốc 3a: dedupe + tóm tắt + ghi Supabase (HN + arXiv) — đã test OK, có 40 tin trong DB.
 - [ ] Cột mốc 3b: thêm 4 nguồn còn lại (blog RSS, GitHub Releases, GitHub Trending, Reddit).
-- [ ] Cột mốc 4: frontend Next.js.
+- [x] Cột mốc 4: frontend Next.js (feed từ Supabase, nút VI/EN) — đã test render OK với dữ liệu thật.
 - [ ] Cột mốc 5: GitHub Actions chạy tự động.
 
 ## File / thư mục chính
@@ -28,6 +28,12 @@ Chi tiết & nguyên tắc: `docs/superpowers/specs/2026-07-22-ai-news-aggregato
 | `lib/keys.js` | `itemKey(item)` = "source\|source_id" — khoá chống trùng. |
 | `lib/config.js` | Cấu hình chung: từ khoá AI, chuyên mục arXiv, giới hạn số tin, cửa sổ thời gian. |
 | `lib/http.js` | fetch dùng chung: timeout, User-Agent; helper `fetchJson` / `fetchText`. |
+| `web/` | **Frontend Next.js (cột mốc 4).** App Router, đọc Supabase (anon key) phía server. |
+| `web/app/page.js` | Server component: đọc `news_items` từ Supabase → `Feed`. ISR 5 phút. |
+| `web/components/Feed.js` | Client: nút chuyển VI/EN (nhớ localStorage), render danh sách thẻ tin. |
+| `web/components/NewsCard.js` | Thẻ 1 tin: badge nguồn, điểm, thời gian, tiêu đề (link), tóm tắt, link gốc. |
+| `web/lib/i18n.js` | Chuỗi giao diện VI/EN. `web/lib/format.js`: nhãn+màu nguồn, thời gian tương đối. |
+| `web/.env.local` | `SUPABASE_URL` + `SUPABASE_ANON_KEY` (KHÔNG commit). Mẫu: `.env.local.example`. |
 | `.env` | Chứa `ANTHROPIC_API_KEY` (KHÔNG commit). Mẫu: `.env.example`. |
 | `package.json` | Node ESM (`type: module`); scripts `npm run collect`, `npm run summarize`. |
 

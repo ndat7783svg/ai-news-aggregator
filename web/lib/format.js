@@ -3,6 +3,12 @@
 export const SOURCE_META = {
   hackernews: { label: "Hacker News", color: "#ff6600" },
   arxiv: { label: "arXiv", color: "#b31b1b" },
+  openai: { label: "OpenAI", color: "#10a37f" },
+  deepmind: { label: "Google DeepMind", color: "#1a73e8" },
+  huggingface: { label: "Hugging Face", color: "#ff9d00" },
+  github_release: { label: "GitHub Release", color: "#6e40c9" },
+  github_trending: { label: "GitHub Trending", color: "#24292e" },
+  reddit: { label: "Reddit", color: "#ff4500" },
 };
 
 export function sourceMeta(source) {

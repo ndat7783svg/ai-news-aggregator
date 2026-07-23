@@ -10,7 +10,7 @@ Chi tiết & nguyên tắc: `docs/superpowers/specs/2026-07-22-ai-news-aggregato
 - [x] Cột mốc 1: collector Hacker News + arXiv, in ra console.
 - [x] Cột mốc 2: tóm tắt AI song ngữ (Claude Haiku) — đã test OK.
 - [x] Cột mốc 3a: dedupe + tóm tắt + ghi Supabase (HN + arXiv) — đã test OK, có 40 tin trong DB.
-- [ ] Cột mốc 3b: thêm 4 nguồn còn lại (blog RSS, GitHub Releases, GitHub Trending, Reddit).
+- [~] Cột mốc 3b: đã thêm Blog RSS (OpenAI/DeepMind/HF), GitHub Releases, GitHub Trending — chạy OK. Còn Reddit (chờ credential).
 - [x] Cột mốc 4: frontend Next.js (feed từ Supabase, nút VI/EN) — đã test render OK với dữ liệu thật.
 - [ ] Cột mốc 5: GitHub Actions chạy tự động.
 
@@ -20,6 +20,9 @@ Chi tiết & nguyên tắc: `docs/superpowers/specs/2026-07-22-ai-news-aggregato
 | `collect.js` | Điểm chạy chính: gọi các collector, gộp, in console. |
 | `collectors/hackernews.js` | Thu thập tin AI từ HN qua Algolia HN Search API. |
 | `collectors/arxiv.js` | Thu thập bài mới từ arXiv (cs.AI, cs.LG, cs.RO) qua Atom API. |
+| `collectors/blogs.js` | Blog chính thức qua RSS/Atom (OpenAI, Google DeepMind, Hugging Face). |
+| `collectors/github.js` | GitHub Releases (repo AI lớn) + "Trending" qua Search API. Dùng api.github.com. |
+| `collectors/reddit.js` | Reddit OAuth (cần REDDIT_CLIENT_ID/SECRET); tự bỏ qua nếu thiếu. |
 | `summarize/summarizer.js` | Tóm tắt AI song ngữ (VI+EN) bằng Claude Haiku (`claude-haiku-4-5`), structured outputs. `summarizeItem` / `summarizeMany`. |
 | `summarize-test.js` | Test cột mốc 2: thu vài tin rồi tóm tắt, in ra để xem chất lượng. |
 | `pipeline.js` | **Pipeline chính (cột mốc 3):** thu thập → lọc tin mới → tóm tắt → ghi Supabase. GitHub Actions sẽ chạy file này. |

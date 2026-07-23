@@ -4,14 +4,21 @@
 
 import { collectHackerNews } from "./collectors/hackernews.js";
 import { collectArxiv } from "./collectors/arxiv.js";
+import { collectBlogs } from "./collectors/blogs.js";
+import { collectGithubReleases, collectGithubTrending } from "./collectors/github.js";
+import { collectReddit } from "./collectors/reddit.js";
 import { summarizeMany } from "./summarize/summarizer.js";
 import { fetchExistingKeys, insertItems } from "./db/supabase.js";
 import { itemKey } from "./lib/keys.js";
 
-// Các collector đang bật. Cột mốc 3b sẽ thêm nguồn vào đây.
+// Các collector đang bật. Reddit tự bỏ qua nếu chưa có credential.
 const COLLECTORS = [
   ["Hacker News", collectHackerNews],
   ["arXiv", collectArxiv],
+  ["Blog", collectBlogs],
+  ["GitHub Releases", collectGithubReleases],
+  ["GitHub Trending", collectGithubTrending],
+  ["Reddit", collectReddit],
 ];
 
 async function safeCollect(name, fn) {

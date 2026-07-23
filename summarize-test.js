@@ -29,10 +29,29 @@ async function main() {
   }
 
   console.log("Thu thập vài tin để test tóm tắt…");
-  const [hn, arxiv] = await Promise.all([collectHackerNews(), collectArxiv()]);
+
+  // Lấy từng nguồn an toàn: 1 nguồn lỗi mạng không làm sập cả chương trình.
+  async function safe(name, fn) {
+    try {
+      return await fn();
+    } catch (err) {
+      const reason = err?.cause?.code === "UND_ERR_CONNECT_TIMEOUT" ? "quá thời gian kết nối (mạng?)" : err.message;
+      console.error(`  ⚠ Không lấy được ${name}: ${reason}`);
+      return [];
+    }
+  }
+
+  const [hn, arxiv] = await Promise.all([
+    safe("Hacker News", collectHackerNews),
+    safe("arXiv", collectArxiv),
+  ]);
 
   // Lấy vài tin mỗi nguồn để chất lượng tóm tắt dễ so sánh.
   const sample = [...hn.slice(0, PER_SOURCE), ...arxiv.slice(0, PER_SOURCE)];
+  if (sample.length === 0) {
+    console.error("\nKhông thu được tin nào — thường do mất kết nối internet. Kiểm tra mạng rồi chạy lại: npm run summarize");
+    process.exit(1);
+  }
   console.log(`Đang tóm tắt ${sample.length} tin bằng Claude Haiku…\n`);
 
   const summarized = await summarizeMany(sample, { concurrency: 3 });

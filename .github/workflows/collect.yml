@@ -1,0 +1,36 @@
+name: Thu thập & tóm tắt tin
+
+on:
+  schedule:
+    - cron: "*/30 * * * *" # chạy mỗi 30 phút (giờ UTC)
+  workflow_dispatch: {} # cho phép bấm chạy tay trong tab Actions
+
+# Không cho 2 lần chạy chồng lên nhau.
+concurrency:
+  group: collect
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Cài dependencies
+        run: npm ci
+
+      - name: Chạy pipeline (thu thập → tóm tắt → ghi Supabase)
+        run: node pipeline.js
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          # Token GitHub tự cấp sẵn cho mỗi lần chạy (giúp phần GitHub collector chạy mượt).
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Tuỳ chọn — có thì hút thêm Reddit, không có thì bỏ qua:
+          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}

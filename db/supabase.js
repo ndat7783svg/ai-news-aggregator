@@ -8,11 +8,14 @@ const TABLE = "news_items";
 let client = null;
 function getClient() {
   if (!client) {
-    const url = process.env.SUPABASE_URL;
+    const rawUrl = process.env.SUPABASE_URL;
     const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!url || !key) {
+    if (!rawUrl || !key) {
       throw new Error("Thiếu SUPABASE_URL hoặc SUPABASE_SERVICE_ROLE_KEY trong .env");
     }
+    // Chuẩn hoá URL: bỏ dấu "/" cuối và phần "/rest/v1" nếu người dùng lỡ dán vào.
+    // Thư viện Supabase cần URL gốc (https://xxxx.supabase.co).
+    const url = rawUrl.trim().replace(/\/+$/, "").replace(/\/rest\/v1$/, "");
     client = createClient(url, key, { auth: { persistSession: false } });
   }
   return client;

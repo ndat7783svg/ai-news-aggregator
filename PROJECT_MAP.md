@@ -9,7 +9,8 @@ Chi tiết & nguyên tắc: `docs/superpowers/specs/2026-07-22-ai-news-aggregato
 ## Tình trạng
 - [x] Cột mốc 1: collector Hacker News + arXiv, in ra console.
 - [x] Cột mốc 2: tóm tắt AI song ngữ (Claude Haiku) — đã test OK.
-- [~] Cột mốc 3: dedupe + ghi Supabase với 2 nguồn (3a) xong code; 3b thêm 4 nguồn còn lại.
+- [x] Cột mốc 3a: dedupe + tóm tắt + ghi Supabase (HN + arXiv) — đã test OK, có 40 tin trong DB.
+- [ ] Cột mốc 3b: thêm 4 nguồn còn lại (blog RSS, GitHub Releases, GitHub Trending, Reddit).
 - [ ] Cột mốc 4: frontend Next.js.
 - [ ] Cột mốc 5: GitHub Actions chạy tự động.
 

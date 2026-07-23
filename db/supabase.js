@@ -13,19 +13,21 @@ function getClient() {
     if (!rawUrl || !key) {
       throw new Error("Thiếu SUPABASE_URL hoặc SUPABASE_SERVICE_ROLE_KEY trong .env");
     }
-    // Chuẩn hoá URL cho "chịu đựng" các kiểu dán thừa hay gặp:
-    // - lỡ dán cả "SUPABASE_URL=" phía trước
-    // - lỡ dán kèm dấu nháy
-    // - dấu "/" cuối hoặc phần "/rest/v1" thừa
-    // Thư viện Supabase cần URL gốc (https://xxxx.supabase.co).
-    const url = rawUrl
-      .trim()
-      .replace(/^SUPABASE_URL\s*=\s*/i, "")
-      .replace(/["']/g, "")
-      .trim()
+    // Chuẩn hoá "chịu đựng" các kiểu dán thừa hay gặp: lỡ dán cả "TÊN=" phía trước,
+    // dấu nháy bao ngoài, khoảng trắng/xuống dòng thừa.
+    const cleanSecret = (raw, name) =>
+      raw
+        .trim()
+        .replace(new RegExp("^" + name + "\\s*=\\s*", "i"), "")
+        .replace(/^["']|["']$/g, "")
+        .trim();
+
+    // URL: thêm bỏ dấu "/" cuối và phần "/rest/v1" thừa.
+    const url = cleanSecret(rawUrl, "SUPABASE_URL")
       .replace(/\/+$/, "")
       .replace(/\/rest\/v1$/, "");
-    client = createClient(url, key.trim(), { auth: { persistSession: false } });
+    const cleanKey = cleanSecret(key, "SUPABASE_SERVICE_ROLE_KEY");
+    client = createClient(url, cleanKey, { auth: { persistSession: false } });
   }
   return client;
 }

@@ -6,13 +6,20 @@ Tra cứu nhanh cấu trúc dự án. Cập nhật khi thêm file/hệ thống m
 Website tổng hợp & tóm tắt tin tức AI (song ngữ VI + EN), hiển thị feed kèm link bài gốc.
 Chi tiết & nguyên tắc: `docs/superpowers/specs/2026-07-22-ai-news-aggregator-design.md`.
 
+**Đang chạy thật:**
+- Web công khai: https://ai-news-aggregator-ivory-beta.vercel.app (Vercel, root = `web/`)
+- Repo: https://github.com/ndat7783svg/ai-news-aggregator
+- Pipeline tự chạy mỗi 30 phút qua GitHub Actions (`.github/workflows/collect.yml`)
+- Database: Supabase (bảng `news_items`), RLS đọc-công-khai/ghi-chỉ-service_role
+
 ## Tình trạng
 - [x] Cột mốc 1: collector Hacker News + arXiv, in ra console.
 - [x] Cột mốc 2: tóm tắt AI song ngữ (Claude Haiku) — đã test OK.
 - [x] Cột mốc 3a: dedupe + tóm tắt + ghi Supabase (HN + arXiv) — đã test OK, có 40 tin trong DB.
 - [~] Cột mốc 3b: đã thêm Blog RSS (OpenAI/DeepMind/HF), GitHub Releases, GitHub Trending — chạy OK. Còn Reddit (chờ credential).
 - [x] Cột mốc 4: frontend Next.js (feed từ Supabase, nút VI/EN) — đã test render OK với dữ liệu thật.
-- [ ] Cột mốc 5: GitHub Actions chạy tự động.
+- [x] Cột mốc 5: GitHub Actions chạy mỗi 30 phút + deploy Vercel công khai — HOÀN TẤT.
+- [ ] (Tuỳ chọn) Thêm Reddit: cần REDDIT_CLIENT_ID/SECRET (secret trên GitHub + Vercel nếu cần).
 
 ## File / thư mục chính
 | Đường dẫn | Vai trò |

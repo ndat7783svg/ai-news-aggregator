@@ -6,10 +6,12 @@
   "description": "Website tổng hợp & tóm tắt tin tức AI (song ngữ VI + EN)",
   "scripts": {
     "collect": "node collect.js",
-    "summarize": "node --env-file=.env summarize-test.js"
+    "summarize": "node --env-file=.env summarize-test.js",
+    "pipeline": "node --env-file=.env pipeline.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.112.5",
+    "@supabase/supabase-js": "^2.110.8",
     "fast-xml-parser": "^4.5.0"
   }
 }

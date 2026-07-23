@@ -5,7 +5,13 @@ import NewsCard from "./NewsCard";
 import { t } from "../lib/i18n";
 import { SOURCE_FILTERS, PAGE_SIZE } from "../lib/filters";
 
-export default function Feed({ initialItems, initialHasMore, error, configMissing }) {
+export default function Feed({
+  initialItems,
+  initialHasMore,
+  availableSources = [],
+  error,
+  configMissing,
+}) {
   const [lang, setLang] = useState("vi");
   const [filter, setFilter] = useState("all");
   const [items, setItems] = useState(initialItems);
@@ -116,10 +122,10 @@ export default function Feed({ initialItems, initialHasMore, error, configMissin
     return () => obs.disconnect();
   }, []);
 
-  const availableFilters = SOURCE_FILTERS.filter((f) =>
-    // Hiện bộ lọc nếu có tin trong danh sách hiện tại, HOẶC đang chọn chính nó
-    // (để nút không biến mất khi lọc), HOẶC đang ở "all" ban đầu có dữ liệu.
-    filter === f.key || initialItems.some((it) => f.sources.includes(it.source))
+  // Hiện nút lọc dựa trên các nguồn THỰC CÓ trong DB (không phụ thuộc trang đầu),
+  // hoặc nếu đang chọn chính nó (để nút không biến mất khi đang lọc).
+  const availableFilters = SOURCE_FILTERS.filter(
+    (f) => filter === f.key || f.sources.some((s) => availableSources.includes(s))
   );
   const activeFilterLabel =
     filter === "all" ? t(lang, "all") : SOURCE_FILTERS.find((f) => f.key === filter)?.label;

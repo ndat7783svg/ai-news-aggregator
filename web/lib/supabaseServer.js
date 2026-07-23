@@ -50,3 +50,20 @@ export async function fetchItems({ filter = "all", offset = 0, limit = 40 } = {}
   if (error) return { items: [], hasMore: false, error: error.message };
   return { items: data || [], hasMore: (data || []).length === limit };
 }
+
+/**
+ * Lấy danh sách các NGUỒN thực sự có tin trong DB (để quyết định hiện nút lọc nào).
+ * Quét cột source của ~2000 tin mới nhất (nhẹ) rồi khử trùng.
+ * @returns {Promise<string[]>}
+ */
+export async function fetchAvailableSources() {
+  const supabase = getClient();
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from("news_items")
+    .select("source")
+    .order("id", { ascending: false })
+    .limit(2000);
+  if (error || !data) return [];
+  return [...new Set(data.map((r) => r.source))];
+}

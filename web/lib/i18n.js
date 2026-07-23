@@ -4,6 +4,7 @@
 const STRINGS = {
   vi: {
     tagline: "Tổng hợp & tóm tắt tin tức AI, kèm nguồn.",
+    all: "Tất cả",
     readOriginal: "Đọc bài gốc",
     empty: "Chưa có tin nào trong cơ sở dữ liệu.",
     errorPrefix: "Lỗi tải dữ liệu",
@@ -14,6 +15,7 @@ const STRINGS = {
   },
   en: {
     tagline: "AI news, summarized, with sources.",
+    all: "All",
     readOriginal: "Read original",
     empty: "No items in the database yet.",
     errorPrefix: "Failed to load data",

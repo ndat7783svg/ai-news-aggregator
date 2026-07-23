@@ -107,6 +107,37 @@ body {
   color: #ef4444;
 }
 
+/* Hàng nút lọc theo nguồn */
+.source-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.source-filter button {
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--muted);
+  padding: 6px 13px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.12s, background 0.12s, border-color 0.12s;
+}
+
+.source-filter button:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.source-filter button.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
 .count {
   color: var(--muted);
   font-size: 0.85rem;

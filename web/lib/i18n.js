@@ -12,6 +12,8 @@ const STRINGS = {
       "Chưa cấu hình Supabase. Thêm SUPABASE_URL và SUPABASE_ANON_KEY vào web/.env.local rồi tải lại trang.",
     itemsSuffix: "tin",
     updatedAuto: "Cập nhật tự động",
+    loadingMore: "Đang tải thêm…",
+    end: "— Đã hết tin —",
   },
   en: {
     tagline: "AI news, summarized, with sources.",
@@ -23,6 +25,8 @@ const STRINGS = {
       "Supabase not configured. Add SUPABASE_URL and SUPABASE_ANON_KEY to web/.env.local and reload.",
     itemsSuffix: "items",
     updatedAuto: "Auto-updated",
+    loadingMore: "Loading more…",
+    end: "— No more items —",
   },
 };
 

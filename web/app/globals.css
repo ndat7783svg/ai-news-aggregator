@@ -231,6 +231,18 @@ body {
   color: var(--muted);
 }
 
+/* Chỉ báo tải thêm / hết tin (infinite scroll) */
+.loadmore {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.85rem;
+  padding: 18px 0 8px;
+}
+
+.loadmore.end {
+  opacity: 0.7;
+}
+
 @media (max-width: 480px) {
   .site-title {
     font-size: 1.6rem;

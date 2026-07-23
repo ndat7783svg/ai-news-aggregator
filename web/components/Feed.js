@@ -1,25 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import NewsCard from "./NewsCard";
 import { t } from "../lib/i18n";
+import { SOURCE_FILTERS, PAGE_SIZE } from "../lib/filters";
 
-// Các bộ lọc nguồn, theo thứ tự hiển thị. match: nguồn nào thuộc bộ lọc này.
-// "Blog" gộp các blog hãng (OpenAI, DeepMind, Hugging Face).
-const SOURCE_FILTERS = [
-  { key: "github_release", label: "GitHub Release", match: (s) => s === "github_release" },
-  { key: "github_trending", label: "GitHub Trending", match: (s) => s === "github_trending" },
-  { key: "hackernews", label: "Hacker News", match: (s) => s === "hackernews" },
-  { key: "arxiv", label: "arXiv", match: (s) => s === "arxiv" },
-  { key: "blog", label: "Blog", match: (s) => ["openai", "deepmind", "huggingface"].includes(s) },
-  { key: "reddit", label: "Reddit", match: (s) => s === "reddit" },
-];
-
-export default function Feed({ items, error, configMissing }) {
+export default function Feed({ initialItems, initialHasMore, error, configMissing }) {
   const [lang, setLang] = useState("vi");
   const [filter, setFilter] = useState("all");
+  const [items, setItems] = useState(initialItems);
+  const [hasMore, setHasMore] = useState(initialHasMore);
+  const [loading, setLoading] = useState(false);
 
-  // Nhớ ngôn ngữ người dùng đã chọn (lưu ở trình duyệt).
+  const offsetRef = useRef(initialItems.length); // số dòng đã lấy từ DB (cho phân trang)
+  const seenIds = useRef(new Set(initialItems.map((i) => i.id))); // chống trùng khi nối
+  const sentinelRef = useRef(null);
+  const didMount = useRef(false); // bỏ qua lần fetch đầu cho "all" (đã có dữ liệu SSR)
+
+  // Nhớ ngôn ngữ đã chọn.
   useEffect(() => {
     try {
       const saved = localStorage.getItem("lang");
@@ -34,15 +32,97 @@ export default function Feed({ items, error, configMissing }) {
     } catch {}
   }
 
-  // Chỉ hiện bộ lọc nào thực sự có tin trong dữ liệu (vd Reddit chỉ hiện nếu có).
+  // Lọc ra các hạng mục chống trùng theo id.
+  function dedupe(list) {
+    const out = [];
+    for (const it of list) {
+      if (seenIds.current.has(it.id)) continue;
+      seenIds.current.add(it.id);
+      out.push(it);
+    }
+    return out;
+  }
+
+  // Đổi bộ lọc → tải lại trang đầu cho nguồn đó (bỏ qua lần đầu "all" vì đã có SSR).
+  useEffect(() => {
+    if (!didMount.current) {
+      didMount.current = true;
+      return;
+    }
+    let cancelled = false;
+    setLoading(true);
+    seenIds.current = new Set();
+    offsetRef.current = 0;
+    setItems([]);
+    setHasMore(true);
+
+    fetch(`/api/items?filter=${encodeURIComponent(filter)}&offset=0&limit=${PAGE_SIZE}`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (cancelled) return;
+        const raw = d.items || [];
+        offsetRef.current = raw.length;
+        setItems(dedupe(raw));
+        setHasMore(!!d.hasMore);
+      })
+      .catch(() => {
+        if (!cancelled) setHasMore(false);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [filter]);
+
+  // Tải thêm batch tiếp theo (nối vào cuối).
+  async function loadMore() {
+    if (loading || !hasMore || configMissing || error) return;
+    setLoading(true);
+    try {
+      const res = await fetch(
+        `/api/items?filter=${encodeURIComponent(filter)}&offset=${offsetRef.current}&limit=${PAGE_SIZE}`
+      );
+      const d = await res.json();
+      const raw = d.items || [];
+      offsetRef.current += raw.length;
+      const fresh = dedupe(raw);
+      if (fresh.length) setItems((prev) => [...prev, ...fresh]);
+      setHasMore(!!d.hasMore);
+    } catch {
+      setHasMore(false);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Luôn trỏ tới loadMore mới nhất để observer không dùng closure cũ.
+  const loadMoreRef = useRef(loadMore);
+  loadMoreRef.current = loadMore;
+
+  // Tự tải thêm khi cuộn gần tới cuối (IntersectionObserver trên "sentinel").
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) loadMoreRef.current();
+      },
+      { rootMargin: "500px" }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
   const availableFilters = SOURCE_FILTERS.filter((f) =>
-    items.some((it) => f.match(it.source))
+    // Hiện bộ lọc nếu có tin trong danh sách hiện tại, HOẶC đang chọn chính nó
+    // (để nút không biến mất khi lọc), HOẶC đang ở "all" ban đầu có dữ liệu.
+    filter === f.key || initialItems.some((it) => f.sources.includes(it.source))
   );
-  const activeFilter = SOURCE_FILTERS.find((f) => f.key === filter);
-  const visible =
-    filter === "all" || !activeFilter
-      ? items
-      : items.filter((it) => activeFilter.match(it.source));
+  const activeFilterLabel =
+    filter === "all" ? t(lang, "all") : SOURCE_FILTERS.find((f) => f.key === filter)?.label;
 
   return (
     <main className="wrap">
@@ -97,21 +177,33 @@ export default function Feed({ items, error, configMissing }) {
           {t(lang, "errorPrefix")}: {error}
         </p>
       )}
-      {!error && !configMissing && visible.length === 0 && (
+      {!error && !configMissing && !loading && items.length === 0 && (
         <p className="notice">{t(lang, "empty")}</p>
       )}
 
-      {visible.length > 0 && (
+      {items.length > 0 && (
         <p className="count">
-          {visible.length} {t(lang, "itemsSuffix")}
+          {items.length}
+          {hasMore ? "+" : ""} {t(lang, "itemsSuffix")}
+          {filter !== "all" && activeFilterLabel ? ` · ${activeFilterLabel}` : ""}
         </p>
       )}
 
       <div className="feed">
-        {visible.map((it) => (
+        {items.map((it) => (
           <NewsCard key={it.id} item={it} lang={lang} />
         ))}
       </div>
+
+      {loading && (
+        <p className="loadmore">{t(lang, "loadingMore")}</p>
+      )}
+      {!loading && !hasMore && items.length > 0 && (
+        <p className="loadmore end">{t(lang, "end")}</p>
+      )}
+
+      {/* Điểm mốc để phát hiện cuộn tới cuối */}
+      <div ref={sentinelRef} aria-hidden="true" style={{ height: 1 }} />
     </main>
   );
 }

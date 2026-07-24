@@ -11,10 +11,15 @@ song ngữ Việt+Anh bằng AI → hiển thị feed kèm link bài gốc. **Kh
 Kiến trúc: **Next.js (Vercel)** đọc **Supabase (Postgres)**; **GitHub Actions** chạy pipeline
 Node.js định kỳ để thu thập + tóm tắt bằng **Claude Haiku API** rồi ghi Supabase.
 
-**7 nguồn đang chạy:** Hacker News (Algolia Search API), arXiv (cs.AI/LG/RO), blog OpenAI /
-Google DeepMind / Hugging Face (RSS), GitHub Releases (llama.cpp, transformers, ComfyUI),
-GitHub "Trending" (qua GitHub **Search API** — không có API trending chính thức). Dùng
-`api.github.com` (khác `github.com`).
+**Nguồn đang chạy:** Hacker News (Algolia Search API), arXiv (cs.AI/LG/RO), GitHub Releases
+(8 repo: llama.cpp, transformers, ComfyUI, vllm, ollama, whisper.cpp, unsloth, sglang),
+GitHub "Trending" (qua GitHub **Search API** — không có API trending chính thức; dùng
+`api.github.com` khác `github.com`), và **13 blog/báo AI qua RSS/Atom**: OpenAI, Google
+DeepMind, Hugging Face, Mistral, Berkeley BAIR, Simon Willison, TechCrunch, The Verge, Ars
+Technica, VentureBeat, MIT Tech Review, Import AI, The Gradient. (Danh sách blog/repo ở
+`lib/config.js`; thêm blog phải khai báo slug ở `web/lib/filters.js` + `web/lib/format.js`.)
+Blog/báo miễn phí, KHÔNG cần API key. **Reddit CHƯA bật** (xem mục 3). X/Twitter **bỏ** (API
+đọc ~$100+/tháng, không hợp chi phí).
 
 ## 2. Trạng thái hiện tại — ĐÃ CHẠY THẬT trên production
 - Cả **5 cột mốc xong**: (1) collector HN+arXiv, (2) tóm tắt song ngữ Haiku, (3) dedupe+Supabase,
@@ -26,7 +31,7 @@ GitHub "Trending" (qua GitHub **Search API** — không có API trending chính 
   chọn tay nhớ `localStorage`; dùng `data-theme` trên `<html>` + script inline chống nháy trong
   `web/app/layout.js`; màu qua biến CSS nên phủ toàn trang.
 - **Tính năng frontend đã live:** feed thẻ; **nút chuyển ngôn ngữ VI/EN** (nhớ localStorage);
-  **lọc theo nguồn** (Tất cả + mỗi nguồn, "Blog" gộp 3 hãng, nút ẩn nếu nguồn chưa có tin);
+  **lọc theo nguồn** (Tất cả + mỗi nguồn, "Blog" gộp cả 13 blog/báo, nút ẩn nếu nguồn chưa có tin);
   **infinite scroll** (tải 40 tin/lần qua `/api/items`, tự tải thêm khi cuộn, kết hợp mọi bộ lọc,
   có "Đang tải thêm…"/"Đã hết tin"). Thẻ hiển thị: badge nguồn, điểm (▲), thời gian tương đối,
   tiêu đề (link bài gốc), tóm tắt theo ngôn ngữ, tác giả.
@@ -39,9 +44,14 @@ GitHub "Trending" (qua GitHub **Search API** — không có API trending chính 
   (`HOT_WINDOW=1000`) rồi sắp ở JS trong `web/lib/supabaseServer.js`.
 - **Lọc thời gian (dropdown):** Hôm nay/Tuần này/Tháng này/Năm này/Mọi lúc — theo `published_at`
   (24h/7/30/365 ngày). Kết hợp đúng với lọc nguồn + sắp xếp. Mặc định "Mọi lúc".
-- **DB:** Supabase bảng `news_items`, RLS = **đọc công khai / ghi chỉ service_role**. Hiện ~130 tin.
-- **Tự động:** `.github/workflows/collect.yml`, cron `7,22,37,52 * * * *` (mỗi 15' ở phút thấp điểm) +
-  chạy tay (workflow_dispatch). Secrets: `ANTHROPIC_API_KEY`, `SUPABASE_URL`,
+- **Vercel Web Analytics:** đã bật (`@vercel/analytics`, `<Analytics/>` trong `web/app/layout.js`);
+  xem số liệu ở Vercel dashboard → tab Analytics.
+- **DB:** Supabase bảng `news_items`, RLS = **đọc công khai / ghi chỉ service_role**. Hiện ~170+ tin
+  (tăng dần sau khi thêm nguồn).
+- **Tự động (QUAN TRỌNG):** lịch chạy thật do **cron-job.org** gọi GitHub REST `workflow_dispatch`
+  mỗi 15' — vì cron nội bộ của GitHub Actions bị bóp lịch (chạy thưa 3-4h/lần), KHÔNG tin cậy.
+  Xem memory `ai-news-cron-throttling-fix` (URL API, header, token). Workflow vẫn giữ block
+  `schedule` (dự phòng) + `workflow_dispatch`. Secrets: `ANTHROPIC_API_KEY`, `SUPABASE_URL`,
   `SUPABASE_SERVICE_ROLE_KEY` (+ `GITHUB_TOKEN` tự cấp; Reddit tùy chọn).
   **Pipeline exit 1 nếu tóm tắt hỏng TOÀN BỘ** (báo ĐỎ thay vì success giả); `summarizer.js`
   tự chuẩn hoá `ANTHROPIC_API_KEY`. (Sự cố key hỏng đã xử lý 24/07 — xem memory.)
@@ -53,7 +63,10 @@ GitHub "Trending" (qua GitHub **Search API** — không có API trending chính 
 
 ## 3. CHƯA làm / dang dở (đừng tưởng đã có)
 - **Reddit: CHƯA bật.** Code `collectors/reddit.js` sẵn sàng, tự bỏ qua nếu thiếu
-  `REDDIT_CLIENT_ID`/`REDDIT_CLIENT_SECRET` (tạo app "script" ở reddit.com/prefs/apps).
+  `REDDIT_CLIENT_ID`/`REDDIT_CLIENT_SECRET`. Vướng: **ISP người dùng chặn `reddit.com`** nên chưa
+  vào được `reddit.com/prefs/apps` tạo app "script". Pipeline chạy trên cloud GitHub → vẫn hoạt
+  động nếu có credential; cần user vào trang đó **1 lần qua 4G/VPN** để lấy client_id/secret rồi
+  thêm vào **GitHub secrets** (không cần Vercel). Grant `client_credentials` (app-only, read-only).
 - **Tên miền .com: CHƯA mua.** Đang dùng subdomain miễn phí `sainews.vercel.app`.
 - Blog **Anthropic & Meta AI**: bỏ qua vì không có RSS chính thức (không scraping).
 - **Login/thanh toán/tài khoản, PWA/app điện thoại: CHƯA làm** (ngoài phạm vi bản đầu).
@@ -83,8 +96,10 @@ GitHub "Trending" (qua GitHub **Search API** — không có API trending chính 
 - **Code tự chuẩn hoá env** (`db/supabase.js`, `web/lib/supabaseServer.js`, `web/app/page.js`):
   tự bỏ prefix `TÊN=`, dấu nháy, khoảng trắng, `/rest/v1` thừa khi dán secret. (Rút ra từ loạt
   Actions fail do dán secret lỗi.)
-- **GitHub Actions scheduled là "best-effort"**: phút tròn :00/:30 hay bị bỏ qua → đã đổi
-  `13,43`. Lịch mới cần vài tiếng để "khởi động". Muốn chạy ngay: Actions → Run workflow.
+- **GitHub Actions scheduled là "best-effort" — ĐÃ XỬ LÝ:** cron nội bộ chạy thưa 3-4h/lần dù đặt
+  15'. Giải pháp đang dùng: **cron-job.org** gọi `workflow_dispatch` mỗi 15' (đáng tin, chạy ngay).
+  Chi tiết cấu hình ở memory `ai-news-cron-throttling-fix`. Muốn chạy tay: cron-job.org → Test Run,
+  hoặc Actions → Run workflow.
 - **Vercel đổi tên domain không giới hạn số lần** (Settings → Domains). Hiện là `sainews`.
 - **Khung trình duyệt tự động của Claude không "vẽ khung hình"** → click mô phỏng &
   IntersectionObserver không kích hoạt trong đó. Kiểm tra tính năng tương tác (nút, lọc, cuộn)
@@ -93,17 +108,19 @@ GitHub "Trending" (qua GitHub **Search API** — không có API trending chính 
   `SUPABASE_ANON_KEY`). Pipeline cục bộ: `npm run pipeline` (cần `.env` ở gốc).
 
 ## 6. Chi phí thực tế
-- **Anthropic tới giờ: ước tính < $0.50** (đã tóm tắt ~130 tin + vài lần test nhỏ). **Số thật xem
-  ở console.anthropic.com → Usage/Billing** (mình không đọc được console của bạn).
-- **Vận hành hàng tháng: ước ~$1–3/tháng, thường chỉ vài chục cent** (chỉ tóm tắt tin MỚI, ~vài
-  chục tin/ngày × 0,15 cent/tin). Supabase/Vercel/GitHub Actions đều **miễn phí** ở quy mô này.
+- **Anthropic tới giờ: ước tính < $1** (đã tóm tắt ~170+ tin + backfill tiêu đề + test). Thêm 10
+  blog + 5 repo (24/07) → 1 lần backfill ~150 tin mới ≈ **$0.25 một lần**. **Số thật xem ở
+  console.anthropic.com → Usage/Billing** (mình không đọc được console của bạn).
+- **Vận hành hàng tháng: ước ~$1–3/tháng, thường chỉ vài chục cent** (chỉ tóm tắt tin MỚI; nhiều
+  nguồn hơn → nhiều tin mới/ngày hơn nhưng vẫn nhỏ, ~0,15 cent/tin). Supabase/Vercel/GitHub Actions
+  + cron-job.org đều **miễn phí** ở quy mô này.
 
 ## 7. Bước tiếp theo nên đề xuất (nếu hỏi "giờ làm gì tiếp")
-1. **Theo dõi nhịp tự động 1–2 ngày** (Actions ở :13/:43). Nếu vẫn quá thưa → gắn cron ngoài
-   (cron-job.org) gọi GitHub `workflow_dispatch` để đảm bảo đúng 30 phút.
-2. **Thêm Reddit** (nếu muốn): tạo app script → điền `REDDIT_CLIENT_ID`/`SECRET` vào `.env` +
-   GitHub secrets. Nút lọc Reddit sẽ tự hiện khi có tin.
-3. **Tính năng người dùng đã nhắc nhưng CHƯA làm** — hỏi có muốn làm không: (a) **dịch tiêu đề**
-   song ngữ + backfill; (b) **nút sắp xếp** mới nhất/nổi bật (theo `score`).
-4. Mua **tên miền .com** riêng (gắn vào Vercel) nếu muốn thương hiệu.
-5. Về sau: PWA/app điện thoại, thêm nguồn, trau chuốt giao diện.
+1. **Thêm Reddit** khi user vào được `reddit.com/prefs/apps` (qua 4G/VPN vì ISP chặn): tạo app
+   script → điền `REDDIT_CLIENT_ID`/`SECRET` vào **GitHub secrets**. Nút lọc Reddit tự hiện khi có tin.
+2. Mua **tên miền .com** riêng (gắn vào Vercel) nếu muốn thương hiệu.
+3. Về sau: PWA/app điện thoại, thêm nguồn nữa, trau chuốt giao diện, có thể thêm lọc từ khoá AI cho
+   các nguồn báo phổ thông (TechCrunch/Verge... hiện lấy toàn bộ mục AI, chưa lọc thêm).
+
+**Đã xong (đừng đề xuất lại):** cron-job.org (nhịp tự động), dịch tiêu đề `title_vi` + backfill,
+nút sắp xếp Mới nhất/Nổi bật, lọc thời gian, dark mode, Vercel Analytics, mở rộng nguồn (13 blog/8 repo).

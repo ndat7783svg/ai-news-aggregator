@@ -9,7 +9,8 @@ Chi tiết & nguyên tắc: `docs/superpowers/specs/2026-07-22-ai-news-aggregato
 **Đang chạy thật (thương hiệu hiển thị: "SAI News", tên project hạ tầng giữ nguyên):**
 - Web công khai: https://sainews.vercel.app (Vercel, root = `web/`)
 - Repo: https://github.com/ndat7783svg/ai-news-aggregator
-- Pipeline tự chạy mỗi 15 phút qua GitHub Actions (`.github/workflows/collect.yml`, cron `7,22,37,52 * * * *`)
+- Pipeline tự chạy mỗi 15 phút: **cron-job.org** gọi `workflow_dispatch` (GitHub Actions cron nội bộ bị bóp lịch, không tin cậy → xem memory `ai-news-cron-throttling-fix`). Workflow: `.github/workflows/collect.yml`.
+- **Vercel Web Analytics** đã bật (`@vercel/analytics`, `<Analytics/>` trong `web/app/layout.js`).
 - Database: Supabase project ref `huqbirxwvrprqkhrwnsl` (bảng `news_items`), RLS đọc-công-khai/ghi-chỉ-service_role
 
 ## Tình trạng
@@ -28,9 +29,9 @@ Chi tiết đầy đủ & quyết định đã chốt: xem `CLAUDE.md` ở gốc
 | `collect.js` | Điểm chạy chính: gọi các collector, gộp, in console. |
 | `collectors/hackernews.js` | Thu thập tin AI từ HN qua Algolia HN Search API. |
 | `collectors/arxiv.js` | Thu thập bài mới từ arXiv (cs.AI, cs.LG, cs.RO) qua Atom API. |
-| `collectors/blogs.js` | Blog chính thức qua RSS/Atom (OpenAI, Google DeepMind, Hugging Face). |
-| `collectors/github.js` | GitHub Releases (repo AI lớn) + "Trending" qua Search API. Dùng api.github.com. |
-| `collectors/reddit.js` | Reddit OAuth (cần REDDIT_CLIENT_ID/SECRET); tự bỏ qua nếu thiếu. |
+| `collectors/blogs.js` | 13 blog/báo AI qua RSS/Atom: OpenAI, DeepMind, Hugging Face, Mistral, BAIR, Simon Willison, TechCrunch, The Verge, Ars Technica, VentureBeat, MIT Tech Review, Import AI, The Gradient. Parser đã nới `processEntities.maxTotalExpansions` (feed nhiều entity). Danh sách + slug ở `lib/config.js` (`BLOG_FEEDS`); slug phải khai báo ở `web/lib/filters.js` (gộp nút "Blog") + `web/lib/format.js` (badge). |
+| `collectors/github.js` | GitHub Releases 8 repo (llama.cpp, transformers, ComfyUI, vllm, ollama, whisper.cpp, unsloth, sglang) + "Trending" qua Search API. Dùng api.github.com. |
+| `collectors/reddit.js` | Reddit OAuth (cần REDDIT_CLIENT_ID/SECRET); tự bỏ qua nếu thiếu. **CHƯA bật** — ISP người dùng chặn reddit.com nên chưa tạo được app (pipeline chạy cloud vẫn OK nếu có credential). |
 | `summarize/summarizer.js` | Tóm tắt AI song ngữ (VI+EN) + **dịch tiêu đề `title_vi`** bằng Claude Haiku (`claude-haiku-4-5`), structured outputs. `summarizeItem`/`summarizeMany`; `translateTitle`/`translateTitles` (dịch riêng tiêu đề cho backfill). |
 | `backfill-titles.js` | Script chạy 1 lần: dịch `title_vi` cho tin cũ chưa có (`--count`/`--limit`, in chi phí token). Cần cột `title_vi` (ALTER TABLE) trước. |
 | `summarize-test.js` | Test cột mốc 2: thu vài tin rồi tóm tắt, in ra để xem chất lượng. |

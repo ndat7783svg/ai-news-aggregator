@@ -39,9 +39,19 @@ function buildUserContent(item) {
   return lines.join("\n");
 }
 
+// Chuẩn hoá key: bỏ prefix "TÊN=", dấu nháy, khoảng trắng thừa khi dán secret lỗi.
+// (Cùng tinh thần với db/supabase.js — tránh lặp lại sự cố key hỏng trên GitHub.)
+function cleanKey(raw) {
+  return (raw || "")
+    .trim()
+    .replace(/^ANTHROPIC_API_KEY\s*=\s*/, "")
+    .replace(/^["']|["']$/g, "")
+    .trim();
+}
+
 let client = null;
 function getClient() {
-  if (!client) client = new Anthropic(); // ném lỗi nếu thiếu ANTHROPIC_API_KEY khi gọi
+  if (!client) client = new Anthropic({ apiKey: cleanKey(process.env.ANTHROPIC_API_KEY) });
   return client;
 }
 
@@ -69,7 +79,7 @@ export async function summarizeItem(item) {
       summaryEn: parsed.summary_en,
     };
   } catch (err) {
-    return { ...item, summaryError: err.message };
+    return { ...item, summaryError: err.message, summaryErrorStatus: err.status };
   }
 }
 

@@ -68,7 +68,18 @@ async function main() {
   const summarized = await summarizeMany(fresh, { concurrency: 3 });
   const ok = summarized.filter((s) => s.summaryVi && s.summaryEn && !s.summaryError);
   const failed = summarized.length - ok.length;
-  if (failed) console.log(`   ⚠ ${failed} tin tóm tắt lỗi — sẽ thử lại lần chạy sau.`);
+  if (failed) {
+    console.log(`   ⚠ ${failed} tin tóm tắt lỗi — sẽ thử lại lần chạy sau.`);
+    const firstErr = summarized.find((s) => s.summaryError);
+    if (firstErr) console.log(`   ↳ Lỗi đầu tiên: status=${firstErr.summaryErrorStatus} — ${firstErr.summaryError}`);
+  }
+
+  // Nếu CÓ tin mới mà tóm tắt hỏng TOÀN BỘ → lỗi hệ thống (key sai/hết hạn/hết credit).
+  // Thoát mã 1 để GitHub Actions báo ĐỎ, tránh "success" giả che mất lỗi.
+  if (fresh.length > 0 && ok.length === 0) {
+    console.error("LỖI: không tóm tắt được tin nào. Kiểm tra ANTHROPIC_API_KEY (sai/hết hạn) hoặc credit ở console.anthropic.com.");
+    process.exit(1);
+  }
 
   console.log(`4) Ghi ${ok.length} tin vào Supabase…`);
   const inserted = await insertItems(ok);

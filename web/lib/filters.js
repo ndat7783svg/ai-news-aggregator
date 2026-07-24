@@ -11,7 +11,11 @@ export const SOURCE_FILTERS = [
   {
     key: "blog",
     label: "Blog",
-    sources: ["openai", "deepmind", "huggingface", "mistral", "bair", "simonwillison"],
+    sources: [
+      "openai", "deepmind", "huggingface", "mistral", "bair", "simonwillison",
+      "techcrunch", "theverge", "arstechnica", "venturebeat", "technologyreview",
+      "importai", "thegradient",
+    ],
   },
   { key: "reddit", label: "Reddit", sources: ["reddit"] },
 ];

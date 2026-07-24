@@ -30,7 +30,8 @@ Chi tiết & nguyên tắc: `docs/superpowers/specs/2026-07-22-ai-news-aggregato
 | `collectors/blogs.js` | Blog chính thức qua RSS/Atom (OpenAI, Google DeepMind, Hugging Face). |
 | `collectors/github.js` | GitHub Releases (repo AI lớn) + "Trending" qua Search API. Dùng api.github.com. |
 | `collectors/reddit.js` | Reddit OAuth (cần REDDIT_CLIENT_ID/SECRET); tự bỏ qua nếu thiếu. |
-| `summarize/summarizer.js` | Tóm tắt AI song ngữ (VI+EN) bằng Claude Haiku (`claude-haiku-4-5`), structured outputs. `summarizeItem` / `summarizeMany`. |
+| `summarize/summarizer.js` | Tóm tắt AI song ngữ (VI+EN) + **dịch tiêu đề `title_vi`** bằng Claude Haiku (`claude-haiku-4-5`), structured outputs. `summarizeItem`/`summarizeMany`; `translateTitle`/`translateTitles` (dịch riêng tiêu đề cho backfill). |
+| `backfill-titles.js` | Script chạy 1 lần: dịch `title_vi` cho tin cũ chưa có (`--count`/`--limit`, in chi phí token). Cần cột `title_vi` (ALTER TABLE) trước. |
 | `summarize-test.js` | Test cột mốc 2: thu vài tin rồi tóm tắt, in ra để xem chất lượng. |
 | `pipeline.js` | **Pipeline chính (cột mốc 3):** thu thập → lọc tin mới → tóm tắt → ghi Supabase. GitHub Actions sẽ chạy file này. |
 | `db/supabase.js` | Kết nối Supabase (service_role): `fetchExistingKeys` (dedupe), `insertItems`. |

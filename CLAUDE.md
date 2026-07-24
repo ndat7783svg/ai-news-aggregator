@@ -24,6 +24,9 @@ GitHub "Trending" (qua GitHub **Search API** — không có API trending chính 
   **infinite scroll** (tải 40 tin/lần qua `/api/items`, tự tải thêm khi cuộn, kết hợp mọi bộ lọc,
   có "Đang tải thêm…"/"Đã hết tin"). Thẻ hiển thị: badge nguồn, điểm (▲), thời gian tương đối,
   tiêu đề (link bài gốc), tóm tắt theo ngôn ngữ, tác giả.
+- **Dịch tiêu đề (title_vi):** chế độ VI hiển thị tiêu đề tiếng Việt (`title_vi`), EN giữ gốc.
+  Sinh trong bước tóm tắt (`summarizer.js`, giữ nguyên tên riêng/repo/phiên bản/username).
+  149 tin cũ đã backfill xong (24/07, ~$0.10) bằng `backfill-titles.js`.
 - **Sắp xếp (có nút):** "Mới nhất" (`published_at` giảm dần) và "Nổi bật nhất" (theo `score`).
   Chỉ **hackernews + reddit** tính điểm; nguồn không điểm (arXiv/blog/GitHub — kể cả github_trending
   dù có sao) **xuống cuối**, không loại bỏ. Sắp phía server; chế độ "hot" lấy cửa sổ ứng viên
@@ -43,9 +46,6 @@ GitHub "Trending" (qua GitHub **Search API** — không có API trending chính 
 - Supabase project ref: **huqbirxwvrprqkhrwnsl** (`https://huqbirxwvrprqkhrwnsl.supabase.co`)
 
 ## 3. CHƯA làm / dang dở (đừng tưởng đã có)
-- **Dịch tiêu đề: CHƯA làm.** Tiêu đề hiển thị **nguyên gốc** (đa số tiếng Anh); chỉ phần
-  **tóm tắt** là song ngữ. Không có cột `title_vi`, không có backfill. Muốn làm phải: thêm dịch
-  tiêu đề vào `summarize/summarizer.js` + cột mới trong DB + backfill 130 tin cũ.
 - **Reddit: CHƯA bật.** Code `collectors/reddit.js` sẵn sàng, tự bỏ qua nếu thiếu
   `REDDIT_CLIENT_ID`/`REDDIT_CLIENT_SECRET` (tạo app "script" ở reddit.com/prefs/apps).
 - **Tên miền .com: CHƯA mua.** Đang dùng subdomain miễn phí `sainews.vercel.app`.

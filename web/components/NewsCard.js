@@ -8,6 +8,8 @@ export default function NewsCard({ item, lang }) {
     lang === "vi"
       ? item.summary_vi || item.summary_en
       : item.summary_en || item.summary_vi;
+  // Chế độ VI hiển thị tiêu đề đã dịch (nếu có); EN giữ nguyên tiêu đề gốc.
+  const title = lang === "vi" ? item.title_vi || item.title : item.title;
 
   return (
     <article className="card">
@@ -23,7 +25,7 @@ export default function NewsCard({ item, lang }) {
 
       <h2 className="card-title">
         <a href={item.url} target="_blank" rel="noopener noreferrer">
-          {item.title}
+          {title}
         </a>
       </h2>
 

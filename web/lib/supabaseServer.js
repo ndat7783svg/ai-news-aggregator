@@ -5,7 +5,7 @@ import { createClient } from "@supabase/supabase-js";
 import { sourcesForFilter } from "./filters";
 
 const COLUMNS =
-  "id, source, title, url, author, published_at, score, summary_vi, summary_en";
+  "id, source, title, title_vi, url, author, published_at, score, summary_vi, summary_en";
 
 // Làm sạch biến môi trường (lỡ dán cả "TÊN=", dấu nháy, khoảng trắng thừa).
 function cleanSecret(raw, name) {

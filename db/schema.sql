@@ -6,6 +6,7 @@ create table if not exists news_items (
   source        text        not null,           -- tên nguồn (hackernews, arxiv, ...)
   source_id     text        not null,           -- id gốc từ nguồn (để chống trùng)
   title         text        not null,
+  title_vi      text,                            -- tiêu đề dịch sang tiếng Việt (null nếu chưa dịch)
   url           text        not null,           -- link bài gốc
   author        text,
   published_at  timestamptz,

@@ -67,6 +67,7 @@ export async function insertItems(items) {
     source: it.source,
     source_id: it.sourceId,
     title: it.title,
+    title_vi: it.titleVi ?? null,
     url: it.url,
     author: it.author ?? null,
     published_at: it.publishedAt ?? null,
@@ -82,4 +83,42 @@ export async function insertItems(items) {
     .select("id");
   if (error) throw new Error(`Lỗi ghi Supabase: ${error.message}`);
   return data ? data.length : 0;
+}
+
+/**
+ * (Backfill) Lấy các tin CHƯA có title_vi. Chỉ lấy cột cần cho việc dịch.
+ * @param {number} limit số tin tối đa lấy về
+ */
+export async function fetchItemsMissingTitleVi(limit = 1000) {
+  const { data, error } = await getClient()
+    .from(TABLE)
+    .select("id, source, title")
+    .is("title_vi", null)
+    .order("id", { ascending: false })
+    .limit(limit);
+  if (error) throw new Error(`Lỗi đọc Supabase: ${error.message}`);
+  return data || [];
+}
+
+/**
+ * (Backfill) Đếm số tin chưa có title_vi (không tải dữ liệu — để ước tính chi phí).
+ */
+export async function countItemsMissingTitleVi() {
+  const { count, error } = await getClient()
+    .from(TABLE)
+    .select("id", { count: "exact", head: true })
+    .is("title_vi", null);
+  if (error) throw new Error(`Lỗi đọc Supabase: ${error.message}`);
+  return count ?? 0;
+}
+
+/**
+ * (Backfill) Cập nhật title_vi cho 1 tin theo id.
+ */
+export async function updateTitleVi(id, titleVi) {
+  const { error } = await getClient()
+    .from(TABLE)
+    .update({ title_vi: titleVi })
+    .eq("id", id);
+  if (error) throw new Error(`Lỗi cập nhật id=${id}: ${error.message}`);
 }

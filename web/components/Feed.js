@@ -14,6 +14,8 @@ export default function Feed({
 }) {
   const [lang, setLang] = useState("vi");
   const [filter, setFilter] = useState("all");
+  const [sort, setSort] = useState("new"); // "new" = Mới nhất, "hot" = Nổi bật nhất
+  const [time, setTime] = useState("all"); // all | today | week | month | year
   const [items, setItems] = useState(initialItems);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [loading, setLoading] = useState(false);
@@ -49,7 +51,19 @@ export default function Feed({
     return out;
   }
 
-  // Đổi bộ lọc → tải lại trang đầu cho nguồn đó (bỏ qua lần đầu "all" vì đã có SSR).
+  // Dựng URL API kèm đủ bộ lọc nguồn + sắp xếp + thời gian đang chọn.
+  function itemsUrl(off) {
+    const p = new URLSearchParams({
+      filter,
+      sort,
+      time,
+      offset: String(off),
+      limit: String(PAGE_SIZE),
+    });
+    return `/api/items?${p.toString()}`;
+  }
+
+  // Đổi bất kỳ bộ lọc/sắp xếp nào → tải lại trang đầu (bỏ qua lần đầu vì đã có SSR).
   useEffect(() => {
     if (!didMount.current) {
       didMount.current = true;
@@ -62,7 +76,7 @@ export default function Feed({
     setItems([]);
     setHasMore(true);
 
-    fetch(`/api/items?filter=${encodeURIComponent(filter)}&offset=0&limit=${PAGE_SIZE}`)
+    fetch(itemsUrl(0))
       .then((r) => r.json())
       .then((d) => {
         if (cancelled) return;
@@ -81,16 +95,14 @@ export default function Feed({
     return () => {
       cancelled = true;
     };
-  }, [filter]);
+  }, [filter, sort, time]);
 
   // Tải thêm batch tiếp theo (nối vào cuối).
   async function loadMore() {
     if (loading || !hasMore || configMissing || error) return;
     setLoading(true);
     try {
-      const res = await fetch(
-        `/api/items?filter=${encodeURIComponent(filter)}&offset=${offsetRef.current}&limit=${PAGE_SIZE}`
-      );
+      const res = await fetch(itemsUrl(offsetRef.current));
       const d = await res.json();
       const raw = d.items || [];
       offsetRef.current += raw.length;
@@ -156,24 +168,67 @@ export default function Feed({
       </header>
 
       {!configMissing && !error && availableFilters.length > 0 && (
-        <div className="source-filter" role="group" aria-label="Filter by source">
-          <button
-            className={filter === "all" ? "active" : ""}
-            onClick={() => setFilter("all")}
-            aria-pressed={filter === "all"}
-          >
-            {t(lang, "all")}
-          </button>
-          {availableFilters.map((f) => (
-            <button
-              key={f.key}
-              className={filter === f.key ? "active" : ""}
-              onClick={() => setFilter(f.key)}
-              aria-pressed={filter === f.key}
-            >
-              {f.label}
-            </button>
-          ))}
+        <div className="controls">
+          <div className="control-group">
+            <span className="control-label">{t(lang, "sourceLabel")}</span>
+            <div className="source-filter" role="group" aria-label="Filter by source">
+              <button
+                className={filter === "all" ? "active" : ""}
+                onClick={() => setFilter("all")}
+                aria-pressed={filter === "all"}
+              >
+                {t(lang, "all")}
+              </button>
+              {availableFilters.map((f) => (
+                <button
+                  key={f.key}
+                  className={filter === f.key ? "active" : ""}
+                  onClick={() => setFilter(f.key)}
+                  aria-pressed={filter === f.key}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="control-row">
+            <div className="control-group">
+              <span className="control-label">{t(lang, "sortLabel")}</span>
+              <div className="pill-toggle" role="group" aria-label={t(lang, "sortLabel")}>
+                <button
+                  className={sort === "new" ? "active" : ""}
+                  onClick={() => setSort("new")}
+                  aria-pressed={sort === "new"}
+                >
+                  {t(lang, "sortNew")}
+                </button>
+                <button
+                  className={sort === "hot" ? "active" : ""}
+                  onClick={() => setSort("hot")}
+                  aria-pressed={sort === "hot"}
+                >
+                  {t(lang, "sortHot")}
+                </button>
+              </div>
+            </div>
+
+            <div className="control-group">
+              <span className="control-label">{t(lang, "timeLabel")}</span>
+              <select
+                className="time-select"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+                aria-label={t(lang, "timeLabel")}
+              >
+                <option value="all">{t(lang, "timeAll")}</option>
+                <option value="today">{t(lang, "timeToday")}</option>
+                <option value="week">{t(lang, "timeWeek")}</option>
+                <option value="month">{t(lang, "timeMonth")}</option>
+                <option value="year">{t(lang, "timeYear")}</option>
+              </select>
+            </div>
+          </div>
         </div>
       )}
 

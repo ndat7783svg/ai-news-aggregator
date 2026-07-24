@@ -5,7 +5,15 @@ import { fetchText } from "../lib/http.js";
 import { XMLParser } from "fast-xml-parser";
 import { BLOG_FEEDS, MAX_ITEMS_PER_SOURCE } from "../lib/config.js";
 
-const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: "@_" });
+// Nới giới hạn "entity expansion" (mặc định 1000). Vài feed Atom (BAIR, Simon
+// Willison) chứa rất nhiều HTML entity hợp lệ trong nội dung, vượt mức mặc định
+// và bị chặn. Feed lấy từ nguồn tin cậy (URL cố định) nên nới an toàn; vẫn giữ
+// trần hữu hạn để phòng feed dị thường.
+const parser = new XMLParser({
+  ignoreAttributes: false,
+  attributeNamePrefix: "@_",
+  processEntities: { enabled: true, maxTotalExpansions: 100000, maxExpandedLength: 5000000 },
+});
 
 function toArray(x) {
   if (x === undefined || x === null) return [];

@@ -8,7 +8,11 @@ export const SOURCE_FILTERS = [
   { key: "github_trending", label: "GitHub Trending", sources: ["github_trending"] },
   { key: "hackernews", label: "Hacker News", sources: ["hackernews"] },
   { key: "arxiv", label: "arXiv", sources: ["arxiv"] },
-  { key: "blog", label: "Blog", sources: ["openai", "deepmind", "huggingface"] },
+  {
+    key: "blog",
+    label: "Blog",
+    sources: ["openai", "deepmind", "huggingface", "mistral", "bair", "simonwillison"],
+  },
   { key: "reddit", label: "Reddit", sources: ["reddit"] },
 ];
 

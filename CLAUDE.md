@@ -21,15 +21,21 @@ GitHub "Trending" (qua GitHub **Search API** — không có API trending chính 
   (4) frontend feed, (5) GitHub Actions + deploy Vercel.
 - **Tính năng frontend đã live:** feed thẻ; **nút chuyển ngôn ngữ VI/EN** (nhớ localStorage);
   **lọc theo nguồn** (Tất cả + mỗi nguồn, "Blog" gộp 3 hãng, nút ẩn nếu nguồn chưa có tin);
-  **infinite scroll** (tải 40 tin/lần qua `/api/items`, tự tải thêm khi cuộn, kết hợp bộ lọc,
+  **infinite scroll** (tải 40 tin/lần qua `/api/items`, tự tải thêm khi cuộn, kết hợp mọi bộ lọc,
   có "Đang tải thêm…"/"Đã hết tin"). Thẻ hiển thị: badge nguồn, điểm (▲), thời gian tương đối,
   tiêu đề (link bài gốc), tóm tắt theo ngôn ngữ, tác giả.
-- **Sắp xếp:** feed chỉ theo **mới nhất** (`published_at` giảm dần, `id` giảm dần). Không có
-  tùy chọn sắp xếp khác.
+- **Sắp xếp (có nút):** "Mới nhất" (`published_at` giảm dần) và "Nổi bật nhất" (theo `score`).
+  Chỉ **hackernews + reddit** tính điểm; nguồn không điểm (arXiv/blog/GitHub — kể cả github_trending
+  dù có sao) **xuống cuối**, không loại bỏ. Sắp phía server; chế độ "hot" lấy cửa sổ ứng viên
+  (`HOT_WINDOW=1000`) rồi sắp ở JS trong `web/lib/supabaseServer.js`.
+- **Lọc thời gian (dropdown):** Hôm nay/Tuần này/Tháng này/Năm này/Mọi lúc — theo `published_at`
+  (24h/7/30/365 ngày). Kết hợp đúng với lọc nguồn + sắp xếp. Mặc định "Mọi lúc".
 - **DB:** Supabase bảng `news_items`, RLS = **đọc công khai / ghi chỉ service_role**. Hiện ~130 tin.
-- **Tự động:** `.github/workflows/collect.yml`, cron `13,43 * * * *` (mỗi 30' ở phút thấp điểm) +
+- **Tự động:** `.github/workflows/collect.yml`, cron `7,22,37,52 * * * *` (mỗi 15' ở phút thấp điểm) +
   chạy tay (workflow_dispatch). Secrets: `ANTHROPIC_API_KEY`, `SUPABASE_URL`,
   `SUPABASE_SERVICE_ROLE_KEY` (+ `GITHUB_TOKEN` tự cấp; Reddit tùy chọn).
+  **Pipeline exit 1 nếu tóm tắt hỏng TOÀN BỘ** (báo ĐỎ thay vì success giả); `summarizer.js`
+  tự chuẩn hoá `ANTHROPIC_API_KEY`. (Sự cố key hỏng đã xử lý 24/07 — xem memory.)
 
 **Toạ độ dự án:**
 - Web: **https://sainews.vercel.app** (Vercel, Root Directory = `web/`, env `SUPABASE_URL` + `SUPABASE_ANON_KEY`)
@@ -40,8 +46,6 @@ GitHub "Trending" (qua GitHub **Search API** — không có API trending chính 
 - **Dịch tiêu đề: CHƯA làm.** Tiêu đề hiển thị **nguyên gốc** (đa số tiếng Anh); chỉ phần
   **tóm tắt** là song ngữ. Không có cột `title_vi`, không có backfill. Muốn làm phải: thêm dịch
   tiêu đề vào `summarize/summarizer.js` + cột mới trong DB + backfill 130 tin cũ.
-- **Sắp xếp "nổi bật/mới nhất": CHƯA có nút.** Chỉ đang sắp theo mới nhất. `score` đã lưu (điểm HN,
-  sao GitHub) nhưng chưa dùng để sắp xếp.
 - **Reddit: CHƯA bật.** Code `collectors/reddit.js` sẵn sàng, tự bỏ qua nếu thiếu
   `REDDIT_CLIENT_ID`/`REDDIT_CLIENT_SECRET` (tạo app "script" ở reddit.com/prefs/apps).
 - **Tên miền .com: CHƯA mua.** Đang dùng subdomain miễn phí `sainews.vercel.app`.

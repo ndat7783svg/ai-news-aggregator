@@ -1,4 +1,5 @@
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata = {
   title: "SAI News — tổng hợp & tóm tắt tin song ngữ",
@@ -15,6 +16,7 @@ export default function RootLayout({ children }) {
       <body>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
         {children}
+        <Analytics />
       </body>
     </html>
   );

@@ -6,20 +6,21 @@ Tra cứu nhanh cấu trúc dự án. Cập nhật khi thêm file/hệ thống m
 Website tổng hợp & tóm tắt tin tức AI (song ngữ VI + EN), hiển thị feed kèm link bài gốc.
 Chi tiết & nguyên tắc: `docs/superpowers/specs/2026-07-22-ai-news-aggregator-design.md`.
 
-**Đang chạy thật:**
-- Web công khai: https://ai-news-aggregator-ivory-beta.vercel.app (Vercel, root = `web/`)
+**Đang chạy thật (thương hiệu hiển thị: "SAI News", tên project hạ tầng giữ nguyên):**
+- Web công khai: https://sainews.vercel.app (Vercel, root = `web/`)
 - Repo: https://github.com/ndat7783svg/ai-news-aggregator
-- Pipeline tự chạy mỗi 30 phút qua GitHub Actions (`.github/workflows/collect.yml`)
-- Database: Supabase (bảng `news_items`), RLS đọc-công-khai/ghi-chỉ-service_role
+- Pipeline tự chạy mỗi 15 phút qua GitHub Actions (`.github/workflows/collect.yml`, cron `7,22,37,52 * * * *`)
+- Database: Supabase project ref `huqbirxwvrprqkhrwnsl` (bảng `news_items`), RLS đọc-công-khai/ghi-chỉ-service_role
 
 ## Tình trạng
-- [x] Cột mốc 1: collector Hacker News + arXiv, in ra console.
-- [x] Cột mốc 2: tóm tắt AI song ngữ (Claude Haiku) — đã test OK.
-- [x] Cột mốc 3a: dedupe + tóm tắt + ghi Supabase (HN + arXiv) — đã test OK, có 40 tin trong DB.
-- [~] Cột mốc 3b: đã thêm Blog RSS (OpenAI/DeepMind/HF), GitHub Releases, GitHub Trending — chạy OK. Còn Reddit (chờ credential).
-- [x] Cột mốc 4: frontend Next.js (feed từ Supabase, nút VI/EN) — đã test render OK với dữ liệu thật.
-- [x] Cột mốc 5: GitHub Actions chạy mỗi 30 phút + deploy Vercel công khai — HOÀN TẤT.
-- [ ] (Tuỳ chọn) Thêm Reddit: cần REDDIT_CLIENT_ID/SECRET (secret trên GitHub + Vercel nếu cần).
+- [x] Cột mốc 1–5: collector (7 nguồn) → tóm tắt song ngữ Haiku → dedupe/Supabase → frontend feed → Actions+Vercel. Đã live, ~130 tin.
+- [x] Dịch tiêu đề (`title_vi`) trong bước tóm tắt + backfill 149 tin cũ xong.
+- [x] Sắp xếp Mới nhất/Nổi bật + lọc thời gian (Hôm nay/Tuần/Tháng/Năm/Mọi lúc).
+- [x] Chế độ Sáng/Tối (theo hệ thống + nhớ lựa chọn) + đổi tên hiển thị "SAI News".
+- [ ] Reddit: code sẵn (`collectors/reddit.js`), CHƯA bật — cần REDDIT_CLIENT_ID/SECRET.
+- [ ] Tên miền .com riêng: CHƯA mua, đang dùng `sainews.vercel.app`.
+
+Chi tiết đầy đủ & quyết định đã chốt: xem `CLAUDE.md` ở gốc dự án (nguồn thông tin mới nhất).
 
 ## File / thư mục chính
 | Đường dẫn | Vai trò |
@@ -40,6 +41,7 @@ Chi tiết & nguyên tắc: `docs/superpowers/specs/2026-07-22-ai-news-aggregato
 | `lib/config.js` | Cấu hình chung: từ khoá AI, chuyên mục arXiv, giới hạn số tin, cửa sổ thời gian. |
 | `lib/http.js` | fetch dùng chung: timeout, User-Agent; helper `fetchJson` / `fetchText`. |
 | `web/` | **Frontend Next.js (cột mốc 4).** App Router, đọc Supabase (anon key) phía server. |
+| `web/app/layout.js` | Root layout: title/meta "SAI News", script inline chống nháy cho `data-theme` (Sáng/Tối) trên `<html>`. |
 | `web/app/page.js` | Server component: đọc `news_items` từ Supabase → `Feed`. ISR 5 phút. |
 | `web/components/Feed.js` | Client: VI/EN (localStorage), lọc nguồn, **sắp xếp Mới nhất/Nổi bật**, **lọc thời gian (dropdown)**, infinite scroll (gọi `/api/items` với filter+sort+time). |
 | `web/lib/supabaseServer.js` | Truy vấn Supabase (anon, chỉ đọc) DÙNG CHUNG cho page.js + API. `fetchItems({filter,sort,time,offset,limit})`: sắp/lọc phía server; chế độ "hot" lấy cửa sổ rồi `sortHot()` ở JS (chỉ HN+Reddit tính điểm). |

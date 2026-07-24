@@ -1,5 +1,6 @@
 // Định nghĩa bộ lọc nguồn — DÙNG CHUNG cho client (Feed) và server (API/page).
-// "Blog" gộp các blog hãng (OpenAI, DeepMind, Hugging Face).
+// 13 blog/báo được chia làm 3 nhóm chủ đề: hãng AI / báo công nghệ / newsletter.
+// `labelKey` (nếu có) là khoá i18n để hiện nhãn theo VI/EN; không có thì dùng `label` cố định.
 
 export const PAGE_SIZE = 40; // số tin mỗi lần tải
 
@@ -9,13 +10,22 @@ export const SOURCE_FILTERS = [
   { key: "hackernews", label: "Hacker News", sources: ["hackernews"] },
   { key: "arxiv", label: "arXiv", sources: ["arxiv"] },
   {
-    key: "blog",
-    label: "Blog",
-    sources: [
-      "openai", "deepmind", "huggingface", "mistral", "bair", "simonwillison",
-      "techcrunch", "theverge", "arstechnica", "venturebeat", "technologyreview",
-      "importai", "thegradient",
-    ],
+    key: "blog_labs",
+    label: "AI Labs",
+    labelKey: "filterBlogLabs",
+    sources: ["openai", "deepmind", "huggingface", "mistral", "bair"],
+  },
+  {
+    key: "blog_press",
+    label: "Tech Press",
+    labelKey: "filterBlogPress",
+    sources: ["techcrunch", "theverge", "arstechnica", "venturebeat", "technologyreview"],
+  },
+  {
+    key: "blog_news",
+    label: "Newsletters",
+    labelKey: "filterBlogNews",
+    sources: ["simonwillison", "importai", "thegradient"],
   },
   { key: "reddit", label: "Reddit", sources: ["reddit"] },
 ];

@@ -5,8 +5,10 @@ import { fetchJson } from "../lib/http.js";
 import {
   GITHUB_RELEASE_REPOS,
   GITHUB_TRENDING_TOPICS,
-  GITHUB_TRENDING_DAYS,
-  MAX_ITEMS_PER_SOURCE,
+  GITHUB_TRENDING_PUSHED_DAYS,
+  GITHUB_TRENDING_MIN_STARS,
+  GITHUB_TRENDING_PER_TOPIC,
+  GITHUB_TRENDING_MAX,
 } from "../lib/config.js";
 
 const GH = "https://api.github.com";
@@ -53,18 +55,22 @@ export async function collectGithubReleases() {
   return out;
 }
 
-/** "Trending" AI: repo tạo gần đây, sắp theo số sao (GitHub Search API chính thức). */
+/** "Repo nổi bật" AI: repo nhiều sao còn hoạt động gần đây, sắp theo số sao (GitHub Search API). */
 export async function collectGithubTrending() {
-  const since = new Date(Date.now() - GITHUB_TRENDING_DAYS * 86400e3)
+  // Chỉ xét repo còn được push (còn "sống") trong N ngày gần đây — không lọc theo ngày TẠO,
+  // nên cả repo lớn kinh điển đang bảo trì lẫn repo mới hot đều lọt vào.
+  const pushedSince = new Date(Date.now() - GITHUB_TRENDING_PUSHED_DAYS * 86400e3)
     .toISOString()
     .slice(0, 10);
   const byId = new Map();
 
   for (const topic of GITHUB_TRENDING_TOPICS) {
     try {
-      const q = encodeURIComponent(`topic:${topic} created:>${since}`);
+      const q = encodeURIComponent(
+        `topic:${topic} pushed:>${pushedSince} stars:>${GITHUB_TRENDING_MIN_STARS}`
+      );
       const data = await fetchJson(
-        `${GH}/search/repositories?q=${q}&sort=stars&order=desc&per_page=5`,
+        `${GH}/search/repositories?q=${q}&sort=stars&order=desc&per_page=${GITHUB_TRENDING_PER_TOPIC}`,
         { headers: ghHeaders() }
       );
       for (const repo of data.items || []) {
@@ -75,7 +81,9 @@ export async function collectGithubTrending() {
           title: repo.full_name,
           url: repo.html_url,
           author: repo.owner?.login ?? null,
-          publishedAt: repo.created_at || null,
+          // Dùng ngày hoạt động gần nhất làm mốc thời gian → repo lớn đang bảo trì nổi lên đầu
+          // feed thay vì chìm vì "tạo lâu rồi".
+          publishedAt: repo.pushed_at || repo.created_at || null,
           score: repo.stargazers_count ?? null,
           extra: {
             language: repo.language,
@@ -85,12 +93,12 @@ export async function collectGithubTrending() {
         });
       }
     } catch (e) {
-      console.error(`  ⚠ GitHub trending topic ${topic} lỗi: ${e.message}`);
+      console.error(`  ⚠ GitHub repo nổi bật topic ${topic} lỗi: ${e.message}`);
     }
   }
 
-  // Sắp theo sao giảm dần rồi cắt bớt.
+  // Sắp theo sao giảm dần rồi cắt bớt tổng.
   return [...byId.values()]
     .sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
-    .slice(0, MAX_ITEMS_PER_SOURCE);
+    .slice(0, GITHUB_TRENDING_MAX);
 }

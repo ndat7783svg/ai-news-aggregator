@@ -174,8 +174,11 @@ export default function Feed({
   const availableFilters = SOURCE_FILTERS.filter(
     (f) => filter === f.key || f.sources.some((s) => availableSources.includes(s))
   );
+  const filterLabel = (f) => (f?.labelKey ? t(lang, f.labelKey) : f?.label);
   const activeFilterLabel =
-    filter === "all" ? t(lang, "all") : SOURCE_FILTERS.find((f) => f.key === filter)?.label;
+    filter === "all"
+      ? t(lang, "all")
+      : filterLabel(SOURCE_FILTERS.find((f) => f.key === filter));
 
   return (
     <main className="wrap">
@@ -231,7 +234,7 @@ export default function Feed({
                   onClick={() => setFilter(f.key)}
                   aria-pressed={filter === f.key}
                 >
-                  {f.label}
+                  {filterLabel(f)}
                 </button>
               ))}
             </div>

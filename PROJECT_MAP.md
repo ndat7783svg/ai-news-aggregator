@@ -29,8 +29,8 @@ Chi tiết đầy đủ & quyết định đã chốt: xem `CLAUDE.md` ở gốc
 | `collect.js` | Điểm chạy chính: gọi các collector, gộp, in console. |
 | `collectors/hackernews.js` | Thu thập tin AI từ HN qua Algolia HN Search API. |
 | `collectors/arxiv.js` | Thu thập bài mới từ arXiv (cs.AI, cs.LG, cs.RO) qua Atom API. |
-| `collectors/blogs.js` | 13 blog/báo AI qua RSS/Atom: OpenAI, DeepMind, Hugging Face, Mistral, BAIR, Simon Willison, TechCrunch, The Verge, Ars Technica, VentureBeat, MIT Tech Review, Import AI, The Gradient. Parser đã nới `processEntities.maxTotalExpansions` (feed nhiều entity). Danh sách + slug ở `lib/config.js` (`BLOG_FEEDS`); slug phải khai báo ở `web/lib/filters.js` (gộp nút "Blog") + `web/lib/format.js` (badge). |
-| `collectors/github.js` | GitHub Releases 8 repo (llama.cpp, transformers, ComfyUI, vllm, ollama, whisper.cpp, unsloth, sglang) + "Trending" qua Search API. Dùng api.github.com. |
+| `collectors/blogs.js` | 13 blog/báo AI qua RSS/Atom: OpenAI, DeepMind, Hugging Face, Mistral, BAIR, Simon Willison, TechCrunch, The Verge, Ars Technica, VentureBeat, MIT Tech Review, Import AI, The Gradient. Parser đã nới `processEntities.maxTotalExpansions` (feed nhiều entity). Danh sách + slug ở `lib/config.js` (`BLOG_FEEDS`); slug phải khai báo ở `web/lib/filters.js` (xếp vào 1 trong 3 nhóm `blog_labs`/`blog_press`/`blog_news`) + `web/lib/format.js` (badge). |
+| `collectors/github.js` | GitHub Releases 8 repo (llama.cpp, transformers, ComfyUI, vllm, ollama, whisper.cpp, unsloth, sglang) + "Repo nổi bật" (`github_trending`) qua Search API: repo AI nhiều sao còn push gần đây (~180 ngày), 7 topic, tối đa 60 — gồm cả repo mới hot lẫn repo lớn kinh điển. Mốc thời gian = ngày push gần nhất. Dùng api.github.com. Ngưỡng/topic ở `lib/config.js` (`GITHUB_TRENDING_*`). |
 | `collectors/reddit.js` | Reddit OAuth (cần REDDIT_CLIENT_ID/SECRET); tự bỏ qua nếu thiếu. **CHƯA bật** — ISP người dùng chặn reddit.com nên chưa tạo được app (pipeline chạy cloud vẫn OK nếu có credential). |
 | `summarize/summarizer.js` | Tóm tắt AI song ngữ (VI+EN) + **dịch tiêu đề `title_vi`** bằng Claude Haiku (`claude-haiku-4-5`), structured outputs. `summarizeItem`/`summarizeMany`; `translateTitle`/`translateTitles` (dịch riêng tiêu đề cho backfill). |
 | `backfill-titles.js` | Script chạy 1 lần: dịch `title_vi` cho tin cũ chưa có (`--count`/`--limit`, in chi phí token). Cần cột `title_vi` (ALTER TABLE) trước. |
@@ -47,7 +47,7 @@ Chi tiết đầy đủ & quyết định đã chốt: xem `CLAUDE.md` ở gốc
 | `web/components/Feed.js` | Client: VI/EN (localStorage), lọc nguồn, **sắp xếp Mới nhất/Nổi bật**, **lọc thời gian (dropdown)**, infinite scroll (gọi `/api/items` với filter+sort+time). |
 | `web/lib/supabaseServer.js` | Truy vấn Supabase (anon, chỉ đọc) DÙNG CHUNG cho page.js + API. `fetchItems({filter,sort,time,offset,limit})`: sắp/lọc phía server; chế độ "hot" lấy cửa sổ rồi `sortHot()` ở JS (chỉ HN+Reddit tính điểm). |
 | `web/app/api/items/route.js` | API phân trang cho infinite scroll: nhận `filter/sort/time/offset/limit`. |
-| `web/lib/filters.js` | Định nghĩa bộ lọc nguồn (`SOURCE_FILTERS`, `PAGE_SIZE=40`) — dùng chung client+server. |
+| `web/lib/filters.js` | Định nghĩa bộ lọc nguồn (`SOURCE_FILTERS`, `PAGE_SIZE=40`) — dùng chung client+server. 13 blog chia 3 nhóm: `blog_labs` (hãng AI), `blog_press` (báo công nghệ), `blog_news` (newsletter); mỗi nhóm có `labelKey` để hiện nhãn VI/EN (chuỗi ở `web/lib/i18n.js`). |
 | `web/components/NewsCard.js` | Thẻ 1 tin: badge nguồn, điểm, thời gian, tiêu đề (link), tóm tắt, link gốc. |
 | `web/lib/i18n.js` | Chuỗi giao diện VI/EN. `web/lib/format.js`: nhãn+màu nguồn, thời gian tương đối. |
 | `web/.env.local` | `SUPABASE_URL` + `SUPABASE_ANON_KEY` (KHÔNG commit). Mẫu: `.env.local.example`. |

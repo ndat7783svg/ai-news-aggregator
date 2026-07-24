@@ -4,7 +4,11 @@
 import { fetchItems } from "../../../lib/supabaseServer";
 import { PAGE_SIZE } from "../../../lib/filters";
 
-export const dynamic = "force-dynamic"; // luôn lấy dữ liệu mới
+export const dynamic = "force-dynamic"; // render động (không cache kết quả route)
+// QUAN TRỌNG: force-dynamic KHÔNG tự tắt cache cho từng fetch bên trong. Supabase đọc qua
+// fetch nên bị Next Data Cache "đóng băng" theo từng URL truy vấn (mỗi bộ lọc/sắp xếp/thời
+// gian là 1 URL) → tin mới không hiện khi lọc theo nguồn. Ép mọi fetch trong route = no-store.
+export const fetchCache = "force-no-store"; // luôn đọc dữ liệu sống từ Supabase
 
 const ALLOWED_TIME = new Set(["all", "today", "week", "month", "year"]);
 

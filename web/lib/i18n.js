@@ -3,7 +3,9 @@
 
 const STRINGS = {
   vi: {
-    tagline: "Tổng hợp & tóm tắt tin tức AI, kèm nguồn.",
+    tagline: "Tổng hợp & tóm tắt tin tức, kèm nguồn.",
+    themeToDark: "Chuyển chế độ tối",
+    themeToLight: "Chuyển chế độ sáng",
     all: "Tất cả",
     readOriginal: "Đọc bài gốc",
     empty: "Chưa có tin nào trong cơ sở dữ liệu.",
@@ -26,7 +28,9 @@ const STRINGS = {
     timeYear: "Năm này",
   },
   en: {
-    tagline: "AI news, summarized, with sources.",
+    tagline: "News, summarized, with sources.",
+    themeToDark: "Switch to dark mode",
+    themeToLight: "Switch to light mode",
     all: "All",
     readOriginal: "Read original",
     empty: "No items in the database yet.",

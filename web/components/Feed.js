@@ -5,6 +5,23 @@ import NewsCard from "./NewsCard";
 import { t } from "../lib/i18n";
 import { SOURCE_FILTERS, PAGE_SIZE } from "../lib/filters";
 
+function SunIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+    </svg>
+  );
+}
+
+function MoonIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+    </svg>
+  );
+}
+
 export default function Feed({
   initialItems,
   initialHasMore,
@@ -13,6 +30,7 @@ export default function Feed({
   configMissing,
 }) {
   const [lang, setLang] = useState("vi");
+  const [theme, setTheme] = useState("light"); // "light" | "dark" (thực tế set sau khi mount)
   const [filter, setFilter] = useState("all");
   const [sort, setSort] = useState("new"); // "new" = Mới nhất, "hot" = Nổi bật nhất
   const [time, setTime] = useState("all"); // all | today | week | month | year
@@ -37,6 +55,23 @@ export default function Feed({
     setLang(l);
     try {
       localStorage.setItem("lang", l);
+    } catch {}
+  }
+
+  // Đồng bộ trạng thái theme với thứ script inline (layout.js) đã đặt trên <html>.
+  useEffect(() => {
+    try {
+      const cur = document.documentElement.dataset.theme;
+      if (cur === "dark" || cur === "light") setTheme(cur);
+    } catch {}
+  }, []);
+
+  function toggleTheme() {
+    const next = theme === "dark" ? "light" : "dark";
+    setTheme(next);
+    try {
+      document.documentElement.dataset.theme = next;
+      localStorage.setItem("theme", next); // nhớ cho lần sau ghé lại
     } catch {}
   }
 
@@ -146,24 +181,34 @@ export default function Feed({
     <main className="wrap">
       <header className="site-header">
         <div>
-          <h1 className="site-title">AI News</h1>
+          <h1 className="site-title">SAI News</h1>
           <p className="tagline">{t(lang, "tagline")}</p>
         </div>
-        <div className="lang-toggle" role="group" aria-label="Language">
+        <div className="header-actions">
           <button
-            className={lang === "vi" ? "active" : ""}
-            onClick={() => pick("vi")}
-            aria-pressed={lang === "vi"}
+            className="theme-toggle"
+            onClick={toggleTheme}
+            aria-label={t(lang, theme === "dark" ? "themeToLight" : "themeToDark")}
+            title={t(lang, theme === "dark" ? "themeToLight" : "themeToDark")}
           >
-            VI
+            {theme === "dark" ? <SunIcon /> : <MoonIcon />}
           </button>
-          <button
-            className={lang === "en" ? "active" : ""}
-            onClick={() => pick("en")}
-            aria-pressed={lang === "en"}
-          >
-            EN
-          </button>
+          <div className="lang-toggle" role="group" aria-label="Language">
+            <button
+              className={lang === "vi" ? "active" : ""}
+              onClick={() => pick("vi")}
+              aria-pressed={lang === "vi"}
+            >
+              VI
+            </button>
+            <button
+              className={lang === "en" ? "active" : ""}
+              onClick={() => pick("en")}
+              aria-pressed={lang === "en"}
+            >
+              EN
+            </button>
+          </div>
         </div>
       </header>
 

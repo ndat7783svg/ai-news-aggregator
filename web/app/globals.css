@@ -1,4 +1,5 @@
 :root {
+  /* Chế độ SÁNG (mặc định) */
   --bg: #f7f7f8;
   --card: #ffffff;
   --text: #1a1a1e;
@@ -8,8 +9,20 @@
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.04);
 }
 
+/* Chế độ TỐI khi người dùng chọn thủ công (ghi nhớ ở localStorage). */
+:root[data-theme="dark"] {
+  --bg: #0e0f13;
+  --card: #17181d;
+  --text: #e8e8ea;
+  --muted: #9aa0ab;
+  --border: #2a2c34;
+  --accent: #5b9dff;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+/* Chế độ TỐI theo hệ thống khi chưa chọn thủ công (dự phòng cả khi tắt JS). */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme]) {
     --bg: #0e0f13;
     --card: #17181d;
     --text: #e8e8ea;
@@ -67,6 +80,35 @@ body {
   margin: 4px 0 0;
   color: var(--muted);
   font-size: 0.95rem;
+}
+
+/* Cụm nút góc trên phải: chuyển theme + chuyển ngôn ngữ */
+.header-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* Nút chuyển Sáng/Tối (chỉ icon) */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 0.12s, border-color 0.12s;
+}
+
+.theme-toggle:hover {
+  color: var(--text);
+  border-color: var(--accent);
 }
 
 /* Language toggle */

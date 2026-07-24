@@ -19,6 +19,12 @@ GitHub "Trending" (qua GitHub **Search API** — không có API trending chính 
 ## 2. Trạng thái hiện tại — ĐÃ CHẠY THẬT trên production
 - Cả **5 cột mốc xong**: (1) collector HN+arXiv, (2) tóm tắt song ngữ Haiku, (3) dedupe+Supabase,
   (4) frontend feed, (5) GitHub Actions + deploy Vercel.
+- **Thương hiệu hiển thị: "SAI News"** (h1 + `<title>` + meta); tagline trung lập "Tổng hợp &
+  tóm tắt tin tức, kèm nguồn." (bỏ neo "AI" để mở rộng chủ đề sau). Tên project trên
+  Vercel/GitHub/Supabase GIỮ NGUYÊN (ai-news-aggregator).
+- **Chế độ Sáng/Tối:** nút icon cạnh VI/EN; mặc định theo hệ thống (`prefers-color-scheme`),
+  chọn tay nhớ `localStorage`; dùng `data-theme` trên `<html>` + script inline chống nháy trong
+  `web/app/layout.js`; màu qua biến CSS nên phủ toàn trang.
 - **Tính năng frontend đã live:** feed thẻ; **nút chuyển ngôn ngữ VI/EN** (nhớ localStorage);
   **lọc theo nguồn** (Tất cả + mỗi nguồn, "Blog" gộp 3 hãng, nút ẩn nếu nguồn chưa có tin);
   **infinite scroll** (tải 40 tin/lần qua `/api/items`, tự tải thêm khi cuộn, kết hợp mọi bộ lọc,

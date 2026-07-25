@@ -124,6 +124,17 @@ CHƯA bật** (xem mục 3). X/Twitter **bỏ** (API đọc ~$100+/tháng, khôn
   15'. Giải pháp đang dùng: **cron-job.org** gọi `workflow_dispatch` mỗi 15' (đáng tin, chạy ngay).
   Chi tiết cấu hình ở memory `ai-news-cron-throttling-fix`. Muốn chạy tay: cron-job.org → Test Run,
   hoặc Actions → Run workflow.
+- **ĐÃ SỬA (25/07) — 1 run kẹt "queued" chặn hàng loạt run sau (~20 run bị `cancelled` liền, web
+  đứng tin 5 tiếng):** nguyên nhân là `concurrency: cancel-in-progress: false` trong
+  `collect.yml` — khi 1 run bị GitHub Actions treo ở hàng đợi (không cấp được runner, hiếm nhưng
+  có thể xảy ra), cấu hình cũ giữ nguyên run kẹt đó và huỷ mọi run mới đến sau, nên pipeline
+  đứng hoàn toàn cho tới khi có người vào tay huỷ run kẹt. **Dấu hiệu nhận ra:** hàng loạt run
+  trong tab Actions đều "chạy" đúng ~14-15 phút rồi bị huỷ (icon 🚫) — pipeline thật chỉ mất
+  20 giây–2 phút, nên thời gian ~15' đó là **thời gian nằm chờ trong hàng đợi**, không phải lỗi
+  code/API key. **Fix:** đổi `cancel-in-progress: true` (run mới luôn thắng, tự đá run kẹt ra,
+  an toàn vì pipeline dedupe theo source+source_id) + thêm `timeout-minutes: 10`. Từ nay nếu
+  GitHub lại treo run, tự phục hồi trong ≤15 phút, không cần can thiệp tay. Chi tiết: memory
+  `ai-news-actions-queue-stuck-fix`.
 - **Vercel đổi tên domain không giới hạn số lần** (Settings → Domains). Hiện là `sainews`.
 - **Khung trình duyệt tự động của Claude không "vẽ khung hình"** → click mô phỏng &
   IntersectionObserver không kích hoạt trong đó. Kiểm tra tính năng tương tác (nút, lọc, cuộn)

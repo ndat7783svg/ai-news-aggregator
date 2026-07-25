@@ -13,13 +13,13 @@ Node.js định kỳ để thu thập + tóm tắt bằng **Claude Haiku API** r
 
 **Nguồn đang chạy:** Hacker News (Algolia Search API), arXiv (cs.AI/LG/RO), GitHub Releases
 (8 repo: llama.cpp, transformers, ComfyUI, vllm, ollama, whisper.cpp, unsloth, sglang),
-GitHub "Trending" (qua GitHub **Search API** — không có API trending chính thức; dùng
-`api.github.com` khác `github.com`), và **13 blog/báo AI qua RSS/Atom**: OpenAI, Google
-DeepMind, Hugging Face, Mistral, Berkeley BAIR, Simon Willison, TechCrunch, The Verge, Ars
-Technica, VentureBeat, MIT Tech Review, Import AI, The Gradient. (Danh sách blog/repo ở
-`lib/config.js`; thêm blog phải khai báo slug ở `web/lib/filters.js` + `web/lib/format.js`.)
-Blog/báo miễn phí, KHÔNG cần API key. **Reddit CHƯA bật** (xem mục 3). X/Twitter **bỏ** (API
-đọc ~$100+/tháng, không hợp chi phí).
+GitHub "Repo nổi bật" (qua GitHub **Search API** — repo AI nhiều sao còn push gần đây, KHÔNG
+còn giới hạn "chỉ repo mới tạo"; dùng `api.github.com` khác `github.com`), và **13 blog/báo AI
+qua RSS/Atom**: OpenAI, Google DeepMind, Hugging Face, Mistral, Berkeley BAIR, Simon Willison,
+TechCrunch, The Verge, Ars Technica, VentureBeat, MIT Tech Review, Import AI, The Gradient.
+(Danh sách blog/repo ở `lib/config.js`; thêm blog phải khai báo slug ở `web/lib/filters.js`
+(vào 1 trong 3 nhóm) + `web/lib/format.js`.) Blog/báo miễn phí, KHÔNG cần API key. **Reddit
+CHƯA bật** (xem mục 3). X/Twitter **bỏ** (API đọc ~$100+/tháng, không hợp chi phí).
 
 ## 2. Trạng thái hiện tại — ĐÃ CHẠY THẬT trên production
 - Cả **5 cột mốc xong**: (1) collector HN+arXiv, (2) tóm tắt song ngữ Haiku, (3) dedupe+Supabase,
@@ -31,10 +31,18 @@ Blog/báo miễn phí, KHÔNG cần API key. **Reddit CHƯA bật** (xem mục 3
   chọn tay nhớ `localStorage`; dùng `data-theme` trên `<html>` + script inline chống nháy trong
   `web/app/layout.js`; màu qua biến CSS nên phủ toàn trang.
 - **Tính năng frontend đã live:** feed thẻ; **nút chuyển ngôn ngữ VI/EN** (nhớ localStorage);
-  **lọc theo nguồn** (Tất cả + mỗi nguồn, "Blog" gộp cả 13 blog/báo, nút ẩn nếu nguồn chưa có tin);
+  **lọc theo nguồn** (Tất cả + mỗi nguồn; 13 blog/báo tách thành **3 nhóm**: "Blog hãng AI"
+  (openai/deepmind/huggingface/mistral/bair), "Báo công nghệ" (techcrunch/theverge/arstechnica/
+  venturebeat/technologyreview), "Newsletter" (simonwillison/importai/thegradient) — nhãn đổi
+  theo VI/EN qua `web/lib/i18n.js`; nút ẩn nếu nhóm/nguồn chưa có tin);
   **infinite scroll** (tải 40 tin/lần qua `/api/items`, tự tải thêm khi cuộn, kết hợp mọi bộ lọc,
   có "Đang tải thêm…"/"Đã hết tin"). Thẻ hiển thị: badge nguồn, điểm (▲), thời gian tương đối,
   tiêu đề (link bài gốc), tóm tắt theo ngôn ngữ, tác giả.
+- **GitHub "Repo nổi bật" đã mở rộng (25/07):** bỏ giới hạn "chỉ repo tạo ≤30 ngày" → lấy repo
+  AI nhiều sao còn push trong ~180 ngày (≥500 sao), 7 chủ đề, tối đa 60 repo/lần thu thập. Giờ có
+  cả repo mới hot lẫn repo lớn kinh điển (tensorflow, ollama, transformers, langchain, pytorch...).
+  Mốc thời gian hiển thị = ngày push gần nhất (không phải ngày tạo repo). Cấu hình ở `lib/config.js`
+  (`GITHUB_TRENDING_*`). Chi phí tóm tắt lô repo mới lần đầu ~$0.10 (một lần, đã chạy 25/07).
 - **Dịch tiêu đề (title_vi):** chế độ VI hiển thị tiêu đề tiếng Việt (`title_vi`), EN giữ gốc.
   Sinh trong bước tóm tắt (`summarizer.js`, giữ nguyên tên riêng/repo/phiên bản/username).
   149 tin cũ đã backfill xong (24/07, ~$0.10) bằng `backfill-titles.js`.
@@ -62,13 +70,24 @@ Blog/báo miễn phí, KHÔNG cần API key. **Reddit CHƯA bật** (xem mục 3
 - Supabase project ref: **huqbirxwvrprqkhrwnsl** (`https://huqbirxwvrprqkhrwnsl.supabase.co`)
 
 ## 3. CHƯA làm / dang dở (đừng tưởng đã có)
-- **Reddit: CHƯA bật.** Code `collectors/reddit.js` sẵn sàng, tự bỏ qua nếu thiếu
-  `REDDIT_CLIENT_ID`/`REDDIT_CLIENT_SECRET`. Vướng: **ISP người dùng chặn `reddit.com`** nên chưa
-  vào được `reddit.com/prefs/apps` tạo app "script". Pipeline chạy trên cloud GitHub → vẫn hoạt
-  động nếu có credential; cần user vào trang đó **1 lần qua 4G/VPN** để lấy client_id/secret rồi
-  thêm vào **GitHub secrets** (không cần Vercel). Grant `client_credentials` (app-only, read-only).
+- **Reddit: CHƯA bật, đang KẸT ở bước tạo app (thử 25/07, tạm gác lại theo yêu cầu user).**
+  Code `collectors/reddit.js` sẵn sàng, tự bỏ qua nếu thiếu `REDDIT_CLIENT_ID`/`SECRET`. Vướng
+  2 lớp: (1) ISP chặn `reddit.com` → user phải dùng 4G/VPN mới vào được `reddit.com/prefs/apps`;
+  (2) **reCAPTCHA khi tạo app cứ tích không "ăn"/bấm "tạo ứng dụng" không phản hồi** — đã loại trừ
+  nguyên nhân chặn cookie bên thứ 3 (đã tắt, vẫn lỗi); nghi ngờ cao nhất là **IP 4G dùng chung
+  (CGNAT) bị Google reCAPTCHA đánh dấu nghi ngờ** (rất phổ biến ở mạng di động VN). Đã gợi ý
+  user thử bật/tắt chế độ máy bay (đổi IP 4G) hoặc thử ở mạng wifi khác hẳn — **CHƯA có kết quả
+  xác nhận**, phiên sau hỏi lại user đã thử chưa trước khi gợi ý thêm. Đừng lặp lại hướng "tắt
+  cookie bên thứ 3" (đã thử, không hiệu quả).
+- **Blog hãng AI còn thiếu tin cập nhật riêng của các mô hình lớn** (Anthropic/Claude, Google
+  Gemini, xAI Grok, Moonshot Kimi...) — user muốn theo dõi các "con AI" này cập nhật gì mới.
+  X/Twitter đã loại vì đắt (~$100+/tháng). Kỳ vọng ban đầu là Reddit sẽ có nhiều tin này nhưng
+  Reddit đang kẹt (xem trên). **CHƯA tìm/thêm nguồn nào cho việc này** — cần tìm RSS chính thức
+  (Anthropic/Google/xAI có thể không có RSS công khai, cần kiểm tra lại) hoặc mở rộng từ khoá
+  HN/blog hiện có để bắt tin về các model này tốt hơn.
 - **Tên miền .com: CHƯA mua.** Đang dùng subdomain miễn phí `sainews.vercel.app`.
-- Blog **Anthropic & Meta AI**: bỏ qua vì không có RSS chính thức (không scraping).
+- Blog **Anthropic & Meta AI** (blog chính thức hãng, khác với "tin về model Claude"): bỏ qua vì
+  không có RSS chính thức (không scraping).
 - **Login/thanh toán/tài khoản, PWA/app điện thoại: CHƯA làm** (ngoài phạm vi bản đầu).
 
 ## 4. Quyết định đã chốt (ĐỪNG đề xuất lại)
@@ -83,6 +102,11 @@ Blog/báo miễn phí, KHÔNG cần API key. **Reddit CHƯA bật** (xem mục 3
 - **Giao diện feed thẻ (kiểu Techmeme/TLDR), KHÔNG làm kiểu swipe/TikTok.** Hợp mô hình
   "tóm tắt + dẫn nguồn", dễ đọc lướt và kèm link gốc.
 - Ngôn ngữ: collector/pipeline dùng **JS thuần (Node ESM)**; web dùng **Next.js 14 App Router (JS)**.
+- **Rủi ro pháp lý mô hình tóm tắt+link: user đã xem xét và CHẤP NHẬN (25/07), đừng bàn lại
+  trừ khi có thay đổi lớn** (thu phí/quảng cáo dựa nội dung người khác, đăng lại toàn văn, dùng
+  logo/ảnh hãng khác). Lý do: tóm tắt ngắn viết lại bằng lời riêng + luôn link nguồn + không chép
+  nguyên văn = nhóm rủi ro thấp (giống Techmeme/TLDR); luật bảo vệ cách diễn đạt, không bảo vệ
+  bản thân sự kiện/tin tức. Chi tiết: memory `ai-news-legal-risk-note`.
 
 ## 5. Vướng mắc / lưu ý kỹ thuật đã gặp
 - **ISP thỉnh thoảng chặn `github.com`** (git push timeout) — nhưng `api.github.com`, Vercel,
@@ -104,23 +128,42 @@ Blog/báo miễn phí, KHÔNG cần API key. **Reddit CHƯA bật** (xem mục 3
 - **Khung trình duyệt tự động của Claude không "vẽ khung hình"** → click mô phỏng &
   IntersectionObserver không kích hoạt trong đó. Kiểm tra tính năng tương tác (nút, lọc, cuộn)
   bằng `dispatchEvent` hoặc trên **web thật**, đừng kết luận "lỗi" từ công cụ.
+- **ĐÃ SỬA (25/07) — Next.js Data Cache làm lọc theo nguồn hiện tin cũ:** `export const dynamic
+  = "force-dynamic"` trong route API **KHÔNG** tự tắt cache cho từng lệnh `fetch` bên trong (Supabase
+  đọc qua `fetch`). Mỗi tổ hợp filter/sort/time là 1 URL bị Next Data Cache "đóng băng" riêng, chỉ
+  query `all` được trang chủ ISR làm tươi. **Fix:** thêm `export const fetchCache =
+  "force-no-store";` cạnh `force-dynamic` trong `web/app/api/items/route.js`. **Nếu thêm route
+  API mới đọc Supabase, LUÔN nhớ thêm cả 2 dòng này**, không chỉ `force-dynamic`. Chi tiết: memory
+  `ai-news-nextjs-data-cache-filter`.
 - Chạy web cục bộ: `cd web && npm run dev` (cần `web/.env.local` với `SUPABASE_URL` +
   `SUPABASE_ANON_KEY`). Pipeline cục bộ: `npm run pipeline` (cần `.env` ở gốc).
 
 ## 6. Chi phí thực tế
-- **Anthropic tới giờ: ước tính < $1** (đã tóm tắt ~170+ tin + backfill tiêu đề + test). Thêm 10
-  blog + 5 repo (24/07) → 1 lần backfill ~150 tin mới ≈ **$0.25 một lần**. **Số thật xem ở
+- **Anthropic tới giờ: ước tính < $1.10** (đã tóm tắt ~170+ tin + backfill tiêu đề + test + ~50-70
+  repo GitHub mới khi mở rộng "Repo nổi bật" 25/07 ≈ +$0.10 một lần). **Số thật xem ở
   console.anthropic.com → Usage/Billing** (mình không đọc được console của bạn).
-- **Vận hành hàng tháng: ước ~$1–3/tháng, thường chỉ vài chục cent** (chỉ tóm tắt tin MỚI; nhiều
-  nguồn hơn → nhiều tin mới/ngày hơn nhưng vẫn nhỏ, ~0,15 cent/tin). Supabase/Vercel/GitHub Actions
-  + cron-job.org đều **miễn phí** ở quy mô này.
+- **Vận hành hàng tháng: ước ~$1–3/tháng, thường chỉ vài chục cent** (chỉ tóm tắt tin MỚI mỗi lần
+  chạy 15'; nhiều nguồn hơn → nhiều tin mới/ngày hơn nhưng vẫn nhỏ, ~0,15 cent/tin). Supabase/
+  Vercel/GitHub Actions + cron-job.org đều **miễn phí** ở quy mô này.
+- **QUAN TRỌNG — tránh nhầm lẫn đã xảy ra 25/07:** chi phí "một lần" (VD $0.10 khi mở rộng nguồn)
+  KHÔNG lặp lại mỗi lần cron chạy (15'). Cron chỉ tóm tắt tin **hoàn toàn mới** (dedupe theo
+  source+source_id), nên mỗi lần chạy chỉ tốn ~vài tin × 0,15 cent, không phải $0.10 × 96
+  lần/ngày. Nếu user hỏi lại lo lắng về chi phí, giải thích đúng cơ chế này ngay, đừng để hiểu
+  nhầm "user tưởng ngày tốn $9,6" lặp lại.
 
 ## 7. Bước tiếp theo nên đề xuất (nếu hỏi "giờ làm gì tiếp")
-1. **Thêm Reddit** khi user vào được `reddit.com/prefs/apps` (qua 4G/VPN vì ISP chặn): tạo app
-   script → điền `REDDIT_CLIENT_ID`/`SECRET` vào **GitHub secrets**. Nút lọc Reddit tự hiện khi có tin.
-2. Mua **tên miền .com** riêng (gắn vào Vercel) nếu muốn thương hiệu.
-3. Về sau: PWA/app điện thoại, thêm nguồn nữa, trau chuốt giao diện, có thể thêm lọc từ khoá AI cho
+1. **Reddit (đang kẹt CAPTCHA/IP 4G, xem mục 3):** hỏi user đã thử bật/tắt máy bay hoặc mạng
+   khác chưa; nếu vẫn kẹt, cân nhắc gác hẳn hoặc thử cách khác (nhờ người khác tạo app hộ ở mạng
+   sạch). Khi có `client_id`/`secret` → thêm vào **GitHub secrets**, nút lọc Reddit tự hiện.
+2. **Thêm nguồn cập nhật cho các AI lớn** (Anthropic/Claude, Gemini, Grok, Kimi) vào nhóm "Blog
+   hãng AI" — user yêu cầu 25/07, chưa khảo sát nguồn khả thi (RSS chính thức có/không, hay mở
+   rộng từ khoá HN/blog hiện có).
+3. Mua **tên miền .com** riêng (gắn vào Vercel) nếu muốn thương hiệu.
+4. Về sau: PWA/app điện thoại, thêm nguồn nữa, trau chuốt giao diện, có thể thêm lọc từ khoá AI cho
    các nguồn báo phổ thông (TechCrunch/Verge... hiện lấy toàn bộ mục AI, chưa lọc thêm).
 
 **Đã xong (đừng đề xuất lại):** cron-job.org (nhịp tự động), dịch tiêu đề `title_vi` + backfill,
-nút sắp xếp Mới nhất/Nổi bật, lọc thời gian, dark mode, Vercel Analytics, mở rộng nguồn (13 blog/8 repo).
+nút sắp xếp Mới nhất/Nổi bật, lọc thời gian, dark mode, Vercel Analytics (đã xem số liệu 25/07 —
+traffic chủ yếu từ Facebook referral, 97% VN, bounce rate cao là bình thường vì web 1 trang),
+tách nhóm Blog (3 nhóm), mở rộng "Repo nổi bật" GitHub (13 blog/60 repo), fix lỗi Next.js Data
+Cache khiến lọc theo nguồn hiện tin cũ.

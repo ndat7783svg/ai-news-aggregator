@@ -56,3 +56,32 @@
 - Cập nhật `CLAUDE.md` + đồng bộ `AGENTS.md` (mục 2, 3, 7) phản ánh toàn bộ việc trên.
 - Đã push lên `origin/main` (HEAD lúc push: `1e97678`; còn phần fix CLAUDE.md/AGENTS.md/HANDOFF.md
   này chưa push, sẽ push ở cuối phiên).
+
+### 2026-07-26 — Claude Code (Opus 5) + Codex: luồng "🔥 Trending" GitHub daily/weekly
+- **Xử lý xong plan Antigravity đang chờ** (`plans/incoming/` → `plans/done/`). Bàn với user và
+  **chốt khác plan gốc**: bỏ phần "Rising" theo ngưỡng sao tuyệt đối (repo mới tạo ≤30 ngày,
+  ≥50 sao) vì dễ ra 0 kết quả nhiều ngày; thay bằng đọc thẳng trang **github.com/trending**
+  (daily + weekly) — đúng thứ user muốn đọc. Cũng **bỏ phần C2** (hạ ngưỡng `github_trending`
+  500→200): user quyết giữ nguyên 500. Phần C3 (update sao repo cũ) vẫn gác lại.
+- Claude viết task `tasks/todo/2026-07-26-cai-thien-hien-thi-thu-thap-github.md` → Codex thực thi
+  trên nhánh `codex/github-trending` (worktree riêng `D:/news-summary-web-project-github-trending`,
+  để **chưa commit**) → Claude kiểm tra thật rồi mới gộp.
+- **Kiểm tra thật (không tin lời kể):** chạy `npm run collect` (132 tin, GitHub 92), chạy riêng
+  collector trending (17 repo trên trang → lọc còn 7 repo AI thật, loại đúng nodejs/jenkins/VPN/
+  game), `npm test` 4/4 pass, `npm run build` trong `web/` pass.
+- **Claude sửa 1 lỗi thật của Codex trước khi gộp:** hàm lọc AI khớp kiểu "chứa chuỗi con" nên
+  từ khoá `rag` dính vào *storage*/*fragment*/*dragon* → repo không liên quan sẽ lọt vào feed.
+  Đổi sang khớp **ranh giới từ** cho mọi từ khoá, test lại 8/8 đúng.
+- **Ngoài phạm vi task nhưng chấp nhận** (đã báo user): Codex đổi `web/next.config.js` →
+  `next.config.mjs` + thêm `"type": "module"` vào `web/package.json` (cần thiết để file test ở
+  gốc import được module trong `web/`). Build web vẫn pass nên giữ lại.
+- File đổi: `collectors/github.js`, `collect.js`, `pipeline.js`, `package.json`,
+  `web/components/NewsCard.js`, `web/lib/{filters,format,supabaseServer}.js`,
+  `web/app/globals.css`, `web/next.config.mjs`, `test/github-trending.test.js`, `PROJECT_MAP.md`.
+- Đã gộp vào `main` (merge `fad8445`) + push `e2dd90f` → Vercel tự deploy, pipeline tự chạy lần
+  sau (cron-job.org 15').
+- **Còn dang dở / cần theo dõi:** (1) chưa xem kết quả thật trên web sau khi pipeline chạy lần
+  tới — phiên sau kiểm tra feed có tin badge "🔥 Trending (ngày)/(tuần)" chưa; (2) worktree
+  `D:/news-summary-web-project-github-trending` + nhánh `codex/github-trending` đã gộp xong,
+  có thể xoá nếu không dùng nữa; (3) chi phí tóm tắt lô repo trending đầu tiên ~$0.05-0.10 một
+  lần (đã báo user từ lúc bàn plan).

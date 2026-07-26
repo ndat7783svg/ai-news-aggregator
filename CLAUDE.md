@@ -107,14 +107,9 @@ CHƯA bật** (xem mục 3). X/Twitter **bỏ** (API đọc ~$100+/tháng, khôn
 - Blog **Anthropic & Meta AI** (blog chính thức hãng, khác với "tin về model Claude"): bỏ qua vì
   không có RSS chính thức (không scraping).
 - **Login/thanh toán/tài khoản, PWA/app điện thoại: CHƯA làm** (ngoài phạm vi bản đầu).
-- **Có 1 plan từ Antigravity đang chờ duyệt (26/07)** về cải thiện hiển thị "Repo nổi bật"
-  GitHub: sau ngày đầu gần như không có tin GitHub mới (top 60 repo ≥500 sao quá ổn định, dedupe
-  khiến không lặp lại), thiếu luồng bắt repo "mới nổi nhanh" (kiểu LoopEngineering, spec-kit —
-  sao ít nhưng tăng nhanh). Đề xuất sơ bộ: cải thiện thẻ hiển thị (rút gọn số sao kiểu "158K",
-  đổi icon, hiện ngôn ngữ lập trình) + thêm luồng "Rising" (repo mới tạo ≤30 ngày, ≥50 sao) +
-  badge riêng. **CHƯA bàn xong với user, chưa quyết ngưỡng sao cho "Rising" (50 hay 100).** File
-  plan nằm ở `plans/incoming/` (tên file tuỳ Antigravity đặt lúc lưu) — phiên sau kiểm tra
-  `plans/incoming/` trước, đọc + bàn tiếp với user nếu chưa xử lý.
+- **Cập nhật số sao repo GitHub cũ (phần C3 của plan Antigravity): CHƯA làm, đã gác lại.**
+  Số sao hiển thị là số tại lúc thu thập, không được cập nhật về sau. Muốn làm phải thêm logic
+  UPDATE trong pipeline (hiện chỉ INSERT) — cân nhắc kỹ, không cấp thiết.
 
 ## 4. Quyết định đã chốt (ĐỪNG đề xuất lại)
 - **Dedupe theo (source, source_id), KHÔNG theo URL.** Vì mỗi nguồn có ID ổn định; URL hay đổi
@@ -189,9 +184,8 @@ CHƯA bật** (xem mục 3). X/Twitter **bỏ** (API đọc ~$100+/tháng, khôn
   nhầm "user tưởng ngày tốn $9,6" lặp lại.
 
 ## 7. Bước tiếp theo nên đề xuất (nếu hỏi "giờ làm gì tiếp")
-1. **Kiểm tra `plans/incoming/` trước tiên (26/07):** có 1 plan từ Antigravity về cải thiện
-   hiển thị "Repo nổi bật" GitHub đang chờ (xem mục 3) — đọc + bàn tiếp với user nếu phiên trước
-   chưa xử lý xong.
+1. **Kiểm tra `plans/incoming/` trước tiên:** nếu Codex/Antigravity có thả plan mới thì đọc +
+   bàn với user trước khi làm việc khác (xem `plans/README.md`). Hiện đang RỖNG (26/07).
 2. **Reddit (đang kẹt CAPTCHA/IP 4G, xem mục 3):** hỏi user đã thử bật/tắt máy bay hoặc mạng
    khác chưa; nếu vẫn kẹt, cân nhắc gác hẳn hoặc thử cách khác (nhờ người khác tạo app hộ ở mạng
    sạch). Khi có `client_id`/`secret` → thêm vào **GitHub secrets**, nút lọc Reddit tự hiện.
@@ -210,4 +204,19 @@ traffic chủ yếu từ Facebook referral, 97% VN, bounce rate cao là bình th
 tách nhóm Blog (3 nhóm), mở rộng "Repo nổi bật" GitHub (13 blog/60 repo), fix lỗi Next.js Data
 Cache khiến lọc theo nguồn hiện tin cũ, mua tên miền riêng `bainews.site` + nối Vercel (26/07),
 tạo cơ chế `plans/` (Codex/Antigravity → Claude bàn → `tasks/todo/`) + track nốt `tasks/` vào
-git (26/07).
+git (26/07), **luồng "🔥 Trending" thật daily/weekly + cải thiện thẻ GitHub (26/07)**.
+
+### Luồng "🔥 Trending" GitHub (26/07) — đã chạy
+Nguồn mới `github_trending_daily` + `github_trending_weekly`: đọc trang **github.com/trending**
+(`?since=daily|weekly`) bằng Cheerio, giữ đúng thứ hạng trang, rồi gọi REST API từng repo để
+**lọc lại theo chủ đề AI** (topic khớp `GITHUB_TRENDING_TOPICS` hoặc mô tả khớp `AI_KEYWORDS`)
+— vì trang trending không lọc theo chủ đề, không lọc sẽ lẫn repo game/VPN/framework web.
+Nguồn `github_trending` cũ (Search API, ngưỡng **500 sao — giữ nguyên, đừng hạ**) vẫn chạy song
+song. Thẻ GitHub: icon ★ + số sao rút gọn ("158K") + badge ngôn ngữ lập trình (cần cột `extra`
+trong `COLUMNS` ở `web/lib/supabaseServer.js`). Chi tiết đã bàn:
+`plans/done/2026-07-26-cai-thien-hien-thi-github-repo-antigravity.md` +
+`tasks/done/2026-07-26-cai-thien-hien-thi-thu-thap-github.md`.
+
+**Bài học khi lọc theo từ khoá:** so khớp phải theo **ranh giới từ** (`\bkeyword\b`), KHÔNG
+dùng "chứa chuỗi con" — từ khoá `rag` dính vào **sto*rag*e**/**f*rag*ment**/**d*rag*on** làm
+repo không liên quan lọt vào feed AI (đã sửa trước khi gộp).

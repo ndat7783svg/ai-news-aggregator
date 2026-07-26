@@ -37,3 +37,15 @@ thẳng lên main nếu chưa qua review.
 
 ## Quy ước đặt tên file
 `YYYY-MM-DD-mo-ta-ngan.md`, ví dụ: `2026-07-26-tim-nguon-blog-ai-lon.md`
+
+## Task xuất phát từ một plan (`plans/`)
+
+Ngoài việc Claude tự khởi xướng, 1 file task ở đây cũng có thể là kết quả của việc bàn luận
+một ý tưởng/plan do Codex hoặc Antigravity mang qua (xem [`plans/README.md`](../plans/README.md)).
+Trường hợp đó, thêm 1 dòng trong mục **Bối cảnh** của file task:
+
+```
+Nguồn: plans/done/<tên file plan gốc>.md
+```
+
+để giữ liên kết ngược lại lý do/ngữ cảnh ban đầu.

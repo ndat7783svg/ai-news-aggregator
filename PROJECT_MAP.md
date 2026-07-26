@@ -19,7 +19,8 @@ Chi tiết & nguyên tắc: `docs/superpowers/specs/2026-07-22-ai-news-aggregato
 - [x] Sắp xếp Mới nhất/Nổi bật + lọc thời gian (Hôm nay/Tuần/Tháng/Năm/Mọi lúc).
 - [x] Chế độ Sáng/Tối (theo hệ thống + nhớ lựa chọn) + đổi tên hiển thị "SAI News".
 - [ ] Reddit: code sẵn (`collectors/reddit.js`), CHƯA bật — cần REDDIT_CLIENT_ID/SECRET.
-- [ ] Tên miền .com riêng: CHƯA mua, đang dùng `sainews.vercel.app`.
+- [x] Tên miền riêng `bainews.site` — đã mua + nối Vercel (26/07), chạy song song
+      `sainews.vercel.app`. CHƯA đổi brand/đặt domain chính (xem CLAUDE.md mục 2, 3).
 
 Chi tiết đầy đủ & quyết định đã chốt: xem `CLAUDE.md` ở gốc dự án (nguồn thông tin mới nhất).
 
@@ -53,6 +54,10 @@ Chi tiết đầy đủ & quyết định đã chốt: xem `CLAUDE.md` ở gốc
 | `web/.env.local` | `SUPABASE_URL` + `SUPABASE_ANON_KEY` (KHÔNG commit). Mẫu: `.env.local.example`. |
 | `.env` | Chứa `ANTHROPIC_API_KEY` (KHÔNG commit). Mẫu: `.env.example`. |
 | `package.json` | Node ESM (`type: module`); scripts `npm run collect`, `npm run summarize`. |
+| `CLAUDE.md` | Hướng dẫn dự án cho Claude Code — nguồn thông tin mới nhất, đọc trước khi làm việc. |
+| `AGENTS.md` | Bản y hệt CLAUDE.md, dành cho agent khác (Codex, Antigravity...) — đồng bộ nội dung, sửa lại khi CLAUDE.md đổi. |
+| `HANDOFF.md` | Nhật ký bàn giao giữa nhiều AI/công cụ khác nhau làm cùng dự án (Claude Code, Codex, Antigravity) — mỗi phiên ghi tóm tắt việc đã làm ở cuối file, đối chiếu bằng git log/diff. |
+| `tasks/` | Giao việc dạng file `.md` cho agent thực thi (Codex): `tasks/todo/` = chưa làm, `tasks/done/` = đã xong & đã review. Xem `tasks/README.md` cho format. |
 | `plans/` | Ý tưởng/plan từ Codex hoặc Antigravity mang qua Claude bàn (chiều ngược `tasks/`): `plans/incoming/` = chờ bàn, `plans/done/` = đã bàn xong (chỉ lưu vết). Chốt xong thì tạo task mới ở `tasks/todo/`, không tự đánh dấu "duyệt" trong file plan. Xem `plans/README.md`. |
 
 ## Khuôn dữ liệu chung (interface giữa các module)

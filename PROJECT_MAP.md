@@ -53,6 +53,7 @@ Chi tiết đầy đủ & quyết định đã chốt: xem `CLAUDE.md` ở gốc
 | `web/.env.local` | `SUPABASE_URL` + `SUPABASE_ANON_KEY` (KHÔNG commit). Mẫu: `.env.local.example`. |
 | `.env` | Chứa `ANTHROPIC_API_KEY` (KHÔNG commit). Mẫu: `.env.example`. |
 | `package.json` | Node ESM (`type: module`); scripts `npm run collect`, `npm run summarize`. |
+| `plans/` | Ý tưởng/plan từ Codex hoặc Antigravity mang qua Claude bàn (chiều ngược `tasks/`): `plans/incoming/` = chờ bàn, `plans/done/` = đã bàn xong (chỉ lưu vết). Chốt xong thì tạo task mới ở `tasks/todo/`, không tự đánh dấu "duyệt" trong file plan. Xem `plans/README.md`. |
 
 ## Khuôn dữ liệu chung (interface giữa các module)
 Mọi collector trả về mảng object: `{ source, sourceId, title, url, author, publishedAt, score, extra }`.

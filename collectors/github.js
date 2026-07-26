@@ -1,8 +1,10 @@
 // Collector: GitHub — Releases của repo AI lớn, và "Trending" (thay bằng Search API chính thức).
 // Dùng api.github.com (khác github.com). Không cần token, nhưng nếu có GITHUB_TOKEN thì hạn mức cao hơn.
 
-import { fetchJson } from "../lib/http.js";
+import * as cheerio from "cheerio";
+import { fetchJson, fetchText } from "../lib/http.js";
 import {
+  AI_KEYWORDS,
   GITHUB_RELEASE_REPOS,
   GITHUB_TRENDING_TOPICS,
   GITHUB_TRENDING_PUSHED_DAYS,
@@ -21,6 +23,51 @@ function ghHeaders() {
   };
   if (process.env.GITHUB_TOKEN) h.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
   return h;
+}
+
+/** Lấy owner/repo theo đúng thứ tự xếp hạng mà github.com/trending hiển thị. */
+export function parseTrendingRepoNames(html) {
+  const $ = cheerio.load(html);
+  const names = [];
+  $("article.Box-row h2 a").each((_, link) => {
+    const href = $(link).attr("href") || "";
+    const name = href.replace(/^\//, "").replace(/\/$/, "");
+    if (/^[^/]+\/[^/]+$/.test(name)) names.push(name);
+  });
+  return names;
+}
+
+/** Chỉ giữ repo AI theo topic chuẩn hoặc từ khóa mô tả, tránh lẫn repo game/web không liên quan. */
+export function isAiTrendingRepo(repo) {
+  const topics = new Set((repo.topics || []).map((topic) => String(topic).toLowerCase()));
+  if (GITHUB_TRENDING_TOPICS.some((topic) => topics.has(topic.toLowerCase()))) return true;
+
+  const description = String(repo.description || "").toLowerCase();
+  // So khớp theo RANH GIỚI TỪ cho mọi từ khoá (không chỉ từ ngắn): khớp kiểu "chứa chuỗi con"
+  // làm "storage"/"fragment"/"dragon" dính từ khoá "rag" → repo không liên quan AI lọt vào feed.
+  return AI_KEYWORDS.some((keyword) => {
+    const escaped = keyword.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return new RegExp(`\\b${escaped}\\b`).test(description);
+  });
+}
+
+/** Chuẩn hóa 1 repo Trending thành item dùng chung cho pipeline. */
+export function toTrendingItem(repo, period, rank, publishedAt = new Date().toISOString()) {
+  return {
+    source: `github_trending_${period}`,
+    sourceId: String(repo.id),
+    title: repo.full_name,
+    url: repo.html_url,
+    author: repo.owner?.login ?? null,
+    publishedAt,
+    score: repo.stargazers_count ?? null,
+    extra: {
+      language: repo.language,
+      stars: repo.stargazers_count,
+      abstract: repo.description || "",
+      rank,
+    },
+  };
 }
 
 /** Bản phát hành mới nhất của các repo AI lớn. */
@@ -101,4 +148,32 @@ export async function collectGithubTrending() {
   return [...byId.values()]
     .sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
     .slice(0, GITHUB_TRENDING_MAX);
+}
+
+/** Trending thật từ github.com/trending, sau đó lọc lại theo chủ đề AI bằng REST API. */
+export async function collectGithubTrendingScrape(period) {
+  if (period !== "daily" && period !== "weekly") {
+    throw new Error(`GitHub Trending period không hợp lệ: ${period}`);
+  }
+
+  const html = await fetchText(`https://github.com/trending?since=${period}`, {
+    headers: ghHeaders(),
+  });
+  const repoNames = parseTrendingRepoNames(html).slice(0, 25);
+  const publishedAt = new Date().toISOString();
+  const items = await Promise.all(
+    repoNames.map(async (fullName, index) => {
+      try {
+        const repo = await fetchJson(`${GH}/repos/${fullName}`, { headers: ghHeaders() });
+        return isAiTrendingRepo(repo)
+          ? toTrendingItem(repo, period, index + 1, publishedAt)
+          : null;
+      } catch (e) {
+        console.error(`  ⚠ GitHub Trending ${period} ${fullName} lỗi: ${e.message}`);
+        return null;
+      }
+    })
+  );
+
+  return items.filter(Boolean);
 }

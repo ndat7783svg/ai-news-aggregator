@@ -18,11 +18,21 @@ export const SOURCE_META = {
   thegradient: { label: "The Gradient", color: "#3f51b5" },
   github_release: { label: "GitHub Release", color: "#6e40c9" },
   github_trending: { label: "GitHub Trending", color: "#24292e" },
+  github_trending_daily: { label: "🔥 Trending (ngày)", color: "#f97316" },
+  github_trending_weekly: { label: "🔥 Trending (tuần)", color: "#ea580c" },
   reddit: { label: "Reddit", color: "#ff4500" },
 };
 
 export function sourceMeta(source) {
   return SOURCE_META[source] || { label: source, color: "#6b7280" };
+}
+
+/** Rút gọn số sao GitHub để phần đầu thẻ gọn hơn. */
+export function formatStars(n) {
+  if (typeof n !== "number" || !Number.isFinite(n)) return "";
+  if (n < 1000) return String(n);
+  const compact = n / 1000;
+  return `${compact >= 100 ? Math.round(compact) : Number(compact.toFixed(1))}K`;
 }
 
 // "2 giờ trước" / "2 hours ago"

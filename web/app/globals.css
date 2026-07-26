@@ -311,6 +311,23 @@ body {
   font-size: 0.97rem;
 }
 
+.repo-language {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: -2px 0 12px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.language-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  flex: 0 0 10px;
+}
+
 .card-bottom {
   display: flex;
   align-items: center;

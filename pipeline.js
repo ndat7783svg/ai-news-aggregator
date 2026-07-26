@@ -5,7 +5,11 @@
 import { collectHackerNews } from "./collectors/hackernews.js";
 import { collectArxiv } from "./collectors/arxiv.js";
 import { collectBlogs } from "./collectors/blogs.js";
-import { collectGithubReleases, collectGithubTrending } from "./collectors/github.js";
+import {
+  collectGithubReleases,
+  collectGithubTrending,
+  collectGithubTrendingScrape,
+} from "./collectors/github.js";
 import { collectReddit } from "./collectors/reddit.js";
 import { summarizeMany } from "./summarize/summarizer.js";
 import { fetchExistingKeys, insertItems } from "./db/supabase.js";
@@ -18,6 +22,8 @@ const COLLECTORS = [
   ["Blog", collectBlogs],
   ["GitHub Releases", collectGithubReleases],
   ["GitHub Trending", collectGithubTrending],
+  ["GitHub Trending Daily", () => collectGithubTrendingScrape("daily")],
+  ["GitHub Trending Weekly", () => collectGithubTrendingScrape("weekly")],
   ["Reddit", collectReddit],
 ];
 

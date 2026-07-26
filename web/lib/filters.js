@@ -7,6 +7,11 @@ export const PAGE_SIZE = 40; // số tin mỗi lần tải
 export const SOURCE_FILTERS = [
   { key: "github_release", label: "GitHub Release", sources: ["github_release"] },
   { key: "github_trending", label: "GitHub Trending", sources: ["github_trending"] },
+  {
+    key: "github_hot",
+    label: "🔥 Trending",
+    sources: ["github_trending_daily", "github_trending_weekly"],
+  },
   { key: "hackernews", label: "Hacker News", sources: ["hackernews"] },
   { key: "arxiv", label: "arXiv", sources: ["arxiv"] },
   {

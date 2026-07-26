@@ -56,6 +56,13 @@ CHƯA bật** (xem mục 3). X/Twitter **bỏ** (API đọc ~$100+/tháng, khôn
   xem số liệu ở Vercel dashboard → tab Analytics.
 - **DB:** Supabase bảng `news_items`, RLS = **đọc công khai / ghi chỉ service_role**. Hiện ~170+ tin
   (tăng dần sau khi thêm nguồn).
+- **Cơ chế `plans/` (mới, 26/07):** chiều ngược lại `tasks/` — Codex hoặc Antigravity thả ý
+  tưởng/plan vào `plans/incoming/`, Claude Code đọc + bàn cùng user trong chat, chốt xong thì
+  Claude viết task thực thi thẳng vào `tasks/todo/` (KHÔNG có `plans/approved/` riêng, xem
+  `plans/README.md`). Đã tạo xong khung + tài liệu (`plans/README.md`, `tasks/README.md` cập
+  nhật, `PROJECT_MAP.md` cập nhật); tiện thể track nốt `tasks/todo/`/`tasks/done/` vào git
+  (trước đó bị sót, chưa từng commit). Chi tiết thiết kế: `docs/superpowers/specs/2026-07-26-
+  multi-agent-plan-review-design.md`.
 - **Tự động (QUAN TRỌNG):** lịch chạy thật do **cron-job.org** gọi GitHub REST `workflow_dispatch`
   mỗi 15' — vì cron nội bộ của GitHub Actions bị bóp lịch (chạy thưa 3-4h/lần), KHÔNG tin cậy.
   Xem memory `ai-news-cron-throttling-fix` (URL API, header, token). Workflow vẫn giữ block
@@ -100,6 +107,14 @@ CHƯA bật** (xem mục 3). X/Twitter **bỏ** (API đọc ~$100+/tháng, khôn
 - Blog **Anthropic & Meta AI** (blog chính thức hãng, khác với "tin về model Claude"): bỏ qua vì
   không có RSS chính thức (không scraping).
 - **Login/thanh toán/tài khoản, PWA/app điện thoại: CHƯA làm** (ngoài phạm vi bản đầu).
+- **Có 1 plan từ Antigravity đang chờ duyệt (26/07)** về cải thiện hiển thị "Repo nổi bật"
+  GitHub: sau ngày đầu gần như không có tin GitHub mới (top 60 repo ≥500 sao quá ổn định, dedupe
+  khiến không lặp lại), thiếu luồng bắt repo "mới nổi nhanh" (kiểu LoopEngineering, spec-kit —
+  sao ít nhưng tăng nhanh). Đề xuất sơ bộ: cải thiện thẻ hiển thị (rút gọn số sao kiểu "158K",
+  đổi icon, hiện ngôn ngữ lập trình) + thêm luồng "Rising" (repo mới tạo ≤30 ngày, ≥50 sao) +
+  badge riêng. **CHƯA bàn xong với user, chưa quyết ngưỡng sao cho "Rising" (50 hay 100).** File
+  plan nằm ở `plans/incoming/` (tên file tuỳ Antigravity đặt lúc lưu) — phiên sau kiểm tra
+  `plans/incoming/` trước, đọc + bàn tiếp với user nếu chưa xử lý.
 
 ## 4. Quyết định đã chốt (ĐỪNG đề xuất lại)
 - **Dedupe theo (source, source_id), KHÔNG theo URL.** Vì mỗi nguồn có ID ổn định; URL hay đổi
@@ -174,20 +189,25 @@ CHƯA bật** (xem mục 3). X/Twitter **bỏ** (API đọc ~$100+/tháng, khôn
   nhầm "user tưởng ngày tốn $9,6" lặp lại.
 
 ## 7. Bước tiếp theo nên đề xuất (nếu hỏi "giờ làm gì tiếp")
-1. **Reddit (đang kẹt CAPTCHA/IP 4G, xem mục 3):** hỏi user đã thử bật/tắt máy bay hoặc mạng
+1. **Kiểm tra `plans/incoming/` trước tiên (26/07):** có 1 plan từ Antigravity về cải thiện
+   hiển thị "Repo nổi bật" GitHub đang chờ (xem mục 3) — đọc + bàn tiếp với user nếu phiên trước
+   chưa xử lý xong.
+2. **Reddit (đang kẹt CAPTCHA/IP 4G, xem mục 3):** hỏi user đã thử bật/tắt máy bay hoặc mạng
    khác chưa; nếu vẫn kẹt, cân nhắc gác hẳn hoặc thử cách khác (nhờ người khác tạo app hộ ở mạng
    sạch). Khi có `client_id`/`secret` → thêm vào **GitHub secrets**, nút lọc Reddit tự hiện.
-2. **Thêm nguồn cập nhật cho các AI lớn** (Anthropic/Claude, Gemini, Grok, Kimi) vào nhóm "Blog
+3. **Thêm nguồn cập nhật cho các AI lớn** (Anthropic/Claude, Gemini, Grok, Kimi) vào nhóm "Blog
    hãng AI" — user yêu cầu 25/07, chưa khảo sát nguồn khả thi (RSS chính thức có/không, hay mở
    rộng từ khoá HN/blog hiện có).
-3. **Đổi brand + domain chính (26/07):** làm banner thông báo đổi tên hiển thị (hiện cho user
+4. **Đổi brand + domain chính (26/07):** làm banner thông báo đổi tên hiển thị (hiện cho user
    hiện tại thấy ~24h), sau đó đổi "SAI News" → "BAI News" + đặt `bainews.site` làm domain
    chính trên Vercel (xem mục 2, mục 3).
-4. Về sau: PWA/app điện thoại, thêm nguồn nữa, trau chuốt giao diện, có thể thêm lọc từ khoá AI cho
+5. Về sau: PWA/app điện thoại, thêm nguồn nữa, trau chuốt giao diện, có thể thêm lọc từ khoá AI cho
    các nguồn báo phổ thông (TechCrunch/Verge... hiện lấy toàn bộ mục AI, chưa lọc thêm).
 
 **Đã xong (đừng đề xuất lại):** cron-job.org (nhịp tự động), dịch tiêu đề `title_vi` + backfill,
 nút sắp xếp Mới nhất/Nổi bật, lọc thời gian, dark mode, Vercel Analytics (đã xem số liệu 25/07 —
 traffic chủ yếu từ Facebook referral, 97% VN, bounce rate cao là bình thường vì web 1 trang),
 tách nhóm Blog (3 nhóm), mở rộng "Repo nổi bật" GitHub (13 blog/60 repo), fix lỗi Next.js Data
-Cache khiến lọc theo nguồn hiện tin cũ, mua tên miền riêng `bainews.site` + nối Vercel (26/07).
+Cache khiến lọc theo nguồn hiện tin cũ, mua tên miền riêng `bainews.site` + nối Vercel (26/07),
+tạo cơ chế `plans/` (Codex/Antigravity → Claude bàn → `tasks/todo/`) + track nốt `tasks/` vào
+git (26/07).

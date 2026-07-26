@@ -84,7 +84,7 @@ mỗi khi nhắc chúng soạn plan) để chúng tự áp dụng format + đo�
    cùng user — sửa/tinh chỉnh ý tưởng qua lại bằng lời, không sửa trực tiếp vào file plan.
 3. Khi hai bên đã thống nhất, Claude **viết một file task mới vào `tasks/todo/`** theo đúng
    format sẵn có trong `tasks/README.md` (Mục tiêu / Bối cảnh / Việc cần làm / Tiêu chí hoàn
-   thành / KHÔNG được làm) — đây là lệnh thực thi thật sự. Thêm dòng `Nguồn: plans/incoming/
+   thành / KHÔNG được làm) — đây là lệnh thực thi thật sự. Thêm dòng `Nguồn: plans/done/
    <tên file>.md` trong phần Bối cảnh để giữ liên kết ngữ cảnh.
 4. Claude di chuyển file plan gốc từ `plans/incoming/` sang `plans/done/` (chỉ lưu vết, không
    cần đánh dấu gì thêm — file task ở `tasks/todo/` chính là bằng chứng đã bàn xong).

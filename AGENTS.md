@@ -1,4 +1,4 @@
-# CLAUDE.md — AI News Aggregator (bàn giao cho phiên sau)
+# AGENTS.md — AI News Aggregator (bàn giao cho phiên sau)
 
 > Đọc file này + `PROJECT_MAP.md` (bản đồ file chi tiết) là tiếp tục làm việc được ngay.
 > Người dùng **không phải lập trình viên**, giao tiếp **tiếng Việt**, thao tác thủ công cần

@@ -3,8 +3,33 @@ import { Analytics } from "@vercel/analytics/next";
 import RenameBanner from "../components/RenameBanner";
 
 export const metadata = {
-  title: "BAI News — tổng hợp & tóm tắt tin song ngữ",
-  description: "Tổng hợp & tóm tắt tin tức, song ngữ Việt–Anh, kèm nguồn.",
+  metadataBase: new URL("https://bainews.site"),
+  title: "BAI News — Tin AI mới nhất, tóm tắt tiếng Việt",
+  description:
+    "Tổng hợp tin tức AI từ Hacker News, arXiv, GitHub và các blog công nghệ hàng đầu, tóm tắt song ngữ Việt–Anh, kèm link nguồn. Cập nhật liên tục, không cần đọc tiếng Anh.",
+  keywords: [
+    "tin AI",
+    "tin tức AI tiếng Việt",
+    "tóm tắt tin AI",
+    "trí tuệ nhân tạo",
+    "AI news",
+    "công nghệ AI",
+  ],
+  openGraph: {
+    title: "BAI News — Tin AI mới nhất, tóm tắt tiếng Việt",
+    description:
+      "Tổng hợp & tóm tắt tin tức AI song ngữ Việt–Anh, kèm nguồn gốc.",
+    url: "https://bainews.site",
+    siteName: "BAI News",
+    locale: "vi_VN",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "BAI News — Tin AI mới nhất, tóm tắt tiếng Việt",
+    description:
+      "Tổng hợp & tóm tắt tin tức AI song ngữ Việt–Anh, kèm nguồn gốc.",
+  },
 };
 
 // Đặt chế độ sáng/tối TRƯỚC khi vẽ để không bị nháy: ưu tiên lựa chọn đã lưu,

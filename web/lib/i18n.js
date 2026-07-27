@@ -49,6 +49,11 @@ const STRINGS = {
     savedEmpty: "Chưa có tin nào được lưu.",
     savedMissing: "tin không tải được (id không còn trong DB).",
     closePopup: "Đóng",
+    // Menu điều hướng ở header
+    menu: "Menu",
+    navHome: "Trang chủ",
+    navGithubAi: "GitHub AI nổi bật",
+    navSaved: "Tin đã lưu",
     // Chia sẻ
     share: "Chia sẻ",
     copiedLink: "Đã copy link!",
@@ -103,6 +108,11 @@ const STRINGS = {
     savedEmpty: "No saved items yet.",
     savedMissing: "item(s) could not be loaded (id no longer in DB).",
     closePopup: "Close",
+    // Header navigation menu
+    menu: "Menu",
+    navHome: "Home",
+    navGithubAi: "Trending GitHub AI",
+    navSaved: "Saved items",
     // Share
     share: "Share",
     copiedLink: "Link copied!",

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import NewsCard from "./NewsCard";
+import HeaderMenu from "./HeaderMenu";
 import { t } from "../lib/i18n";
 import { SOURCE_FILTERS, PAGE_SIZE } from "../lib/filters";
 
@@ -240,6 +241,7 @@ export default function Feed({
               EN
             </button>
           </div>
+          <HeaderMenu lang={lang} />
         </div>
       </header>
 
@@ -359,12 +361,11 @@ export default function Feed({
       {/* Điểm mốc để phát hiện cuộn tới cuối */}
       <div ref={sentinelRef} aria-hidden="true" style={{ height: 1 }} />
 
-      <footer style={{ textAlign: "center", padding: "2rem 0 1rem", color: "var(--muted)", fontSize: "0.85rem", display: "flex", justifyContent: "center", gap: "1.5rem", flexWrap: "wrap" }}>
-        <a href="/github-ai" style={{ color: "var(--muted)", textDecoration: "underline" }}>
-          {lang === "vi" ? "📂 GitHub AI nổi bật →" : "📂 Trending GitHub AI →"}
-        </a>
-        <a href="/da-luu" style={{ color: "var(--muted)", textDecoration: "underline" }}>
-          {lang === "vi" ? "🔖 Tin đã lưu →" : "🔖 Saved items →"}
+      {/* Link tới các trang khác đã chuyển lên menu ☰ ở header (giữ 1 link ở chân trang
+          cho người cuộn hết feed, và để Google có liên kết nội bộ trong HTML tĩnh). */}
+      <footer className="site-footer">
+        <a href={lang === "en" ? "/en/github-ai" : "/github-ai"}>
+          {t(lang, "navGithubAi")} →
         </a>
       </footer>
     </main>

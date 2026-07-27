@@ -97,7 +97,7 @@ export default function SaveListPopup({ itemId, lang, onClose, onUpdate }) {
           </span>
           <button
             onClick={onClose}
-            aria-label="Đóng"
+            aria-label={t(lang, "closePopup")}
             style={{
               background: "none",
               border: "none",

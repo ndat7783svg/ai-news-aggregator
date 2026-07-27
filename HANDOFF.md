@@ -232,3 +232,34 @@
 - **Còn dang dở:** chưa deploy lên production để xem Google Search Console có index được không
   (cần thời gian, không kiểm tra ngay được); chưa đo hiệu quả traffic thật (cần vài tuần). Nếu
   hiệu quả, cân nhắc nhân rộng sang chủ đề khác (blog hãng, arXiv) như đã ghi trong spec.
+
+### 2026-07-27 — Claude Code (Sonnet 5) bàn thiết kế + Antigravity thực thi — nút Lưu & Chia sẻ
+- **Claude:** bàn với user, chốt thiết kế: lưu tin vào danh sách trong `localStorage` (không cần
+  login — CLAUDE.md mục 4), bấm là lưu ngay vào "Đã lưu" mặc định (popup chọn danh sách là thao
+  tác phụ); chia sẻ dùng Web Share API + fallback copy link, URL trỏ về trang chi tiết mới
+  `/tin/[id]` (không chia sẻ thẳng link bài gốc — mục tiêu kéo traffic về web). Spec:
+  `docs/superpowers/specs/2026-07-27-save-share-buttons-design.md`.
+- **Antigravity:** thực thi, commit `6c6ac82` (feat, 12 file) + `8af1263` (docs). File mới:
+  `web/lib/savedLists.js`, `web/lib/share.js`, `web/components/SaveListPopup.js`,
+  `web/app/tin/[id]/page.js` + `DetailContent.js`, `web/app/da-luu/page.js`,
+  `web/app/api/saved-items/route.js`; sửa `NewsCard.js`, `Feed.js` (link footer "Tin đã lưu"),
+  `i18n.js`, `supabaseServer.js` (thêm `fetchItemById`/`fetchItemsByIds`), `globals.css`.
+- **Claude kiểm tra lại:** đọc diff từng file, đối chiếu spec — đúng kiến trúc, API route có ĐỦ
+  cả `force-dynamic` + `fetchCache = "force-no-store"` (bài học CLAUDE.md mục 5, lần này không
+  sót). Viết script test riêng mock `localStorage` chạy thẳng `savedLists.js` bằng Node: **11/11
+  case pass**, kể cả các case rìa (chặn xoá danh sách "default", xoá danh sách kéo theo tin bên
+  trong, không lưu trùng, bỏ lưu khỏi mọi danh sách).
+- **Claude PHÁT HIỆN + SỬA 2 lỗi i18n Antigravity bỏ sót** (task đã ghi rõ "KHÔNG được sót bản
+  dịch nào" nhưng vẫn lọt): (1) `da-luu/page.js` hardcode tiếng Việt "N tin không tải được (id
+  không còn trong DB)." — hiện nguyên tiếng Việt cả khi đang ở chế độ EN; (2) `SaveListPopup.js`
+  hardcode `aria-label="Đóng"`. Fix: thêm khoá `savedMissing`/`closePopup` vào `i18n.js` (cả VI
+  và EN), thay 2 chỗ hardcode. Đã verify lại trên trình duyệt thật: đổi VI/EN cả 2 chuỗi hiện
+  đúng ngôn ngữ, không lỗi console.
+- **Hạn chế khi kiểm tra:** máy này KHÔNG có `web/.env.local` nên không kết nối được Supabase —
+  không thể bấm thử nút Lưu/Chia sẻ trên thẻ tin thật, cũng không mở được `/tin/<id>` với dữ
+  liệu thật. Phần đã verify được: logic `savedLists.js` (test script), trang `/da-luu` render
+  (nạp dữ liệu giả vào localStorage — danh sách/đổi tên/đếm số/chặn xoá "default" đều đúng),
+  build sạch (11 route). **Cần user tự kiểm tra trên production sau khi deploy:** bấm nút Lưu và
+  Chia sẻ trên thẻ tin thật, mở thử link `/tin/<id>` được chia sẻ.
+- Lặp lại bài học cũ: Antigravity làm đúng phần lớn nhưng vẫn sót chi tiết khác nhau mỗi lần —
+  lần này là i18n (đúng loại lỗi đã từng xảy ra 27/07). Luôn phải đọc diff + chạy thử thật.

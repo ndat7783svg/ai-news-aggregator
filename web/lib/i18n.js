@@ -47,6 +47,8 @@ const STRINGS = {
     renameList: "Đổi tên",
     deleteList: "Xoá danh sách",
     savedEmpty: "Chưa có tin nào được lưu.",
+    savedMissing: "tin không tải được (id không còn trong DB).",
+    closePopup: "Đóng",
     // Chia sẻ
     share: "Chia sẻ",
     copiedLink: "Đã copy link!",
@@ -99,6 +101,8 @@ const STRINGS = {
     renameList: "Rename",
     deleteList: "Delete list",
     savedEmpty: "No saved items yet.",
+    savedMissing: "item(s) could not be loaded (id no longer in DB).",
+    closePopup: "Close",
     // Share
     share: "Share",
     copiedLink: "Link copied!",

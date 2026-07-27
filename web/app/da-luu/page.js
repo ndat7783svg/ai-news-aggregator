@@ -185,7 +185,7 @@ export default function DaLuuPage() {
               ))}
               {listSaved.length > items.length && (
                 <p style={{ color: "var(--muted)", fontSize: "0.85rem" }}>
-                  {listSaved.length - items.length} tin không tải được (id không còn trong DB).
+                  {listSaved.length - items.length} {t(lang, "savedMissing")}
                 </p>
               )}
             </div>

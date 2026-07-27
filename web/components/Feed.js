@@ -171,9 +171,25 @@ export default function Feed({
 
   // Hiện nút lọc dựa trên các nguồn THỰC CÓ trong DB (không phụ thuộc trang đầu),
   // hoặc nếu đang chọn chính nó (để nút không biến mất khi đang lọc).
+  // Chỉ lấy entry KHÔNG có `parent` để 4 nút con GitHub không hiện trên hàng chính.
   const availableFilters = SOURCE_FILTERS.filter(
-    (f) => filter === f.key || f.sources.some((s) => availableSources.includes(s))
+    (f) =>
+      !f.parent &&
+      (filter === f.key || f.sources.some((s) => availableSources.includes(s)))
   );
+
+  // Entry con GitHub có dữ liệu thực tế trong DB.
+  const githubSubFilters = SOURCE_FILTERS.filter(
+    (f) =>
+      f.parent === "github" &&
+      f.sources.some((s) => availableSources.includes(s))
+  );
+
+  // Kiểm tra filter đang chọn thuộc nhóm GitHub (cha hoặc con).
+  const isGithubActive =
+    filter === "github" ||
+    SOURCE_FILTERS.find((x) => x.key === filter)?.parent === "github";
+
   const filterLabel = (f) => (f?.labelKey ? t(lang, f.labelKey) : f?.label);
   const activeFilterLabel =
     filter === "all"
@@ -230,13 +246,30 @@ export default function Feed({
               {availableFilters.map((f) => (
                 <button
                   key={f.key}
-                  className={filter === f.key ? "active" : ""}
+                  className={f.key === "github" && isGithubActive ? "active" : filter === f.key ? "active" : ""}
                   onClick={() => setFilter(f.key)}
-                  aria-pressed={filter === f.key}
+                  aria-pressed={f.key === "github" ? isGithubActive : filter === f.key}
                 >
                   {filterLabel(f)}
                 </button>
               ))}
+
+              {/* Ô chọn phụ GitHub — chỉ hiện khi đang lọc nhóm GitHub */}
+              {isGithubActive && githubSubFilters.length > 0 && (
+                <select
+                  className="github-sub-select"
+                  value={isGithubActive && filter !== "github" ? filter : "github"}
+                  onChange={(e) => setFilter(e.target.value)}
+                  aria-label="GitHub sub-filter"
+                >
+                  <option value="github">{t(lang, "githubSubAll")}</option>
+                  {githubSubFilters.map((f) => (
+                    <option key={f.key} value={f.key}>
+                      {filterLabel(f)}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
           </div>
 

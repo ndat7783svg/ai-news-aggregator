@@ -29,6 +29,10 @@ const STRINGS = {
     timeWeek: "Tuần này",
     timeMonth: "Tháng này",
     timeYear: "Năm này",
+    githubSubAll: "Tất cả GitHub",
+    githubSubStars: "Trending (nhiều sao)",
+    githubSubDaily: "🔥 Trending (ngày)",
+    githubSubWeekly: "🔥 Trending (tuần)",
   },
   en: {
     tagline: "News, summarized, with sources.",
@@ -57,6 +61,10 @@ const STRINGS = {
     timeWeek: "This week",
     timeMonth: "This month",
     timeYear: "This year",
+    githubSubAll: "All GitHub",
+    githubSubStars: "Trending (most stars)",
+    githubSubDaily: "🔥 Trending (daily)",
+    githubSubWeekly: "🔥 Trending (weekly)",
   },
 };
 

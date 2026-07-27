@@ -239,6 +239,27 @@ body {
   border-color: var(--accent);
 }
 
+/* Ô chọn phụ GitHub (nằm cạnh nút lọc trong .source-filter) */
+.github-sub-select {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid var(--accent);
+  background-color: var(--card);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239aa0ab' d='M6 8.5L1.5 4h9z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 11px center;
+  color: var(--text);
+  padding: 6px 30px 6px 13px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.github-sub-select:hover {
+  border-color: var(--accent);
+}
+
 .count {
   color: var(--muted);
   font-size: 0.85rem;

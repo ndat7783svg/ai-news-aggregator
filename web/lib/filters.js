@@ -5,13 +5,13 @@
 export const PAGE_SIZE = 40; // số tin mỗi lần tải
 
 export const SOURCE_FILTERS = [
-  { key: "github_release", label: "GitHub Release", sources: ["github_release"] },
-  { key: "github_trending", label: "GitHub Trending", sources: ["github_trending"] },
-  {
-    key: "github_hot",
-    label: "🔥 Trending",
-    sources: ["github_trending_daily", "github_trending_weekly"],
-  },
+  // Nút cha gộp tất cả GitHub — hiện trên hàng nút chính.
+  { key: "github", label: "GitHub", sources: ["github_release", "github_trending", "github_trending_daily", "github_trending_weekly"] },
+  // 4 nút con — chỉ hiện trong ô <select> phụ khi chọn GitHub.
+  { key: "github_release", label: "Release", sources: ["github_release"], parent: "github" },
+  { key: "github_trending", label: "Trending (nhiều sao)", labelKey: "githubSubStars", sources: ["github_trending"], parent: "github" },
+  { key: "github_trending_daily", label: "🔥 Trending (ngày)", labelKey: "githubSubDaily", sources: ["github_trending_daily"], parent: "github" },
+  { key: "github_trending_weekly", label: "🔥 Trending (tuần)", labelKey: "githubSubWeekly", sources: ["github_trending_weekly"], parent: "github" },
   { key: "hackernews", label: "Hacker News", sources: ["hackernews"] },
   { key: "arxiv", label: "arXiv", sources: ["arxiv"] },
   {

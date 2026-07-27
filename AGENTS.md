@@ -217,8 +217,9 @@ git (26/07), **luồng "🔥 Trending" thật daily/weekly + cải thiện thẻ
 nút lọc GitHub thành 1 nút + ô chọn phụ (27/07, lần đầu giao Antigravity làm — Codex hết token
 tháng)**, **đổi brand "SAI News" → "BAI News" + banner thông báo 3 ngày (27/07, Antigravity)**, **mở rộng
 GitHub "Kinh điển" (136 repo, đã backfill thật) + "Trending tháng" + tách 6 nguồn GitHub khỏi
-feed "Tất cả" (27/07, lần đầu giao Gemini 3.6 Flash — Claude phát hiện + sửa 2 lỗi thật trong
-script backfill trước khi chạy, xem mục "Bài học điều phối nhiều AI" cuối file)**, **đặt
+feed "Tất cả" (27/07, Antigravity — lần này chạy model Gemini 3.6 Flash bên trong — Claude phát
+hiện + sửa 2 lỗi thật trong script backfill trước khi chạy, xem mục "Bài học điều phối nhiều AI"
+cuối file)**, **đặt
 `bainews.site` làm domain chính trên Vercel (27/07, user tự làm)**, **sửa bug chế độ sáng/tối
 không giữ sau tải lại trang + thiếu dịch badge/banner GitHub (27/07, Claude Sonnet 5)**.
 
@@ -248,12 +249,13 @@ riêng. Trong phạm vi lọc GitHub, "Nổi bật nhất" sắp theo **số sao
 (giữ bản mới nhất, không tính `github_release`). Chi tiết:
 `docs/superpowers/specs/2026-07-27-github-expansion-classics-monthly-design.md`.
 
-**Bài học điều phối nhiều AI làm task (Codex → Antigravity → Gemini 3.6 Flash):** cả 3 đều làm
-đúng phần lớn khi có task file chi tiết ở `tasks/todo/`, nhưng đều **quên/sai sót khác nhau**
-mỗi lần — Codex/Antigravity từng thiếu `labelKey` i18n hoặc quên cập nhật AGENTS.md; Gemini viết
-script backfill copy khuôn từ `pipeline.js` nhưng **bỏ sót bước lọc bản tóm tắt lỗi trước khi
-ghi DB** (nguy hiểm — dữ liệu hỏng ghi kiểu này KHÔNG sửa được bằng cách chạy lại, vì dedupe
-theo unique key + `ignoreDuplicates`) và **copy nhầm tham số `onUsage`** giữa 2 hàm tương tự
+**Bài học điều phối nhiều AI làm task (Codex, Antigravity — Antigravity chạy nhiều model khác
+nhau tuỳ lúc, có lần Gemini 3.6 Flash):** cả 2 công cụ đều làm đúng phần lớn khi có task file
+chi tiết ở `tasks/todo/`, nhưng đều **quên/sai sót khác nhau** mỗi lần — có lần thiếu `labelKey`
+i18n hoặc quên cập nhật AGENTS.md; lần dùng Gemini 3.6 Flash viết script backfill copy khuôn từ
+`pipeline.js` nhưng **bỏ sót bước lọc bản tóm tắt lỗi trước khi ghi DB** (nguy hiểm — dữ liệu
+hỏng ghi kiểu này KHÔNG sửa được bằng cách chạy lại, vì dedupe theo unique key +
+`ignoreDuplicates`) và **copy nhầm tham số `onUsage`** giữa 2 hàm tương tự
 nhau khiến báo giá luôn hiện $0. → **LUÔN đọc kỹ diff + chạy thử thật (không chỉ đọc code) sau
 mỗi lần giao AI khác làm**, đừng tin báo cáo "xong" của AI đó. Đã cập nhật bài học chung (áp
 dụng mọi project, không riêng dự án này) vào skill `app-web-sk` mục 8.

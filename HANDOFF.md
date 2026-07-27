@@ -145,7 +145,7 @@
 - File đổi: `web/app/layout.js`, `web/components/Feed.js`, `web/app/globals.css`,
   `web/components/RenameBanner.js` (mới), `CLAUDE.md`, `AGENTS.md`.
 
-### 2026-07-27 — Claude Code (Opus 5) + Gemini 3.6 Flash: mở rộng GitHub (Kinh điển + Trending tháng)
+### 2026-07-27 — Claude Code (Opus 5) + Antigravity (model Gemini 3.6 Flash): mở rộng GitHub (Kinh điển + Trending tháng)
 - **Vấn đề user nêu:** tin GitHub quá ít với developer muốn tìm repo — thiếu chiều rộng, thiếu
   repo "kinh điển" nổi lâu, thiếu góc nhìn top tháng. User tự chỉ ra rủi ro: bơm thêm ~150 repo
   vào feed "Tất cả" sẽ **lấp tin thời sự trong ngày** → chốt **tách hẳn 6 nguồn GitHub khỏi
@@ -155,10 +155,11 @@
   cũng rối". Fix: thêm `sortByStars`, chỉ áp dụng khi lọc thuần GitHub.
 - Thiết kế đầy đủ: `docs/superpowers/specs/2026-07-27-github-expansion-classics-monthly-design.md`;
   task: `tasks/done/2026-07-27-mo-rong-github-kinh-dien-trending-thang.md`.
-- **Lần đầu giao Gemini 3.6 Flash** (trước đó Codex, rồi Antigravity). Làm đúng phần lớn: collector
-  `collectGithubClassics`, 3 thay đổi logic `supabaseServer.js`, i18n **đủ cả VI+EN**, cập nhật
-  **cả CLAUDE.md lẫn AGENTS.md** (2 lỗi Antigravity từng mắc — lần này không lặp lại), tự thêm
-  badge ở `web/lib/format.js` dù task không ghi (đúng quy ước dự án).
+- **Antigravity làm task này với model Gemini 3.6 Flash** (Antigravity là công cụ, model bên
+  trong nó có thể đổi tuỳ lúc — Gemini 3.6 Flash không phải 1 agent riêng). Làm đúng phần lớn:
+  collector `collectGithubClassics`, 3 thay đổi logic `supabaseServer.js`, i18n **đủ cả VI+EN**,
+  cập nhật **cả CLAUDE.md lẫn AGENTS.md** (2 lỗi Antigravity từng mắc ở task trước — lần này
+  không lặp lại), tự thêm badge ở `web/lib/format.js` dù task không ghi (đúng quy ước dự án).
 - **Claude phát hiện + sửa 2 lỗi thật trong `backfill-github-classics.js`:**
   1. **Ghi cả repo tóm tắt HỎNG vào DB** — dùng `insertItems(summarized)` thay vì lọc `ok` như
      `pipeline.js`. Hậu quả nếu để nguyên: thẻ trống vĩnh viễn trên web, chạy lại KHÔNG sửa được

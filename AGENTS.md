@@ -32,7 +32,13 @@ CHƯA bật** (xem mục 3). X/Twitter **bỏ** (API đọc ~$100+/tháng, khôn
   Sau 30/07 banner tự ẩn, không cần deploy lại; dọn code cũ không cấp thiết.
 - **Chế độ Sáng/Tối:** nút icon cạnh VI/EN; mặc định theo hệ thống (`prefers-color-scheme`),
   chọn tay nhớ `localStorage`; dùng `data-theme` trên `<html>` + script inline chống nháy trong
-  `web/app/layout.js`; màu qua biến CSS nên phủ toàn trang.
+  `web/app/layout.js`; màu qua biến CSS nên phủ toàn trang. **Bug đã sửa (27/07):** script
+  inline đặt `data-theme` trước khi React hydrate, nhưng thuộc tính này có thể bị mất sau khi
+  hydrate xong (JSX gốc của `<html>` không khai báo `data-theme` nên không đảm bảo giữ nguyên
+  qua vòng đời React) → chọn sáng/tối xong tải lại trang có lúc KHÔNG giữ. Fix: `Feed.js` đọc
+  thẳng `localStorage.getItem("theme")` (nguồn đáng tin cậy) trong `useEffect` sau khi mount rồi
+  **ghi lại** `data-theme`, không chỉ đọc từ thuộc tính DOM. Nhãn nút VI/EN, badge nguồn GitHub
+  (`web/lib/format.js`) và banner đổi tên (`RenameBanner.js`) đều đã hỗ trợ dịch song ngữ đầy đủ.
 - **Tính năng frontend đã live:** feed thẻ; **nút chuyển ngôn ngữ VI/EN** (nhớ localStorage);
   **lọc theo nguồn** (Tất cả + mỗi nguồn; 13 blog/báo tách thành **3 nhóm**: "Blog hãng AI"
   (openai/deepmind/huggingface/mistral/bair), "Báo công nghệ" (techcrunch/theverge/arstechnica/

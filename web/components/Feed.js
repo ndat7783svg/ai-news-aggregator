@@ -55,14 +55,26 @@ export default function Feed({
     setLang(l);
     try {
       localStorage.setItem("lang", l);
+      // Báo cho các component ngoài cây React (RenameBanner) đổi ngôn ngữ ngay, không cần tải lại trang.
+      window.dispatchEvent(new CustomEvent("bai-lang-change", { detail: l }));
     } catch {}
   }
 
-  // Đồng bộ trạng thái theme với thứ script inline (layout.js) đã đặt trên <html>.
+  // Đồng bộ trạng thái theme: đọc thẳng từ localStorage (nguồn đáng tin cậy nhất) thay vì chỉ
+  // dựa vào thuộc tính script inline (layout.js) đã đặt trên <html> — thuộc tính đó có thể bị
+  // React dọn mất lúc hydrate vì JSX gốc không khai báo `data-theme`. Ghi lại thuộc tính ở đây
+  // để chắc chắn giao diện luôn khớp lựa chọn đã lưu, kể cả khi bước đặt trước hydrate bị mất.
   useEffect(() => {
     try {
-      const cur = document.documentElement.dataset.theme;
-      if (cur === "dark" || cur === "light") setTheme(cur);
+      const saved = localStorage.getItem("theme");
+      const t =
+        saved === "dark" || saved === "light"
+          ? saved
+          : document.documentElement.dataset.theme;
+      if (t === "dark" || t === "light") {
+        setTheme(t);
+        document.documentElement.dataset.theme = t;
+      }
     } catch {}
   }, []);
 

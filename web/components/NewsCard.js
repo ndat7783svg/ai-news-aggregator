@@ -14,7 +14,7 @@ const LANGUAGE_COLORS = {
 };
 
 export default function NewsCard({ item, lang }) {
-  const meta = sourceMeta(item.source);
+  const meta = sourceMeta(item.source, lang);
   // Ưu tiên ngôn ngữ đang chọn; nếu thiếu thì rơi về bản còn lại.
   const summary =
     lang === "vi"

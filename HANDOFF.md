@@ -179,3 +179,33 @@
 - File đổi: `lib/config.js`, `collectors/github.js`, `pipeline.js`, `collect.js`,
   `summarize/summarizer.js`, `backfill-github-classics.js` (mới), `web/lib/filters.js`,
   `web/lib/format.js`, `web/lib/i18n.js`, `web/lib/supabaseServer.js`, + tài liệu.
+
+### 2026-07-27 — Claude Code (Sonnet 5) sửa 2 bug user phát hiện sau khi deploy GitHub expansion
+- **User báo (qua ảnh chụp màn hình EN mode):** (1) badge "Kinh điển" không có bản dịch tiếng
+  Anh, banner đổi tên miền cũng không dịch; (2) lưu chế độ sáng/tối "vẫn chưa hoạt động".
+- **Bug 1 — i18n badge/banner:** `web/lib/format.js` (`SOURCE_META`) lưu nhãn nguồn dạng chuỗi
+  cố định, không phân biệt VI/EN — lỗi này đã có TỪ TRƯỚC (áp dụng cả cho
+  `github_trending_daily/weekly` cũ, chỉ là "Kinh điển" thuần Việt nên lộ rõ nhất). Fix: thêm
+  `labelKey` vào các entry cần dịch, `sourceMeta(source, lang)` nhận thêm `lang` để tra `t()`.
+  `RenameBanner.js` trước đây hardcode tiếng Việt 100% (bỏ sót khi viết task đổi brand 27/07,
+  không phát hiện lúc đó vì test chỉ nhìn qua, không đổi ngôn ngữ). Fix: thêm khoá
+  `renameBannerText`/`renameBannerClose` vào `i18n.js`, banner tự đọc `localStorage.lang` lúc
+  mount + lắng nghe custom event `bai-lang-change` (Feed.js bắn ra khi bấm nút VI/EN) để đổi
+  chữ ngay không cần tải lại trang — vì banner nằm ngoài cây state của Feed, không tự nhận
+  props lang.
+- **Bug 2 — mất chế độ sáng/tối sau tải lại trang (bug thật, xác nhận bằng test trực tiếp trên
+  bainews.site với tab trình duyệt HOÀN TOÀN MỚI, nhiều lần, loại trừ cache/tool quirk):**
+  script inline trong `layout.js` đặt `document.documentElement.dataset.theme` TRƯỚC khi React
+  hydrate — nhưng vì JSX gốc của `<html>` không khai báo `data-theme`, thuộc tính này không
+  được đảm bảo giữ nguyên qua vòng đời hydrate của React (có thể bị dọn mất). `Feed.js` trước
+  đó CHỈ đọc lại thuộc tính này (không tự ghi), nên nếu nó đã mất thì React state `theme` sai
+  theo, và nút bấm sau đó vẫn hoạt động (set lại state) nhưng round tiếp theo (tải trang mới)
+  lặp lại vấn đề. Fix: đổi effect trong `Feed.js` — đọc THẲNG `localStorage.getItem("theme")`
+  (nguồn đáng tin cậy nhất, không phụ thuộc DOM attribute có sống sót qua hydrate hay không) rồi
+  chủ động **ghi lại** `data-theme` mỗi lần mount, không chỉ đọc. Đã test qua nhiều lần bật/tắt
+  + tải lại (bằng `window.location.reload()` thật, tab mới hoàn toàn) trên `localhost` — giữ
+  đúng cả 2 chiều sáng/tối.
+- File đổi: `web/components/Feed.js`, `web/components/NewsCard.js`,
+  `web/components/RenameBanner.js`, `web/lib/format.js`, `web/lib/i18n.js`.
+- Build sạch, đã verify bằng dev server thật (không dùng route giả cho phần theme — test trực
+  tiếp qua reload thật).

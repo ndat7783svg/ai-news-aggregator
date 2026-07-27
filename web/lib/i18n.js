@@ -35,6 +35,8 @@ const STRINGS = {
     githubSubWeekly: "🔥 Trending (tuần)",
     githubSubMonthly: "🔥 Trending (tháng)",
     githubSubClassics: "Kinh điển",
+    renameBannerText: "SAI News nay đã đổi tên thành BAI News tại tên miền mới bainews.site.",
+    renameBannerClose: "Đóng thông báo",
   },
   en: {
     tagline: "News, summarized, with sources.",
@@ -69,6 +71,8 @@ const STRINGS = {
     githubSubWeekly: "🔥 Trending (weekly)",
     githubSubMonthly: "🔥 Trending (monthly)",
     githubSubClassics: "Classics",
+    renameBannerText: "SAI News is now BAI News at the new domain bainews.site.",
+    renameBannerClose: "Dismiss notice",
   },
 };
 

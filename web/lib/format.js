@@ -1,5 +1,7 @@
 // Nhãn + màu cho từng nguồn, và định dạng thời gian tương đối song ngữ.
 
+import { t } from "./i18n";
+
 export const SOURCE_META = {
   hackernews: { label: "Hacker News", color: "#ff6600" },
   arxiv: { label: "arXiv", color: "#b31b1b" },
@@ -17,16 +19,19 @@ export const SOURCE_META = {
   importai: { label: "Import AI", color: "#1f6feb" },
   thegradient: { label: "The Gradient", color: "#3f51b5" },
   github_release: { label: "GitHub Release", color: "#6e40c9" },
-  github_trending: { label: "GitHub Trending", color: "#24292e" },
-  github_trending_daily: { label: "🔥 Trending (ngày)", color: "#f97316" },
-  github_trending_weekly: { label: "🔥 Trending (tuần)", color: "#ea580c" },
-  github_trending_monthly: { label: "🔥 Trending (tháng)", color: "#c2410c" },
-  github_classics: { label: "Kinh điển", color: "#475569" },
+  github_trending: { label: "GitHub Trending", labelKey: "githubSubStars", color: "#24292e" },
+  github_trending_daily: { label: "🔥 Trending (ngày)", labelKey: "githubSubDaily", color: "#f97316" },
+  github_trending_weekly: { label: "🔥 Trending (tuần)", labelKey: "githubSubWeekly", color: "#ea580c" },
+  github_trending_monthly: { label: "🔥 Trending (tháng)", labelKey: "githubSubMonthly", color: "#c2410c" },
+  github_classics: { label: "Kinh điển", labelKey: "githubSubClassics", color: "#475569" },
   reddit: { label: "Reddit", color: "#ff4500" },
 };
 
-export function sourceMeta(source) {
-  return SOURCE_META[source] || { label: source, color: "#6b7280" };
+// `lang` tuỳ chọn: nếu nguồn có `labelKey`, dịch theo chuỗi i18n (VI/EN) thay vì nhãn cố định.
+export function sourceMeta(source, lang) {
+  const meta = SOURCE_META[source] || { label: source, color: "#6b7280" };
+  if (lang && meta.labelKey) return { ...meta, label: t(lang, meta.labelKey) };
+  return meta;
 }
 
 /** Rút gọn số sao GitHub để phần đầu thẻ gọn hơn. */

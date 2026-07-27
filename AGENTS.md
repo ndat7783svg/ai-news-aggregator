@@ -33,10 +33,14 @@ CHƯA bật** (xem mục 3). X/Twitter **bỏ** (API đọc ~$100+/tháng, khôn
 - **Tính năng frontend đã live:** feed thẻ; **nút chuyển ngôn ngữ VI/EN** (nhớ localStorage);
   **lọc theo nguồn** (Tất cả + mỗi nguồn; 13 blog/báo tách thành **3 nhóm**: "Blog hãng AI"
   (openai/deepmind/huggingface/mistral/bair), "Báo công nghệ" (techcrunch/theverge/arstechnica/
-  venturebeat/technologyreview), "Newsletter" (simonwillison/importai/thegradient) — nhãn đổi
-  theo VI/EN qua `web/lib/i18n.js`; nút ẩn nếu nhóm/nguồn chưa có tin);
+  venturebeat/technologyreview), "Newsletter" (simonwillison/importai/thegradient); **4 nguồn
+  GitHub gộp thành 1 nút "GitHub" + 1 ô `<select>` phụ hiện khi chọn** (Tất cả GitHub / Release /
+  Trending nhiều sao / 🔥 Trending ngày / 🔥 Trending tuần — xem `web/lib/filters.js`, entry con
+  đánh dấu `parent: "github"`, 27/07) — nhãn đổi theo VI/EN qua `web/lib/i18n.js`; nút ẩn nếu
+  nhóm/nguồn chưa có tin);
   **infinite scroll** (tải 40 tin/lần qua `/api/items`, tự tải thêm khi cuộn, kết hợp mọi bộ lọc,
-  có "Đang tải thêm…"/"Đã hết tin"). Thẻ hiển thị: badge nguồn, điểm (▲), thời gian tương đối,
+  có "Đang tải thêm…"/"Đã hết tin"). Thẻ hiển thị: badge nguồn, điểm — GitHub dùng ★ + số rút
+  gọn ("158K") + badge ngôn ngữ lập trình, nguồn khác dùng ▲ + số đầy đủ — thời gian tương đối,
   tiêu đề (link bài gốc), tóm tắt theo ngôn ngữ, tác giả.
 - **GitHub "Repo nổi bật" đã mở rộng (25/07):** bỏ giới hạn "chỉ repo tạo ≤30 ngày" → lấy repo
   AI nhiều sao còn push trong ~180 ngày (≥500 sao), 7 chủ đề, tối đa 60 repo/lần thu thập. Giờ có
@@ -204,7 +208,9 @@ traffic chủ yếu từ Facebook referral, 97% VN, bounce rate cao là bình th
 tách nhóm Blog (3 nhóm), mở rộng "Repo nổi bật" GitHub (13 blog/60 repo), fix lỗi Next.js Data
 Cache khiến lọc theo nguồn hiện tin cũ, mua tên miền riêng `bainews.site` + nối Vercel (26/07),
 tạo cơ chế `plans/` (Codex/Antigravity → Claude bàn → `tasks/todo/`) + track nốt `tasks/` vào
-git (26/07), **luồng "🔥 Trending" thật daily/weekly + cải thiện thẻ GitHub (26/07)**.
+git (26/07), **luồng "🔥 Trending" thật daily/weekly + cải thiện thẻ GitHub (26/07)**, **gom 4
+nút lọc GitHub thành 1 nút + ô chọn phụ (27/07, lần đầu giao Antigravity làm — Codex hết token
+tháng)**.
 
 ### Luồng "🔥 Trending" GitHub (26/07) — đã chạy
 Nguồn mới `github_trending_daily` + `github_trending_weekly`: đọc trang **github.com/trending**

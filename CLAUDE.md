@@ -68,7 +68,21 @@ CHƯA bật** (xem mục 3). X/Twitter **bỏ** (API đọc ~$100+/tháng, khôn
 - **Lọc thời gian (dropdown):** Hôm nay/Tuần này/Tháng này/Năm này/Mọi lúc — theo `published_at`
   (24h/7/30/365 ngày). Kết hợp đúng với lọc nguồn + sắp xếp. Mặc định "Mọi lúc".
 - **Vercel Web Analytics:** đã bật (`@vercel/analytics`, `<Analytics/>` trong `web/app/layout.js`);
-  xem số liệu ở Vercel dashboard → tab Analytics.
+  xem số liệu ở Vercel dashboard → tab Analytics. **Số liệu xem thật 27/07 (24h):** 174 visitor,
+  275 pageview, bounce rate 88%, đỉnh ~20 visitor/giờ. Referrer: **~64% từ Facebook**
+  (facebook.com/l.facebook.com/lm.facebook.com/m.facebook.com cộng lại), **gần như 0% từ tìm
+  kiếm** (bing.com chỉ 1, không có Google organic). → Kết luận: traffic phụ thuộc gần hoàn toàn
+  1 kênh (Facebook, đăng 1 lần rồi thôi, không đều) — đây là gốc rễ traffic dao động mạnh theo
+  ngày. **Quyết định:** chưa bật quảng cáo (xem mục 4), ưu tiên đa dạng hoá kênh trước.
+- **SEO cơ bản đã thêm (27/07, Claude Sonnet 5):** `web/app/robots.js` (cho phép crawl + trỏ
+  sitemap), `web/app/sitemap.js` (khai trang chủ), `web/app/icon.svg` (favicon — trước đó
+  KHÔNG có favicon nào), metadata trong `web/app/layout.js` mở rộng (`keywords`, `openGraph`,
+  `twitter`, `metadataBase`, title/description có từ khoá tiếng Việt "tin AI"/"tóm tắt tin AI
+  tiếng Việt"). **Lưu ý:** thử thêm ảnh Open Graph tự sinh (`next/og` `ImageResponse`) nhưng gặp
+  lỗi đã biết của Next.js **trên Windows** (load font mặc định qua `file://` URL sai định dạng,
+  lỗi `ERR_INVALID_URL`) — đã bỏ, chỉ giữ OG dạng chữ. Muốn có ảnh preview đẹp khi chia sẻ
+  Facebook thì cần thiết kế ảnh tĩnh 1200×630 rồi gắn thủ công (chưa làm, không gấp). Đã commit
+  + push (`77b4f84`), Vercel tự deploy.
 - **DB:** Supabase bảng `news_items`, RLS = **đọc công khai / ghi chỉ service_role**. Hiện ~170+ tin
   (tăng dần sau khi thêm nguồn).
 - **Cơ chế `plans/` (mới, 26/07):** chiều ngược lại `tasks/` — Codex hoặc Antigravity thả ý
@@ -97,6 +111,14 @@ CHƯA bật** (xem mục 3). X/Twitter **bỏ** (API đọc ~$100+/tháng, khôn
 - Supabase project ref: **huqbirxwvrprqkhrwnsl** (`https://huqbirxwvrprqkhrwnsl.supabase.co`)
 
 ## 3. CHƯA làm / dang dở (đừng tưởng đã có)
+- **Quảng cáo (ads): CHƯA bật.** Đã bàn kỹ 27/07 — traffic hiện quá nhỏ (174 visitor/ngày) và quá
+  bấp bênh (phụ thuộc 1 kênh Facebook không đều, dao động -48%/ngày) để quảng cáo có ý nghĩa. Mốc
+  tham khảo để cân nhắc lại: traffic ổn định vài trăm–1000+/ngày *liên tục* (không phải 1 đỉnh
+  rồi tụt). Đừng đề xuất bật quảng cáo trước khi đạt mốc này.
+- **Nội dung SEO dài hạn (bài viết/landing riêng để lên top tìm kiếm): CHƯA làm.** Mới làm xong
+  phần kỹ thuật (robots/sitemap/metadata — xem mục 2). Trang chủ là SPA 1 trang nên khó tối ưu
+  sâu cho nhiều từ khoá khác nhau — cần nghĩ thêm hướng (có thể thêm trang/bài viết riêng?) nếu
+  muốn đẩy SEO xa hơn.
 - **Reddit: CHƯA bật, đang KẸT ở bước tạo app (thử 25/07, tạm gác lại theo yêu cầu user).**
   Code `collectors/reddit.js` sẵn sàng, tự bỏ qua nếu thiếu `REDDIT_CLIENT_ID`/`SECRET`. Vướng
   2 lớp: (1) ISP chặn `reddit.com` → user phải dùng 4G/VPN mới vào được `reddit.com/prefs/apps`;
@@ -124,6 +146,12 @@ CHƯA bật** (xem mục 3). X/Twitter **bỏ** (API đọc ~$100+/tháng, khôn
   UPDATE trong pipeline (hiện chỉ INSERT) — cân nhắc kỹ, không cấp thiết.
 
 ## 4. Quyết định đã chốt (ĐỪNG đề xuất lại)
+- **Chiến lược quảng bá (27/07):** ưu tiên **Facebook đăng đều tay** (kênh đang có traffic thật
+  nhưng chỉ đăng 1 lần rồi thôi — cần làm đều đặn thay vì 1 lần) song song với **SEO làm nền tảng
+  lâu dài** (chậm nhưng bền, không phụ thuộc thuật toán 1 nền tảng). **KHÔNG dùng Product
+  Hunt/Indie Hackers** dù đây là gợi ý mặc định cho web tool — vì đối tượng ở đó là dev/founder
+  quốc tế nói tiếng Anh, lệch hẳn với 97% traffic hiện tại là người Việt.
+  Xem thêm dự án phụ trợ ở mục 8 (video ngắn quảng bá qua NotebookLM).
 - **Dedupe theo (source, source_id), KHÔNG theo URL.** Vì mỗi nguồn có ID ổn định; URL hay đổi
   (tham số tracking/redirect) dễ sót; cùng 1 bài ở 2 nguồn thì **giữ cả 2** (thể hiện độ nóng).
   (Gộp chéo theo URL có thể làm sau nếu cần.)
@@ -181,6 +209,10 @@ CHƯA bật** (xem mục 3). X/Twitter **bỏ** (API đọc ~$100+/tháng, khôn
   `ai-news-nextjs-data-cache-filter`.
 - Chạy web cục bộ: `cd web && npm run dev` (cần `web/.env.local` với `SUPABASE_URL` +
   `SUPABASE_ANON_KEY`). Pipeline cục bộ: `npm run pipeline` (cần `.env` ở gốc).
+  **Lưu ý (27/07):** kiểm tra thấy `web/.env.local` hiện KHÔNG tồn tại trên máy này (chỉ có
+  `.env.local.example`) — nếu cần chạy dev cục bộ mà chưa có, tạo file này từ mẫu, điền
+  `SUPABASE_URL`/`SUPABASE_ANON_KEY` (lấy ở Supabase Dashboard → Settings → API Keys → tab
+  "Legacy anon, service_role API keys" → dòng `anon`).
 
 ## 6. Chi phí thực tế
 - **Anthropic tới giờ: ước tính < $1.10** (đã tóm tắt ~170+ tin + backfill tiêu đề + test + ~50-70
@@ -196,6 +228,8 @@ CHƯA bật** (xem mục 3). X/Twitter **bỏ** (API đọc ~$100+/tháng, khôn
   nhầm "user tưởng ngày tốn $9,6" lặp lại.
 
 ## 7. Bước tiếp theo nên đề xuất (nếu hỏi "giờ làm gì tiếp")
+0. **Dự án video (mục 8) đã setup xong, chưa chạy thử** — nếu user nhắc tới, gợi ý mở chat mới ở
+   `D:\bai-news-video-project` để làm video test đầu tiên (không làm trong project này).
 1. **Kiểm tra `plans/incoming/` trước tiên:** nếu Codex/Antigravity có thả plan mới thì đọc +
    bàn với user trước khi làm việc khác (xem `plans/README.md`). Hiện đang RỖNG (26/07).
 2. **Reddit (đang kẹt CAPTCHA/IP 4G, xem mục 3):** hỏi user đã thử bật/tắt máy bay hoặc mạng
@@ -221,7 +255,11 @@ feed "Tất cả" (27/07, Antigravity — lần này chạy model Gemini 3.6 Fla
 hiện + sửa 2 lỗi thật trong script backfill trước khi chạy, xem mục "Bài học điều phối nhiều AI"
 cuối file)**, **đặt
 `bainews.site` làm domain chính trên Vercel (27/07, user tự làm)**, **sửa bug chế độ sáng/tối
-không giữ sau tải lại trang + thiếu dịch badge/banner GitHub (27/07, Claude Sonnet 5)**.
+không giữ sau tải lại trang + thiếu dịch badge/banner GitHub (27/07, Claude Sonnet 5)**, **SEO
+cơ bản: robots.txt/sitemap.xml/favicon/metadata (27/07, Claude Sonnet 5, xem mục 2)**, **xem số
+liệu Analytics thật + chốt chiến lược quảng bá Facebook đều tay + SEO song song (27/07, xem mục
+4)**, **setup xong dự án phụ trợ video NotebookLM ở `D:\bai-news-video-project` — chưa chạy thử
+(27/07, xem mục 8)**.
 
 ### Luồng "🔥 Trending" GitHub (26/07) — đã chạy
 Nguồn mới `github_trending_daily` + `github_trending_weekly`: đọc trang **github.com/trending**
@@ -248,6 +286,25 @@ riêng. Trong phạm vi lọc GitHub, "Nổi bật nhất" sắp theo **số sao
 `isPureGithubSources`). Xem "Tất cả GitHub" tự **gộp trùng repo** xuất hiện ở nhiều nguồn con
 (giữ bản mới nhất, không tính `github_release`). Chi tiết:
 `docs/superpowers/specs/2026-07-27-github-expansion-classics-monthly-design.md`.
+
+## 8. Dự án phụ trợ: video quảng bá qua NotebookLM (mới, 27/07)
+
+Đã tạo dự án **RIÊNG BIỆT** tại `D:\bai-news-video-project` (Claude Code project khác, KHÔNG phải
+thư mục con của project này) — mục đích tạo video ngắn (~60s, dọc) tóm tắt tin AI nổi bật bằng
+NotebookLM, đăng YouTube Shorts/TikTok/Facebook Reels để có thêm kênh quảng bá ngoài Facebook.
+
+**Cách 2 dự án liên kết:** KHÔNG qua "chat nhớ nhau" (2 chat độc lập hoàn toàn) — mà qua
+**database Supabase dùng chung**. Dự án video có sẵn file `.env` riêng chứa `SUPABASE_URL` +
+`SUPABASE_ANON_KEY` (đã copy từ Supabase Dashboard 27/07, key chỉ đọc — an toàn) để tự query bảng
+`news_items` qua REST API, không cần đụng vào thư mục project này. Nếu sau này đổi anon key
+(xoay vòng bảo mật) thì nhớ cập nhật cả bên `D:\bai-news-video-project\.env`.
+
+**Trạng thái:** đã setup xong toàn bộ tài liệu/quy trình (xem `D:\bai-news-video-project\
+CLAUDE.md`), kênh YouTube mới "AisuoG" đã tạo, tài khoản NotebookLM đã có — **CHƯA chạy thử làm
+video lần nào**. Quyết định quan trọng đã chốt bên đó: bán tự động (không tự động hoàn toàn, cần
+người dùng mở phiên chủ động + luôn tự bấm nút đăng cuối), video nói **tiếng Anh** (khác với
+Facebook đang dùng tiếng Việt), dùng kênh YouTube MỚI thay vì kênh Minecraft cũ (1500 sub,
+dormant 3 năm, khác ngách hoàn toàn).
 
 **Bài học điều phối nhiều AI làm task (Codex, Antigravity — Antigravity chạy nhiều model khác
 nhau tuỳ lúc, có lần Gemini 3.6 Flash):** cả 2 công cụ đều làm đúng phần lớn khi có task file

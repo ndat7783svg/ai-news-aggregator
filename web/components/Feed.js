@@ -200,7 +200,7 @@ export default function Feed({
     <main className="wrap">
       <header className="site-header">
         <div>
-          <h1 className="site-title">SAI News</h1>
+          <h1 className="site-title">BAI News</h1>
           <p className="tagline">{t(lang, "tagline")}</p>
         </div>
         <div className="header-actions">

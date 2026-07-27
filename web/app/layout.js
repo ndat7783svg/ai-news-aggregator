@@ -1,8 +1,9 @@
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
+import RenameBanner from "../components/RenameBanner";
 
 export const metadata = {
-  title: "SAI News — tổng hợp & tóm tắt tin song ngữ",
+  title: "BAI News — tổng hợp & tóm tắt tin song ngữ",
   description: "Tổng hợp & tóm tắt tin tức, song ngữ Việt–Anh, kèm nguồn.",
 };
 
@@ -15,6 +16,7 @@ export default function RootLayout({ children }) {
     <html lang="vi" suppressHydrationWarning>
       <body>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
+        <RenameBanner />
         {children}
         <Analytics />
       </body>

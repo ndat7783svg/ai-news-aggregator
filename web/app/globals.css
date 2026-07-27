@@ -7,6 +7,9 @@
   --border: #e5e7eb;
   --accent: #2563eb;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.04);
+  --banner-bg: #fef9e7;
+  --banner-text: #6b5900;
+  --banner-border: #f0d56c;
 }
 
 /* Chế độ TỐI khi người dùng chọn thủ công (ghi nhớ ở localStorage). */
@@ -18,6 +21,9 @@
   --border: #2a2c34;
   --accent: #5b9dff;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.25);
+  --banner-bg: #2a2517;
+  --banner-text: #f5dfa0;
+  --banner-border: #5a4d2a;
 }
 
 /* Chế độ TỐI theo hệ thống khi chưa chọn thủ công (dự phòng cả khi tắt JS). */
@@ -30,6 +36,9 @@
     --border: #2a2c34;
     --accent: #5b9dff;
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.25);
+    --banner-bg: #2a2517;
+    --banner-text: #f5dfa0;
+    --banner-border: #5a4d2a;
   }
 }
 
@@ -386,4 +395,38 @@ body {
   .site-title {
     font-size: 1.6rem;
   }
+}
+
+/* Banner thông báo đổi tên (tạm thời, tự ẩn sau hạn) */
+.rename-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--banner-bg);
+  color: var(--banner-text);
+  border-bottom: 1px solid var(--banner-border);
+  padding: 10px 20px;
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.rename-banner-text {
+  margin: 0;
+}
+
+.rename-banner-close {
+  background: none;
+  border: none;
+  color: var(--banner-text);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+.rename-banner-close:hover {
+  opacity: 1;
 }

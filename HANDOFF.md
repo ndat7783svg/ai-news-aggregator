@@ -116,3 +116,31 @@
   `app-web-sk` copy sang `~/.gemini/GEMINI.md`. **CHÚ Ý: các bản này KHÔNG tự đồng bộ — sửa 1
   bên phải sửa bên kia.** User CHƯA xác nhận Antigravity có thật sự đọc `~/.gemini/GEMINI.md`
   hay không (vị trí này lấy từ nguồn ngoài, độ tin cậy thấp hơn phần `.agents/skills/`).
+
+### 2026-07-27 — Claude Code (Opus 5) + Antigravity: đổi brand "SAI News" → "BAI News" + banner 3 ngày
+- **Yêu cầu user (3 việc):** (1) lưu chế độ màu + ngôn ngữ, (2) banner báo đổi tên miền hiện 3
+  ngày, (3) đổi tên trang SAI News → BAI News.
+- **Việc (1) hoá ra ĐÃ CÓ SẴN** — Claude test trực tiếp trên production (đổi sang sáng + EN,
+  tải lại trang, cả 2 giữ nguyên; `localStorage` ở `Feed.js:47-76`). Không code gì thêm. Bài
+  học: user báo "chưa có tính năng X" thì kiểm chứng trên web thật trước khi viết task.
+- **Quyết định đã chốt khi bàn plan:** đổi brand NGAY trong cùng 1 lần deploy (không làm banner
+  "sắp đổi" trước rồi đổi sau); hạn banner hardcode 30/07/2026 nên tự ẩn cho mọi người, KHÔNG
+  cần deploy lần 2; có nút ✕ đóng, nhớ bằng `localStorage`.
+- **Antigravity làm:** đổi 2 chỗ brand (`web/app/layout.js` metadata.title, `web/components/Feed.js`
+  h1), tạo `web/components/RenameBanner.js`, thêm 3 biến CSS `--banner-*` vào cả 3 block theme
+  (`:root`, `[data-theme="dark"]`, `@media prefers-color-scheme:dark`) + style `.rename-banner`.
+  Làm đúng phạm vi, không lan man. Để **chưa commit** (giống lần trước).
+- **Claude kiểm tra thật (không tin lời kể):** `npm run build` sạch; chạy dev server, xác nhận
+  h1 + `document.title` đều "BAI News"; banner hiện đúng nội dung; bấm ✕ → biến mất + ghi
+  `dismissedBanner_baiRename2026=1`, tải lại KHÔNG hiện lại; xoá khoá + đặt theme tối → banner
+  hiện lại với màu tối đúng (`#2a2517` nền / `#f5dfa0` chữ, tương phản tốt); hằng số hạn parse
+  đúng (30/07/2026 23:59:59 +07, còn 3.53 ngày).
+- **Claude sửa thêm — Antigravity chỉ cập nhật CLAUDE.md mục 2, còn sót:** mục 2 (toạ độ dự án),
+  mục 3 (việc dang dở), mục 7 việc 4 vẫn ghi "CHƯA đổi brand"; và **AGENTS.md không được cập
+  nhật gì cả** (file này là bản sao y hệt CLAUDE.md, chỉ khác dòng tiêu đề). Claude sửa 3 chỗ
+  còn sót + đồng bộ lại AGENTS.md. **Lần sau viết task nhớ ghi rõ: cập nhật CẢ CLAUDE.md VÀ
+  AGENTS.md, và rà hết mọi mục nhắc tới việc đó, không chỉ mục trạng thái.**
+- **CÒN LẠI (việc tay của user):** vào Vercel → Settings → Domains → đặt `bainews.site` làm
+  Primary. Chưa làm tính đến cuối phiên này.
+- File đổi: `web/app/layout.js`, `web/components/Feed.js`, `web/app/globals.css`,
+  `web/components/RenameBanner.js` (mới), `CLAUDE.md`, `AGENTS.md`.

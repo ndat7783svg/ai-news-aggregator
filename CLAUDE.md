@@ -24,9 +24,12 @@ CHƯA bật** (xem mục 3). X/Twitter **bỏ** (API đọc ~$100+/tháng, khôn
 ## 2. Trạng thái hiện tại — ĐÃ CHẠY THẬT trên production
 - Cả **5 cột mốc xong**: (1) collector HN+arXiv, (2) tóm tắt song ngữ Haiku, (3) dedupe+Supabase,
   (4) frontend feed, (5) GitHub Actions + deploy Vercel.
-- **Thương hiệu hiển thị: "SAI News"** (h1 + `<title>` + meta); tagline trung lập "Tổng hợp &
-  tóm tắt tin tức, kèm nguồn." (bỏ neo "AI" để mở rộng chủ đề sau). Tên project trên
-  Vercel/GitHub/Supabase GIỮ NGUYÊN (ai-news-aggregator).
+- **Thương hiệu hiển thị: "BAI News"** (h1 + `<title>` + meta, đổi từ "SAI News" ngày 27/07);
+  tagline trung lập "Tổng hợp & tóm tắt tin tức, kèm nguồn." (bỏ neo "AI" để mở rộng chủ đề
+  sau). Tên project trên Vercel/GitHub/Supabase GIỮ NGUYÊN (ai-news-aggregator).
+  **Banner thông báo đổi tên** hiện đầu trang đến hết 30/07/2026 (tự ẩn sau hạn, có nút đóng
+  lưu localStorage) — component `web/components/RenameBanner.js`, gắn trong `web/app/layout.js`.
+  Sau 30/07 banner tự ẩn, không cần deploy lại; dọn code cũ không cấp thiết.
 - **Chế độ Sáng/Tối:** nút icon cạnh VI/EN; mặc định theo hệ thống (`prefers-color-scheme`),
   chọn tay nhớ `localStorage`; dùng `data-theme` trên `<html>` + script inline chống nháy trong
   `web/app/layout.js`; màu qua biến CSS nên phủ toàn trang.
@@ -80,11 +83,11 @@ CHƯA bật** (xem mục 3). X/Twitter **bỏ** (API đọc ~$100+/tháng, khôn
 - **Domain riêng mới (26/07): `bainews.site`** — đã mua ở Namecheap ($0.98/năm, KHÔNG auto-renew,
   tự hết hạn nếu không gia hạn tay), đã trỏ DNS (A record `@` → IP Vercel) + add vào Vercel
   Domains, **đã chạy thật (HTTP 200, SSL tự cấp)**. Hiện chạy **song song** với
-  `sainews.vercel.app`, cả 2 cùng dẫn tới 1 web. **CHƯA đổi brand hiển thị** (vẫn "SAI News"),
-  **CHƯA đặt làm domain chính** — kế hoạch: làm banner thông báo đổi tên hiển thị 24h cho user
-  cũ biết trước, rồi mới đổi brand "SAI News" → "BAI News" + đặt `bainews.site` làm domain
-  chính (xem việc dang dở mục 3). Lý do đổi: traffic chủ yếu qua Facebook share (mục 7 phần đã
-  xong), rủi ro mất user khi đổi domain thấp vì ít người nhớ/gõ tay URL cũ.
+  `sainews.vercel.app`, cả 2 cùng dẫn tới 1 web. **ĐÃ đổi brand hiển thị sang "BAI News"
+  (27/07)** kèm banner thông báo tới hết 30/07. **CHƯA đặt làm domain chính** — việc còn lại
+  là user tự vào Vercel → Settings → Domains → Set as Primary cho `bainews.site` (thao tác tay,
+  không phải code). Lý do đổi: traffic chủ yếu qua Facebook share (mục 7 phần đã xong), rủi ro
+  mất user khi đổi domain thấp vì ít người nhớ/gõ tay URL cũ.
 - GitHub: **https://github.com/ndat7783svg/ai-news-aggregator** (public)
 - Supabase project ref: **huqbirxwvrprqkhrwnsl** (`https://huqbirxwvrprqkhrwnsl.supabase.co`)
 
@@ -104,10 +107,10 @@ CHƯA bật** (xem mục 3). X/Twitter **bỏ** (API đọc ~$100+/tháng, khôn
   Reddit đang kẹt (xem trên). **CHƯA tìm/thêm nguồn nào cho việc này** — cần tìm RSS chính thức
   (Anthropic/Google/xAI có thể không có RSS công khai, cần kiểm tra lại) hoặc mở rộng từ khoá
   HN/blog hiện có để bắt tin về các model này tốt hơn.
-- **Tên miền riêng: ĐÃ MUA `bainews.site` (26/07, xem mục 2)**, đã nối Vercel, chạy song song
-  `sainews.vercel.app`. **CHƯA công khai/đổi brand** — còn dang dở: (1) làm banner thông báo
-  đổi tên hiển thị cho user hiện tại thấy trong ~24h, (2) sau đó mới đổi "SAI News" → "BAI News"
-  + đặt `bainews.site` làm domain chính. Không mua `.com` (giá premium $2,385, quá đắt).
+- **Tên miền riêng `bainews.site`: đã mua + đã đổi brand (xem mục 2), CHỈ CÒN đặt làm domain
+  chính** — user tự vào Vercel → Settings → Domains → Set as Primary (thao tác tay). Sau khi
+  đặt, `sainews.vercel.app` tự redirect sang `bainews.site`, link Facebook/bookmark cũ không
+  gãy. Không mua `.com` (giá premium $2,385, quá đắt).
 - Blog **Anthropic & Meta AI** (blog chính thức hãng, khác với "tin về model Claude"): bỏ qua vì
   không có RSS chính thức (không scraping).
 - **Login/thanh toán/tài khoản, PWA/app điện thoại: CHƯA làm** (ngoài phạm vi bản đầu).
@@ -196,9 +199,9 @@ CHƯA bật** (xem mục 3). X/Twitter **bỏ** (API đọc ~$100+/tháng, khôn
 3. **Thêm nguồn cập nhật cho các AI lớn** (Anthropic/Claude, Gemini, Grok, Kimi) vào nhóm "Blog
    hãng AI" — user yêu cầu 25/07, chưa khảo sát nguồn khả thi (RSS chính thức có/không, hay mở
    rộng từ khoá HN/blog hiện có).
-4. **Đổi brand + domain chính (26/07):** làm banner thông báo đổi tên hiển thị (hiện cho user
-   hiện tại thấy ~24h), sau đó đổi "SAI News" → "BAI News" + đặt `bainews.site` làm domain
-   chính trên Vercel (xem mục 2, mục 3).
+4. **Đặt `bainews.site` làm domain chính (việc tay của user):** brand đã đổi sang "BAI News" +
+   banner đã chạy (27/07), chỉ còn bước vào Vercel → Settings → Domains → Set as Primary. Nếu
+   user chưa làm, nhắc + hướng dẫn từng bước (xem mục 2, mục 3).
 5. Về sau: PWA/app điện thoại, thêm nguồn nữa, trau chuốt giao diện, có thể thêm lọc từ khoá AI cho
    các nguồn báo phổ thông (TechCrunch/Verge... hiện lấy toàn bộ mục AI, chưa lọc thêm).
 
@@ -210,7 +213,7 @@ Cache khiến lọc theo nguồn hiện tin cũ, mua tên miền riêng `bainews
 tạo cơ chế `plans/` (Codex/Antigravity → Claude bàn → `tasks/todo/`) + track nốt `tasks/` vào
 git (26/07), **luồng "🔥 Trending" thật daily/weekly + cải thiện thẻ GitHub (26/07)**, **gom 4
 nút lọc GitHub thành 1 nút + ô chọn phụ (27/07, lần đầu giao Antigravity làm — Codex hết token
-tháng)**.
+tháng)**, **đổi brand "SAI News" → "BAI News" + banner thông báo 3 ngày (27/07, Antigravity)**.
 
 ### Luồng "🔥 Trending" GitHub (26/07) — đã chạy
 Nguồn mới `github_trending_daily` + `github_trending_weekly`: đọc trang **github.com/trending**

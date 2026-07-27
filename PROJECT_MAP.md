@@ -43,13 +43,14 @@ Chi tiết đầy đủ & quyết định đã chốt: xem `CLAUDE.md` ở gốc
 | `lib/config.js` | Cấu hình chung: từ khoá AI, chuyên mục arXiv, giới hạn số tin, cửa sổ thời gian. |
 | `lib/http.js` | fetch dùng chung: timeout, User-Agent; helper `fetchJson` / `fetchText`. |
 | `web/` | **Frontend Next.js (cột mốc 4).** App Router, đọc Supabase (anon key) phía server. |
-| `web/app/layout.js` | Root layout: title/meta "SAI News", script inline chống nháy cho `data-theme` (Sáng/Tối) trên `<html>`. |
+| `web/app/layout.js` | Root layout: title/meta "BAI News", script inline chống nháy cho `data-theme` (Sáng/Tối) trên `<html>`, render `<RenameBanner/>` trên cùng `<body>`. |
 | `web/app/page.js` | Server component: đọc `news_items` từ Supabase → `Feed`. ISR 5 phút. |
 | `web/components/Feed.js` | Client: VI/EN (localStorage), lọc nguồn, **sắp xếp Mới nhất/Nổi bật**, **lọc thời gian (dropdown)**, infinite scroll (gọi `/api/items` với filter+sort+time). |
 | `web/lib/supabaseServer.js` | Truy vấn Supabase (anon, chỉ đọc) DÙNG CHUNG cho page.js + API. `fetchItems({filter,sort,time,offset,limit})`: sắp/lọc phía server; chế độ "hot" lấy cửa sổ rồi `sortHot()` ở JS (chỉ HN+Reddit tính điểm). |
 | `web/app/api/items/route.js` | API phân trang cho infinite scroll: nhận `filter/sort/time/offset/limit`. |
 | `web/lib/filters.js` | Định nghĩa bộ lọc nguồn (`SOURCE_FILTERS`, `PAGE_SIZE=40`) — dùng chung client+server. 13 blog chia 3 nhóm: `blog_labs` (hãng AI), `blog_press` (báo công nghệ), `blog_news` (newsletter); mỗi nhóm có `labelKey` để hiện nhãn VI/EN (chuỗi ở `web/lib/i18n.js`). |
 | `web/components/NewsCard.js` | Thẻ 1 tin: badge nguồn, điểm, thời gian, tiêu đề (link), tóm tắt, link gốc. |
+| `web/components/RenameBanner.js` | **Tạm thời** — banner báo đổi tên SAI→BAI, tự ẩn sau 30/07/2026 (hằng số `BANNER_EXPIRES`), nút ✕ nhớ bằng localStorage. Style `.rename-banner` + biến `--banner-*` ở `globals.css`. Hết hạn thì tự ẩn, xoá code không cấp thiết. |
 | `web/lib/i18n.js` | Chuỗi giao diện VI/EN. `web/lib/format.js`: nhãn+màu nguồn, thời gian tương đối. |
 | `web/.env.local` | `SUPABASE_URL` + `SUPABASE_ANON_KEY` (KHÔNG commit). Mẫu: `.env.local.example`. |
 | `.env` | Chứa `ANTHROPIC_API_KEY` (KHÔNG commit). Mẫu: `.env.example`. |

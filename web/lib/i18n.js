@@ -37,6 +37,22 @@ const STRINGS = {
     githubSubClassics: "Kinh điển",
     renameBannerText: "SAI News nay đã đổi tên thành BAI News tại tên miền mới bainews.site.",
     renameBannerClose: "Đóng thông báo",
+    // Lưu tin
+    save: "Lưu",
+    saved: "Đã lưu",
+    unsave: "Bỏ lưu",
+    saveToList: "Lưu vào danh sách khác",
+    createList: "Tạo danh sách mới",
+    newListPlaceholder: "Tên danh sách...",
+    renameList: "Đổi tên",
+    deleteList: "Xoá danh sách",
+    savedEmpty: "Chưa có tin nào được lưu.",
+    // Chia sẻ
+    share: "Chia sẻ",
+    copiedLink: "Đã copy link!",
+    // Trang chi tiết
+    backHome: "← Về trang chủ",
+    readOriginalFull: "Đọc bài gốc đầy đủ →",
   },
   en: {
     tagline: "News, summarized, with sources.",
@@ -73,6 +89,23 @@ const STRINGS = {
     githubSubClassics: "Classics",
     renameBannerText: "SAI News is now BAI News at the new domain bainews.site.",
     renameBannerClose: "Dismiss notice",
+    // Save
+    save: "Save",
+    saved: "Saved",
+    unsave: "Unsave",
+    saveToList: "Save to another list",
+    createList: "Create new list",
+    newListPlaceholder: "List name...",
+    renameList: "Rename",
+    deleteList: "Delete list",
+    savedEmpty: "No saved items yet.",
+    // Share
+    share: "Share",
+    copiedLink: "Link copied!",
+    // Detail page
+    backHome: "← Back to home",
+    readOriginalFull: "Read full original article →",
+
   },
 };
 

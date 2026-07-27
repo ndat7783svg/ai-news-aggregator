@@ -205,3 +205,36 @@ export async function fetchAvailableSources() {
   if (error || !data) return [];
   return [...new Set(data.map((r) => r.source))];
 }
+
+/**
+ * Lấy 1 tin theo id (cho trang chi tiết /tin/[id]).
+ * @param {number|string} id
+ * @returns {Promise<object|null>}
+ */
+export async function fetchItemById(id) {
+  const supabase = getClient();
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from("news_items")
+    .select(COLUMNS)
+    .eq("id", Number(id))
+    .single();
+  if (error || !data) return null;
+  return data;
+}
+
+/**
+ * Lấy nhiều tin theo mảng id (cho trang Đã lưu /da-luu).
+ * @param {number[]} ids
+ * @returns {Promise<object[]>}
+ */
+export async function fetchItemsByIds(ids) {
+  const supabase = getClient();
+  if (!supabase || !ids || ids.length === 0) return [];
+  const { data, error } = await supabase
+    .from("news_items")
+    .select(COLUMNS)
+    .in("id", ids.map(Number));
+  if (error || !data) return [];
+  return data;
+}

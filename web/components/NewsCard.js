@@ -1,5 +1,11 @@
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
 import { formatStars, sourceMeta, relativeTime } from "../lib/format";
 import { t } from "../lib/i18n";
+import { isSaved, saveItem, removeItemFromAll } from "../lib/savedLists";
+import { shareItem } from "../lib/share";
+import SaveListPopup from "./SaveListPopup";
 
 const LANGUAGE_COLORS = {
   Python: "#3572A5",
@@ -15,15 +21,45 @@ const LANGUAGE_COLORS = {
 
 export default function NewsCard({ item, lang }) {
   const meta = sourceMeta(item.source, lang);
-  // Ưu tiên ngôn ngữ đang chọn; nếu thiếu thì rơi về bản còn lại.
   const summary =
     lang === "vi"
       ? item.summary_vi || item.summary_en
       : item.summary_en || item.summary_vi;
-  // Chế độ VI hiển thị tiêu đề đã dịch (nếu có); EN giữ nguyên tiêu đề gốc.
   const title = lang === "vi" ? item.title_vi || item.title : item.title;
   const isGithub = item.source?.startsWith("github_");
   const language = isGithub ? item.extra?.language : null;
+
+  // State lưu tin
+  const [saved, setSaved] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
+  // Toast thông báo copy link
+  const [toast, setToast] = useState("");
+
+  useEffect(() => {
+    setSaved(isSaved(item.id));
+  }, [item.id]);
+
+  function handleSave() {
+    if (saved) {
+      removeItemFromAll(item.id);
+      setSaved(false);
+    } else {
+      saveItem(item.id);
+      setSaved(true);
+    }
+  }
+
+  const handlePopupUpdate = useCallback(() => {
+    setSaved(isSaved(item.id));
+  }, [item.id]);
+
+  async function handleShare() {
+    const result = await shareItem(item, lang);
+    if (result === "copied") {
+      setToast(t(lang, "copiedLink"));
+      setTimeout(() => setToast(""), 2000);
+    }
+  }
 
   return (
     <article className="card">
@@ -32,7 +68,10 @@ export default function NewsCard({ item, lang }) {
           {meta.label}
         </span>
         {typeof item.score === "number" && (
-          <span className="score">{isGithub ? "★" : "▲"} {isGithub ? formatStars(item.score) : item.score}</span>
+          <span className="score">
+            {isGithub ? "★" : "▲"}{" "}
+            {isGithub ? formatStars(item.score) : item.score}
+          </span>
         )}
         <span className="time">{relativeTime(item.published_at, lang)}</span>
       </div>
@@ -65,7 +104,56 @@ export default function NewsCard({ item, lang }) {
           {t(lang, "readOriginal")} →
         </a>
         {item.author && <span className="author">· {item.author}</span>}
+
+        {/* Nút Lưu + mũi tên popup */}
+        <span className="card-actions">
+          <button
+            className={`action-btn save-btn${saved ? " saved" : ""}`}
+            onClick={handleSave}
+            title={saved ? t(lang, "unsave") : t(lang, "save")}
+            aria-label={saved ? t(lang, "unsave") : t(lang, "save")}
+          >
+            {saved ? "🔖" : "🔖"}
+            <span className="action-label">
+              {saved ? t(lang, "saved") : t(lang, "save")}
+            </span>
+          </button>
+          <button
+            className="action-btn list-arrow-btn"
+            onClick={() => setShowPopup(true)}
+            title={t(lang, "saveToList")}
+            aria-label={t(lang, "saveToList")}
+          >
+            ▾
+          </button>
+
+          {/* Nút Chia sẻ */}
+          <button
+            className="action-btn share-btn"
+            onClick={handleShare}
+            title={t(lang, "share")}
+            aria-label={t(lang, "share")}
+          >
+            🔗
+            <span className="action-label">{t(lang, "share")}</span>
+          </button>
+        </span>
+
+        {/* Toast thông báo copy link */}
+        {toast && (
+          <span className="copy-toast">{toast}</span>
+        )}
       </div>
+
+      {/* Popup chọn danh sách */}
+      {showPopup && (
+        <SaveListPopup
+          itemId={item.id}
+          lang={lang}
+          onClose={() => setShowPopup(false)}
+          onUpdate={handlePopupUpdate}
+        />
+      )}
     </article>
   );
 }

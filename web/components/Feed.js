@@ -359,9 +359,12 @@ export default function Feed({
       {/* Điểm mốc để phát hiện cuộn tới cuối */}
       <div ref={sentinelRef} aria-hidden="true" style={{ height: 1 }} />
 
-      <footer style={{ textAlign: "center", padding: "2rem 0 1rem", color: "var(--muted)", fontSize: "0.85rem" }}>
+      <footer style={{ textAlign: "center", padding: "2rem 0 1rem", color: "var(--muted)", fontSize: "0.85rem", display: "flex", justifyContent: "center", gap: "1.5rem", flexWrap: "wrap" }}>
         <a href="/github-ai" style={{ color: "var(--muted)", textDecoration: "underline" }}>
           {lang === "vi" ? "📂 GitHub AI nổi bật →" : "📂 Trending GitHub AI →"}
+        </a>
+        <a href="/da-luu" style={{ color: "var(--muted)", textDecoration: "underline" }}>
+          {lang === "vi" ? "🔖 Tin đã lưu →" : "🔖 Saved items →"}
         </a>
       </footer>
     </main>

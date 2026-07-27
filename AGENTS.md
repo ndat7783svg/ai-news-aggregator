@@ -87,15 +87,12 @@ CHƯA bật** (xem mục 3). X/Twitter **bỏ** (API đọc ~$100+/tháng, khôn
   tự chuẩn hoá `ANTHROPIC_API_KEY`. (Sự cố key hỏng đã xử lý 24/07 — xem memory.)
 
 **Toạ độ dự án:**
-- Web: **https://sainews.vercel.app** (Vercel, Root Directory = `web/`, env `SUPABASE_URL` + `SUPABASE_ANON_KEY`)
-- **Domain riêng mới (26/07): `bainews.site`** — đã mua ở Namecheap ($0.98/năm, KHÔNG auto-renew,
-  tự hết hạn nếu không gia hạn tay), đã trỏ DNS (A record `@` → IP Vercel) + add vào Vercel
-  Domains, **đã chạy thật (HTTP 200, SSL tự cấp)**. Hiện chạy **song song** với
-  `sainews.vercel.app`, cả 2 cùng dẫn tới 1 web. **ĐÃ đổi brand hiển thị sang "BAI News"
-  (27/07)** kèm banner thông báo tới hết 30/07. **CHƯA đặt làm domain chính** — việc còn lại
-  là user tự vào Vercel → Settings → Domains → Set as Primary cho `bainews.site` (thao tác tay,
-  không phải code). Lý do đổi: traffic chủ yếu qua Facebook share (mục 7 phần đã xong), rủi ro
-  mất user khi đổi domain thấp vì ít người nhớ/gõ tay URL cũ.
+- Web chính: **https://bainews.site** — domain riêng, đã mua ở Namecheap ($0.98/năm, KHÔNG
+  auto-renew, tự hết hạn nếu không gia hạn tay), đã trỏ DNS + đã đặt làm **domain chính** trên
+  Vercel (27/07, qua "Redirect to another Domain"). `sainews.vercel.app` (URL Vercel gốc, Root
+  Directory = `web/`, env `SUPABASE_URL` + `SUPABASE_ANON_KEY`) giờ **tự redirect 308** sang
+  `bainews.site` — link Facebook/bookmark cũ không gãy. Brand hiển thị đã đổi sang "BAI News"
+  (27/07), banner thông báo đổi tên chạy tới hết 30/07/2026 rồi tự ẩn.
 - GitHub: **https://github.com/ndat7783svg/ai-news-aggregator** (public)
 - Supabase project ref: **huqbirxwvrprqkhrwnsl** (`https://huqbirxwvrprqkhrwnsl.supabase.co`)
 
@@ -115,10 +112,10 @@ CHƯA bật** (xem mục 3). X/Twitter **bỏ** (API đọc ~$100+/tháng, khôn
   Reddit đang kẹt (xem trên). **CHƯA tìm/thêm nguồn nào cho việc này** — cần tìm RSS chính thức
   (Anthropic/Google/xAI có thể không có RSS công khai, cần kiểm tra lại) hoặc mở rộng từ khoá
   HN/blog hiện có để bắt tin về các model này tốt hơn.
-- **Tên miền riêng `bainews.site`: đã mua + đã đổi brand (xem mục 2), CHỈ CÒN đặt làm domain
-  chính** — user tự vào Vercel → Settings → Domains → Set as Primary (thao tác tay). Sau khi
-  đặt, `sainews.vercel.app` tự redirect sang `bainews.site`, link Facebook/bookmark cũ không
-  gãy. Không mua `.com` (giá premium $2,385, quá đắt).
+- ~~Tên miền riêng `bainews.site`: đặt làm domain chính~~ **ĐÃ XONG (27/07).** User tự vào
+  Vercel → Domains → Edit → bật "Redirect to another Domain" → `sainews.vercel.app` giờ tự
+  redirect 308 sang `bainews.site` (đã xác nhận qua ảnh chụp Vercel Dashboard). Không mua
+  `.com` (giá premium $2,385, quá đắt).
 - Blog **Anthropic & Meta AI** (blog chính thức hãng, khác với "tin về model Claude"): bỏ qua vì
   không có RSS chính thức (không scraping).
 - **Login/thanh toán/tài khoản, PWA/app điện thoại: CHƯA làm** (ngoài phạm vi bản đầu).
@@ -207,10 +204,7 @@ CHƯA bật** (xem mục 3). X/Twitter **bỏ** (API đọc ~$100+/tháng, khôn
 3. **Thêm nguồn cập nhật cho các AI lớn** (Anthropic/Claude, Gemini, Grok, Kimi) vào nhóm "Blog
    hãng AI" — user yêu cầu 25/07, chưa khảo sát nguồn khả thi (RSS chính thức có/không, hay mở
    rộng từ khoá HN/blog hiện có).
-4. **Đặt `bainews.site` làm domain chính (việc tay của user):** brand đã đổi sang "BAI News" +
-   banner đã chạy (27/07), chỉ còn bước vào Vercel → Settings → Domains → Set as Primary. Nếu
-   user chưa làm, nhắc + hướng dẫn từng bước (xem mục 2, mục 3).
-5. Về sau: PWA/app điện thoại, thêm nguồn nữa, trau chuốt giao diện, có thể thêm lọc từ khoá AI cho
+4. Về sau: PWA/app điện thoại, thêm nguồn nữa, trau chuốt giao diện, có thể thêm lọc từ khoá AI cho
    các nguồn báo phổ thông (TechCrunch/Verge... hiện lấy toàn bộ mục AI, chưa lọc thêm).
 
 **Đã xong (đừng đề xuất lại):** cron-job.org (nhịp tự động), dịch tiêu đề `title_vi` + backfill,
@@ -221,7 +215,12 @@ Cache khiến lọc theo nguồn hiện tin cũ, mua tên miền riêng `bainews
 tạo cơ chế `plans/` (Codex/Antigravity → Claude bàn → `tasks/todo/`) + track nốt `tasks/` vào
 git (26/07), **luồng "🔥 Trending" thật daily/weekly + cải thiện thẻ GitHub (26/07)**, **gom 4
 nút lọc GitHub thành 1 nút + ô chọn phụ (27/07, lần đầu giao Antigravity làm — Codex hết token
-tháng)**, **đổi brand "SAI News" → "BAI News" + banner thông báo 3 ngày (27/07, Antigravity)**, **mở rộng GitHub "Kinh điển" + "Trending tháng" + tách 6 nguồn GitHub khỏi feed "Tất cả" (27/07, Antigravity)**.
+tháng)**, **đổi brand "SAI News" → "BAI News" + banner thông báo 3 ngày (27/07, Antigravity)**, **mở rộng
+GitHub "Kinh điển" (136 repo, đã backfill thật) + "Trending tháng" + tách 6 nguồn GitHub khỏi
+feed "Tất cả" (27/07, lần đầu giao Gemini 3.6 Flash — Claude phát hiện + sửa 2 lỗi thật trong
+script backfill trước khi chạy, xem mục "Bài học điều phối nhiều AI" cuối file)**, **đặt
+`bainews.site` làm domain chính trên Vercel (27/07, user tự làm)**, **sửa bug chế độ sáng/tối
+không giữ sau tải lại trang + thiếu dịch badge/banner GitHub (27/07, Claude Sonnet 5)**.
 
 ### Luồng "🔥 Trending" GitHub (26/07) — đã chạy
 Nguồn mới `github_trending_daily` + `github_trending_weekly`: đọc trang **github.com/trending**
@@ -237,3 +236,24 @@ trong `COLUMNS` ở `web/lib/supabaseServer.js`). Chi tiết đã bàn:
 **Bài học khi lọc theo từ khoá:** so khớp phải theo **ranh giới từ** (`\bkeyword\b`), KHÔNG
 dùng "chứa chuỗi con" — từ khoá `rag` dính vào **sto*rag*e**/**f*rag*ment**/**d*rag*on** làm
 repo không liên quan lọt vào feed AI (đã sửa trước khi gộp).
+
+### GitHub mở rộng: "Kinh điển" + "Trending tháng" + tách khỏi "Tất cả" (27/07) — đã chạy
+Nguồn mới `github_classics` (≥5.000 sao, không giới hạn ngày push, backfill **1 lần** qua
+`node --env-file=.env backfill-github-classics.js`, đã chạy thật: 136 repo, $0.2656) và
+`github_trending_monthly` (chạy đều như ngày/tuần). **Toàn bộ 6 nguồn GitHub đã tách khỏi feed
+"Tất cả"** — trang chủ mặc định giờ chỉ còn tin thời sự/blog/arXiv/HN, xem GitHub phải bấm nút
+riêng. Trong phạm vi lọc GitHub, "Nổi bật nhất" sắp theo **số sao** (trước đây GitHub luôn bị
+đẩy xuống cuối vì chỉ HN/Reddit được tính điểm — đã sửa, xem `web/lib/supabaseServer.js`
+`isPureGithubSources`). Xem "Tất cả GitHub" tự **gộp trùng repo** xuất hiện ở nhiều nguồn con
+(giữ bản mới nhất, không tính `github_release`). Chi tiết:
+`docs/superpowers/specs/2026-07-27-github-expansion-classics-monthly-design.md`.
+
+**Bài học điều phối nhiều AI làm task (Codex → Antigravity → Gemini 3.6 Flash):** cả 3 đều làm
+đúng phần lớn khi có task file chi tiết ở `tasks/todo/`, nhưng đều **quên/sai sót khác nhau**
+mỗi lần — Codex/Antigravity từng thiếu `labelKey` i18n hoặc quên cập nhật AGENTS.md; Gemini viết
+script backfill copy khuôn từ `pipeline.js` nhưng **bỏ sót bước lọc bản tóm tắt lỗi trước khi
+ghi DB** (nguy hiểm — dữ liệu hỏng ghi kiểu này KHÔNG sửa được bằng cách chạy lại, vì dedupe
+theo unique key + `ignoreDuplicates`) và **copy nhầm tham số `onUsage`** giữa 2 hàm tương tự
+nhau khiến báo giá luôn hiện $0. → **LUÔN đọc kỹ diff + chạy thử thật (không chỉ đọc code) sau
+mỗi lần giao AI khác làm**, đừng tin báo cáo "xong" của AI đó. Đã cập nhật bài học chung (áp
+dụng mọi project, không riêng dự án này) vào skill `app-web-sk` mục 8.

@@ -85,3 +85,34 @@
   `D:/news-summary-web-project-github-trending` + nhánh `codex/github-trending` đã gộp xong,
   có thể xoá nếu không dùng nữa; (3) chi phí tóm tắt lô repo trending đầu tiên ~$0.05-0.10 một
   lần (đã báo user từ lúc bàn plan).
+
+### 2026-07-27 — Claude Code (Opus 5) + Antigravity: gom bộ lọc GitHub làm 1
+- **Vấn đề:** sau khi thêm luồng Trending daily/weekly, hàng nút lọc có 3 nút GitHub rời
+  (`GitHub Release`, `GitHub Trending`, `🔥 Trending`) — rối, sẽ càng rối nếu thêm nguồn GitHub
+  nữa. User cân nhắc làm hẳn trang phụ cho GitHub; Claude khuyên KHÔNG (tách trang riêng là đổi
+  luôn mô hình 1-feed đã chốt ở CLAUDE.md mục 4), thay bằng gom nhóm như cách 13 blog đang gom
+  thành 3 nhóm. User đồng ý.
+- **Cách làm đã chốt:** 1 nút "GitHub" gộp 4 nguồn trên hàng chính + 1 ô `<select>` phụ hiện khi
+  chọn GitHub (Tất cả GitHub / Release / Trending nhiều sao / 🔥 Trending ngày / 🔥 Trending
+  tuần). Tái dùng đúng pattern `<select>` của bộ lọc "Thời gian", KHÔNG dựng component dropdown
+  mới. Entry con đánh dấu `parent: "github"` để ẩn khỏi hàng nút chính.
+- **Lần đầu giao việc cho Antigravity** (Codex hết token tháng). Antigravity sửa thẳng trên
+  `main`, để **chưa commit** — làm đúng task, không lan man ngoài phạm vi.
+- **Kiểm tra thật:** máy không có `web/.env.local` nên trang chính không tải được dữ liệu →
+  Claude tạo route tạm `web/app/tmp-uicheck/page.js` truyền props giả để kiểm tra UI, test xong
+  **đã xoá** (build xác nhận sạch). Kết quả: nút gộp đúng, ô phụ hiện/ẩn đúng khi đổi filter,
+  giữ đúng lựa chọn, nút "GitHub" vẫn `aria-pressed=true` khi đang chọn mục con.
+- **Claude sửa thêm 1 chỗ (lỗi của task Claude viết, không phải Antigravity):** 3 mục con trong ô
+  phụ thiếu `labelKey` nên chế độ EN vẫn hiện tiếng Việt. Đã thêm `githubSubStars/Daily/Weekly`
+  vào `web/lib/i18n.js` + `labelKey` vào `web/lib/filters.js`, kiểm tra lại VI/EN đều đúng.
+- File đổi: `web/lib/filters.js`, `web/lib/i18n.js`, `web/components/Feed.js`,
+  `web/app/globals.css`. Thêm `.agents/skills/nextjs-perf-sk/SKILL.md` (skill Next.js cho
+  Antigravity đọc, xem mục dưới).
+- **Ngoài code dự án — cấu hình skill cho Antigravity (26-27/07):** tạo skill
+  `nextjs-perf-sk` (tối ưu hiệu năng React/Next.js, rút gọn từ `vercel-labs/agent-skills`, chỉ
+  ĐỌC nội dung công khai, KHÔNG cài package bên thứ 3) ở 2 nơi: `~/.claude/skills/nextjs-perf-sk/`
+  (Claude Code) và `.agents/skills/nextjs-perf-sk/` (Antigravity, theo tài liệu chính thức ở
+  `~/.gemini/antigravity/builtin/skills/agy-customizations/docs/skills.md`). Nguyên tắc chung
+  `app-web-sk` copy sang `~/.gemini/GEMINI.md`. **CHÚ Ý: các bản này KHÔNG tự đồng bộ — sửa 1
+  bên phải sửa bên kia.** User CHƯA xác nhận Antigravity có thật sự đọc `~/.gemini/GEMINI.md`
+  hay không (vị trí này lấy từ nguồn ngoài, độ tin cậy thấp hơn phần `.agents/skills/`).

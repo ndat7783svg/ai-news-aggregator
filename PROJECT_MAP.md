@@ -6,7 +6,7 @@ Tra cứu nhanh cấu trúc dự án. Cập nhật khi thêm file/hệ thống m
 Website tổng hợp & tóm tắt tin tức AI (song ngữ VI + EN), hiển thị feed kèm link bài gốc.
 Chi tiết & nguyên tắc: `docs/superpowers/specs/2026-07-22-ai-news-aggregator-design.md`.
 
-**Đang chạy thật (thương hiệu hiển thị: "SAI News", tên project hạ tầng giữ nguyên):**
+**Đang chạy thật (thương hiệu hiển thị: "BAI News", tên project hạ tầng giữ nguyên):**
 - Web công khai: https://sainews.vercel.app (Vercel, root = `web/`)
 - Repo: https://github.com/ndat7783svg/ai-news-aggregator
 - Pipeline tự chạy mỗi 15 phút: **cron-job.org** gọi `workflow_dispatch` (GitHub Actions cron nội bộ bị bóp lịch, không tin cậy → xem memory `ai-news-cron-throttling-fix`). Workflow: `.github/workflows/collect.yml`.
@@ -46,11 +46,14 @@ Chi tiết đầy đủ & quyết định đã chốt: xem `CLAUDE.md` ở gốc
 | `web/` | **Frontend Next.js (cột mốc 4).** App Router, đọc Supabase (anon key) phía server. |
 | `web/app/layout.js` | Root layout: title/meta "BAI News", script inline chống nháy cho `data-theme` (Sáng/Tối) trên `<html>`, render `<RenameBanner/>` trên cùng `<body>`. |
 | `web/app/page.js` | Server component: đọc `news_items` từ Supabase → `Feed`. ISR 5 phút. |
-| `web/components/Feed.js` | Client: VI/EN (localStorage), lọc nguồn, **sắp xếp Mới nhất/Nổi bật**, **lọc thời gian (dropdown)**, infinite scroll (gọi `/api/items` với filter+sort+time). |
-| `web/lib/supabaseServer.js` | Truy vấn Supabase (anon, chỉ đọc) DÙNG CHUNG cho page.js + API. `fetchItems({filter,sort,time,offset,limit})`: loại 6 nguồn GitHub khỏi `filter="all"`; sắp xếp theo sao cho nguồn thuần GitHub; cửa sổ candidate + dedupe 6 nguồn cho `filter="github"`. |
+| `web/components/Feed.js` | Client: VI/EN (localStorage), lọc nguồn, **sắp xếp Mới nhất/Nổi bật**, **lọc thời gian (dropdown)**, infinite scroll (gọi `/api/items` với filter+sort+time). Footer link nội bộ trỏ tới `/github-ai`. |
+| `web/lib/supabaseServer.js` | Truy vấn Supabase (anon, chỉ đọc) DÙNG CHUNG cho page.js + API + trang SEO. `fetchItems({filter,sort,time,offset,limit})`: loại 6 nguồn GitHub khỏi `filter="all"`; sắp xếp theo sao cho nguồn thuần GitHub; cửa sổ candidate + dedupe 6 nguồn cho `filter="github"`. |
 | `web/app/api/items/route.js` | API phân trang cho infinite scroll: nhận `filter/sort/time/offset/limit`. |
 | `web/lib/filters.js` | Định nghĩa bộ lọc nguồn (`SOURCE_FILTERS`, `PAGE_SIZE=40`) — dùng chung client+server. 6 nguồn GitHub gộp vào 1 nút "GitHub" cha + 6 sub-filter con; export `GITHUB_ALL_SOURCES` và `GITHUB_TRENDING_FAMILY`. |
 | `web/components/NewsCard.js` | Thẻ 1 tin: badge nguồn, điểm, thời gian, tiêu đề (link), tóm tắt, link gốc. |
+| `web/components/GithubAiList.js` | **Server Component** — danh sách thẻ GitHub AI cho 2 trang SEO. Nhận props `items` + `lang`. Không có state/interaction. Tái dùng CSS class từ `globals.css`. |
+| `web/app/github-ai/page.js` | **Trang SEO tiếng Việt** `/github-ai`: server-rendered ISR 5 phút, gọi `fetchItems(filter=github,sort=hot)`, metadata + hreflang đầy đủ. |
+| `web/app/en/github-ai/page.js` | **Trang SEO tiếng Anh** `/en/github-ai`: tương tự nhưng `lang=en`. Liên kết hreflang với bản VI. |
 | `web/components/RenameBanner.js` | **Tạm thời** — banner báo đổi tên SAI→BAI, tự ẩn sau 30/07/2026 (hằng số `BANNER_EXPIRES`), nút ✕ nhớ bằng localStorage. Style `.rename-banner` + biến `--banner-*` ở `globals.css`. Hết hạn thì tự ẩn, xoá code không cấp thiết. |
 | `web/lib/i18n.js` | Chuỗi giao diện VI/EN. `web/lib/format.js`: nhãn+màu nguồn, thời gian tương đối. |
 | `web/.env.local` | `SUPABASE_URL` + `SUPABASE_ANON_KEY` (KHÔNG commit). Mẫu: `.env.local.example`. |

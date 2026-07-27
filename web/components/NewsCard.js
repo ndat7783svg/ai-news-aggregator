@@ -6,6 +6,7 @@ import { t } from "../lib/i18n";
 import { isSaved, saveItem, removeItemFromAll } from "../lib/savedLists";
 import { shareItem } from "../lib/share";
 import SaveListPopup from "./SaveListPopup";
+import { ShareIcon, BookmarkIcon, ChevronDownIcon } from "./icons";
 
 const LANGUAGE_COLORS = {
   Python: "#3572A5",
@@ -105,38 +106,40 @@ export default function NewsCard({ item, lang }) {
         </a>
         {item.author && <span className="author">· {item.author}</span>}
 
-        {/* Nút Lưu + mũi tên popup */}
+        {/* Nút Chia sẻ + nhóm nút Lưu (kèm mũi tên mở popup danh sách) */}
         <span className="card-actions">
           <button
-            className={`action-btn save-btn${saved ? " saved" : ""}`}
-            onClick={handleSave}
-            title={saved ? t(lang, "unsave") : t(lang, "save")}
-            aria-label={saved ? t(lang, "unsave") : t(lang, "save")}
-          >
-            {saved ? "🔖" : "🔖"}
-            <span className="action-label">
-              {saved ? t(lang, "saved") : t(lang, "save")}
-            </span>
-          </button>
-          <button
-            className="action-btn list-arrow-btn"
-            onClick={() => setShowPopup(true)}
-            title={t(lang, "saveToList")}
-            aria-label={t(lang, "saveToList")}
-          >
-            ▾
-          </button>
-
-          {/* Nút Chia sẻ */}
-          <button
-            className="action-btn share-btn"
+            className="pill share-pill"
             onClick={handleShare}
             title={t(lang, "share")}
             aria-label={t(lang, "share")}
           >
-            🔗
-            <span className="action-label">{t(lang, "share")}</span>
+            <ShareIcon />
+            <span className="pill-label">{t(lang, "share")}</span>
           </button>
+
+          <span className={`pill-group${saved ? " saved" : ""}`}>
+            <button
+              className="pill pill-main"
+              onClick={handleSave}
+              title={saved ? t(lang, "unsave") : t(lang, "save")}
+              aria-label={saved ? t(lang, "unsave") : t(lang, "save")}
+              aria-pressed={saved}
+            >
+              <BookmarkIcon filled={saved} />
+              <span className="pill-label">
+                {saved ? t(lang, "saved") : t(lang, "save")}
+              </span>
+            </button>
+            <button
+              className="pill pill-caret"
+              onClick={() => setShowPopup(true)}
+              title={t(lang, "saveToList")}
+              aria-label={t(lang, "saveToList")}
+            >
+              <ChevronDownIcon />
+            </button>
+          </span>
         </span>
 
         {/* Toast thông báo copy link */}

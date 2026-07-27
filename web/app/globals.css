@@ -10,6 +10,9 @@
   --banner-bg: #fef9e7;
   --banner-text: #6b5900;
   --banner-border: #f0d56c;
+  /* Nền nút "pill" (Lưu / Chia sẻ) */
+  --chip: #f0f0f1;
+  --chip-hover: #e2e2e5;
 }
 
 /* Chế độ TỐI khi người dùng chọn thủ công (ghi nhớ ở localStorage). */
@@ -24,6 +27,8 @@
   --banner-bg: #2a2517;
   --banner-text: #f5dfa0;
   --banner-border: #5a4d2a;
+  --chip: #272930;
+  --chip-hover: #34363f;
 }
 
 /* Chế độ TỐI theo hệ thống khi chưa chọn thủ công (dự phòng cả khi tắt JS). */
@@ -39,6 +44,8 @@
     --banner-bg: #2a2517;
     --banner-text: #f5dfa0;
     --banner-border: #5a4d2a;
+    --chip: #272930;
+    --chip-hover: #34363f;
   }
 }
 
@@ -380,56 +387,100 @@ body {
   color: var(--muted);
 }
 
-/* Nhóm nút Lưu / Chia sẻ */
+/* Nhóm nút Lưu / Chia sẻ — kiểu "pill" bo tròn, nền đặc (tham chiếu YouTube). */
 .card-actions {
   margin-left: auto;
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
-.action-btn {
+.pill {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  background: none;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 3px 8px;
-  font-size: 0.78rem;
-  color: var(--muted);
-  cursor: pointer;
-  transition: color 0.12s, border-color 0.12s, background 0.12s;
-  line-height: 1.4;
-}
-
-.action-btn:hover {
-  border-color: var(--accent);
+  gap: 6px;
+  background-color: var(--chip);
+  border: none;
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
   color: var(--text);
+  cursor: pointer;
+  transition: background-color 0.12s;
+  line-height: 1;
+  white-space: nowrap;
+  font-family: inherit;
 }
 
-/* Nút mũi tên mở popup — nhỏ hơn, không có label */
-.list-arrow-btn {
-  padding: 3px 5px;
-  font-size: 0.7rem;
-  border-left: none;
-  border-radius: 0 6px 6px 0;
-  margin-left: -1px;
+.pill:hover {
+  background-color: var(--chip-hover);
 }
 
-.save-btn {
-  border-radius: 6px 0 0 6px;
+.pill svg {
+  flex-shrink: 0;
 }
 
-/* Khi đã lưu: màu nổi bật hơn */
-.save-btn.saved {
-  color: var(--accent);
-  border-color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 8%, transparent);
+/* Nút Lưu + mũi tên nằm chung 1 viên pill, ngăn nhau bằng vạch mảnh. */
+.pill-group {
+  display: inline-flex;
+  align-items: center;
+  background-color: var(--chip);
+  border-radius: 999px;
 }
 
-.action-label {
-  font-size: 0.75rem;
+.pill-group:hover {
+  background-color: var(--chip-hover);
+}
+
+.pill-group .pill {
+  background-color: transparent;
+}
+
+.pill-group .pill:hover {
+  background-color: transparent;
+}
+
+.pill-main {
+  padding-right: 10px;
+}
+
+.pill-caret {
+  padding: 7px 12px 7px 10px;
+  border-left: 1px solid var(--border);
+  color: var(--muted);
+}
+
+/* Khi đã lưu: đảo màu cho nổi bật, giống trạng thái bật của nút YouTube. */
+.pill-group.saved {
+  background-color: var(--text);
+}
+
+.pill-group.saved:hover {
+  background-color: var(--text);
+  opacity: 0.85;
+}
+
+.pill-group.saved .pill {
+  color: var(--card);
+}
+
+.pill-group.saved .pill-caret {
+  border-left-color: color-mix(in srgb, var(--card) 30%, transparent);
+}
+
+/* Ẩn chữ trên màn hình hẹp, chỉ chừa icon cho đỡ chật. */
+@media (max-width: 460px) {
+  .pill-label {
+    display: none;
+  }
+  .pill {
+    padding: 8px 12px;
+  }
+  .pill-main {
+    padding-right: 8px;
+  }
 }
 
 /* Toast thông báo copy link */

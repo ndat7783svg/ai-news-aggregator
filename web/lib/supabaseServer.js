@@ -1,8 +1,9 @@
-// Truy vấn Supabase phía server (dùng khoá anon, chỉ đọc). DÙNG CHUNG cho page.js và API route.
-// KHÔNG import file này vào client component (chứa khoá phía server).
-
 import { createClient } from "@supabase/supabase-js";
-import { sourcesForFilter } from "./filters";
+import {
+  sourcesForFilter,
+  GITHUB_ALL_SOURCES,
+  GITHUB_TRENDING_FAMILY,
+} from "./filters";
 
 const COLUMNS =
   "id, source, title, title_vi, url, author, published_at, score, summary_vi, summary_en, extra";
@@ -27,15 +28,13 @@ function getClient() {
   return createClient(url, key, { auth: { persistSession: false } });
 }
 
-// Chỉ 2 nguồn có "điểm độ nóng" thật (upvote). GitHub Trending có số sao nhưng
-// theo thiết kế KHÔNG dùng để xếp hạng (khác thang đo) → coi như không điểm.
+// Chỉ 2 nguồn có "điểm độ nóng" thật (upvote).
 const SCORED_SOURCES = new Set(["hackernews", "reddit"]);
 
-// Trần cửa sổ ứng viên khi sắp theo "Nổi bật" (giới hạn 1 request của PostgREST).
-// Ở quy mô hiện tại (hàng trăm tin) là dư; kết hợp bộ lọc thời gian còn nhỏ hơn.
+// Trần cửa sổ ứng viên khi sắp theo "Nổi bật" hoặc khi dedupe GitHub.
 const HOT_WINDOW = 1000;
+const GITHUB_WINDOW = 2000;
 
-// Mốc thời gian (published_at >= now - N ngày). null = "Mọi lúc" (không lọc).
 function timeCutoffISO(time) {
   const days = { today: 1, week: 7, month: 30, year: 365 }[time];
   if (!days) return null;
@@ -49,8 +48,7 @@ function cmpNewest(a, b) {
   return tb - ta || b.id - a.id;
 }
 
-// Sắp "Nổi bật nhất": tin có điểm (HN/Reddit) lên đầu theo điểm giảm dần;
-// các nguồn không có điểm xuống cuối, xếp theo mới nhất. KHÔNG loại bỏ tin nào.
+// Sắp "Nổi bật nhất" cho tin thông thường (HN/Reddit lên đầu theo điểm).
 function sortHot(rows) {
   const scored = [];
   const rest = [];
@@ -61,6 +59,43 @@ function sortHot(rows) {
   scored.sort((a, b) => b.score - a.score || cmpNewest(a, b));
   rest.sort(cmpNewest);
   return [...scored, ...rest];
+}
+
+// Sắp theo số sao giảm dần cho các nguồn GitHub.
+function sortByStars(rows) {
+  return [...rows].sort((a, b) => (b.score ?? 0) - (a.score ?? 0) || cmpNewest(a, b));
+}
+
+// Kiểm tra danh sách nguồn có phải thuần các nguồn GitHub không.
+function isPureGithubSources(sources) {
+  if (!sources || sources.length === 0) return false;
+  return sources.every((s) => GITHUB_ALL_SOURCES.includes(s));
+}
+
+// Dedupe repo trùng trong nhóm trending-family (giữ bản có published_at mới nhất).
+function dedupeGithubTrendingFamily(rows) {
+  const trendingMap = new Map();
+  const releases = [];
+
+  for (const item of rows) {
+    if (GITHUB_TRENDING_FAMILY.includes(item.source)) {
+      const key = item.title;
+      if (!trendingMap.has(key)) {
+        trendingMap.set(key, item);
+      } else {
+        const existing = trendingMap.get(key);
+        const tNew = item.published_at ? Date.parse(item.published_at) : 0;
+        const tOld = existing.published_at ? Date.parse(existing.published_at) : 0;
+        if (tNew > tOld || (tNew === tOld && (item.score ?? 0) > (existing.score ?? 0))) {
+          trendingMap.set(key, item);
+        }
+      }
+    } else {
+      releases.push(item);
+    }
+  }
+
+  return [...trendingMap.values(), ...releases];
 }
 
 /**
@@ -81,35 +116,72 @@ export async function fetchItems({
   const sources = sourcesForFilter(filter);
   const cutoff = timeCutoffISO(time);
 
-  if (sort === "hot") {
-    // Không phân trang được ở DB (thứ tự điểm có điều kiện) → lấy cửa sổ ứng viên,
-    // sắp ở JS rồi cắt đúng trang. Ứng viên lấy theo mới nhất để bám tin gần đây.
+  // Nhánh đặc biệt cho nút cha "github" (gộp 6 nguồn): cần cửa sổ ứng viên + dedupe theo title ở JS.
+  if (filter === "github") {
     let q = supabase
       .from("news_items")
       .select(COLUMNS)
       .order("published_at", { ascending: false, nullsFirst: false })
       .order("id", { ascending: false })
-      .limit(HOT_WINDOW);
+      .limit(GITHUB_WINDOW);
     if (sources && sources.length) q = q.in("source", sources);
     if (cutoff) q = q.gte("published_at", cutoff);
 
     const { data, error } = await q;
     if (error) return { items: [], hasMore: false, error: error.message };
-    const sorted = sortHot(data || []);
+
+    const deduped = dedupeGithubTrendingFamily(data || []);
+    const sorted = sort === "hot" ? sortByStars(deduped) : deduped.sort(cmpNewest);
     return {
       items: sorted.slice(offset, offset + limit),
       hasMore: offset + limit < sorted.length,
     };
   }
 
-  // "Mới nhất" (mặc định): phân trang hiệu quả ngay ở DB.
+  // Nhánh sắp theo "Nổi bật nhất" (sort === "hot") cho các bộ lọc khác.
+  if (sort === "hot") {
+    let q = supabase
+      .from("news_items")
+      .select(COLUMNS)
+      .order("published_at", { ascending: false, nullsFirst: false })
+      .order("id", { ascending: false })
+      .limit(HOT_WINDOW);
+
+    if (filter === "all") {
+      q = q.not("source", "in", `(${GITHUB_ALL_SOURCES.join(",")})`);
+    } else if (sources && sources.length) {
+      q = q.in("source", sources);
+    }
+
+    if (cutoff) q = q.gte("published_at", cutoff);
+
+    const { data, error } = await q;
+    if (error) return { items: [], hasMore: false, error: error.message };
+
+    const sorted = isPureGithubSources(sources)
+      ? sortByStars(data || [])
+      : sortHot(data || []);
+
+    return {
+      items: sorted.slice(offset, offset + limit),
+      hasMore: offset + limit < sorted.length,
+    };
+  }
+
+  // Nhánh sắp "Mới nhất" (sort === "new") cho các bộ lọc thông thường.
   let q = supabase
     .from("news_items")
     .select(COLUMNS)
     .order("published_at", { ascending: false, nullsFirst: false })
     .order("id", { ascending: false })
     .range(offset, offset + limit - 1);
-  if (sources && sources.length) q = q.in("source", sources);
+
+  if (filter === "all") {
+    q = q.not("source", "in", `(${GITHUB_ALL_SOURCES.join(",")})`);
+  } else if (sources && sources.length) {
+    q = q.in("source", sources);
+  }
+
   if (cutoff) q = q.gte("published_at", cutoff);
 
   const { data, error } = await q;

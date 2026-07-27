@@ -33,6 +33,8 @@ const STRINGS = {
     githubSubStars: "Trending (nhiều sao)",
     githubSubDaily: "🔥 Trending (ngày)",
     githubSubWeekly: "🔥 Trending (tuần)",
+    githubSubMonthly: "🔥 Trending (tháng)",
+    githubSubClassics: "Kinh điển",
   },
   en: {
     tagline: "News, summarized, with sources.",
@@ -65,6 +67,8 @@ const STRINGS = {
     githubSubStars: "Trending (most stars)",
     githubSubDaily: "🔥 Trending (daily)",
     githubSubWeekly: "🔥 Trending (weekly)",
+    githubSubMonthly: "🔥 Trending (monthly)",
+    githubSubClassics: "Classics",
   },
 };
 

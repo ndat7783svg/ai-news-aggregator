@@ -24,6 +24,7 @@ const COLLECTORS = [
   ["GitHub Trending", collectGithubTrending],
   ["GitHub Trending Daily", () => collectGithubTrendingScrape("daily")],
   ["GitHub Trending Weekly", () => collectGithubTrendingScrape("weekly")],
+  ["GitHub Trending Monthly", () => collectGithubTrendingScrape("monthly")],
   ["Reddit", collectReddit],
 ];
 

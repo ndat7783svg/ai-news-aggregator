@@ -49,16 +49,17 @@ async function runSafe(name, fn) {
 async function main() {
   console.log("Bắt đầu thu thập tin AI (cột mốc 1)…");
 
-  const [hn, arxiv, releases, trending, trendingDaily, trendingWeekly] = await Promise.all([
+  const [hn, arxiv, releases, trending, trendingDaily, trendingWeekly, trendingMonthly] = await Promise.all([
     runSafe("Hacker News", collectHackerNews),
     runSafe("arXiv", collectArxiv),
     runSafe("GitHub Releases", collectGithubReleases),
     runSafe("GitHub Trending", collectGithubTrending),
     runSafe("GitHub Trending Daily", () => collectGithubTrendingScrape("daily")),
     runSafe("GitHub Trending Weekly", () => collectGithubTrendingScrape("weekly")),
+    runSafe("GitHub Trending Monthly", () => collectGithubTrendingScrape("monthly")),
   ]);
 
-  const githubTotal = releases.length + trending.length + trendingDaily.length + trendingWeekly.length;
+  const githubTotal = releases.length + trending.length + trendingDaily.length + trendingWeekly.length + trendingMonthly.length;
   const total = hn.length + arxiv.length + githubTotal;
   console.log(`\n\n>>> Tổng cộng: ${total} tin (HN: ${hn.length}, arXiv: ${arxiv.length}, GitHub: ${githubTotal})`);
   console.log(">>> Xong. Chưa lưu database, chưa tóm tắt AI — đúng phạm vi cột mốc 1.");

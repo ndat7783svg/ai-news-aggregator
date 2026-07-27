@@ -11,6 +11,9 @@ import {
   GITHUB_TRENDING_MIN_STARS,
   GITHUB_TRENDING_PER_TOPIC,
   GITHUB_TRENDING_MAX,
+  GITHUB_CLASSICS_MIN_STARS,
+  GITHUB_CLASSICS_PER_TOPIC,
+  GITHUB_CLASSICS_MAX,
 } from "../lib/config.js";
 
 const GH = "https://api.github.com";
@@ -150,9 +153,49 @@ export async function collectGithubTrending() {
     .slice(0, GITHUB_TRENDING_MAX);
 }
 
+/** "Repo kinh điển" AI: repo nổi lâu, nhiều sao (>= 5000 sao), không giới hạn ngày push (Search API). */
+export async function collectGithubClassics() {
+  const byId = new Map();
+
+  for (const topic of GITHUB_TRENDING_TOPICS) {
+    try {
+      const q = encodeURIComponent(
+        `topic:${topic} stars:>${GITHUB_CLASSICS_MIN_STARS}`
+      );
+      const data = await fetchJson(
+        `${GH}/search/repositories?q=${q}&sort=stars&order=desc&per_page=${GITHUB_CLASSICS_PER_TOPIC}`,
+        { headers: ghHeaders() }
+      );
+      for (const repo of data.items || []) {
+        if (byId.has(repo.id)) continue;
+        byId.set(repo.id, {
+          source: "github_classics",
+          sourceId: String(repo.id),
+          title: repo.full_name,
+          url: repo.html_url,
+          author: repo.owner?.login ?? null,
+          publishedAt: repo.pushed_at || repo.created_at || null,
+          score: repo.stargazers_count ?? null,
+          extra: {
+            language: repo.language,
+            stars: repo.stargazers_count,
+            abstract: repo.description || "",
+          },
+        });
+      }
+    } catch (e) {
+      console.error(`  ⚠ GitHub repo kinh điển topic ${topic} lỗi: ${e.message}`);
+    }
+  }
+
+  return [...byId.values()]
+    .sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
+    .slice(0, GITHUB_CLASSICS_MAX);
+}
+
 /** Trending thật từ github.com/trending, sau đó lọc lại theo chủ đề AI bằng REST API. */
 export async function collectGithubTrendingScrape(period) {
-  if (period !== "daily" && period !== "weekly") {
+  if (period !== "daily" && period !== "weekly" && period !== "monthly") {
     throw new Error(`GitHub Trending period không hợp lệ: ${period}`);
   }
 

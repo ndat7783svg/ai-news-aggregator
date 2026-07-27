@@ -36,11 +36,13 @@ CHƯA bật** (xem mục 3). X/Twitter **bỏ** (API đọc ~$100+/tháng, khôn
 - **Tính năng frontend đã live:** feed thẻ; **nút chuyển ngôn ngữ VI/EN** (nhớ localStorage);
   **lọc theo nguồn** (Tất cả + mỗi nguồn; 13 blog/báo tách thành **3 nhóm**: "Blog hãng AI"
   (openai/deepmind/huggingface/mistral/bair), "Báo công nghệ" (techcrunch/theverge/arstechnica/
-  venturebeat/technologyreview), "Newsletter" (simonwillison/importai/thegradient); **4 nguồn
+  venturebeat/technologyreview), "Newsletter" (simonwillison/importai/thegradient); **6 nguồn
   GitHub gộp thành 1 nút "GitHub" + 1 ô `<select>` phụ hiện khi chọn** (Tất cả GitHub / Release /
-  Trending nhiều sao / 🔥 Trending ngày / 🔥 Trending tuần — xem `web/lib/filters.js`, entry con
-  đánh dấu `parent: "github"`, 27/07) — nhãn đổi theo VI/EN qua `web/lib/i18n.js`; nút ẩn nếu
-  nhóm/nguồn chưa có tin);
+  Trending nhiều sao / 🔥 Trending ngày / 🔥 Trending tuần / 🔥 Trending tháng / Kinh điển —
+  xem `web/lib/filters.js`, entry con đánh dấu `parent: "github"`, 27/07) — nhãn đổi theo VI/EN
+  qua `web/lib/i18n.js`; nút ẩn nếu nhóm/nguồn chưa có tin; **toàn bộ 6 nguồn GitHub đã được tách
+  khỏi feed "Tất cả"** (trang chủ mặc định chỉ hiện tin thời sự/báo/blog/arXiv/HN); trong phạm vi
+  GitHub, sắp "Nổi bật nhất" xếp theo số sao giảm dần);
   **infinite scroll** (tải 40 tin/lần qua `/api/items`, tự tải thêm khi cuộn, kết hợp mọi bộ lọc,
   có "Đang tải thêm…"/"Đã hết tin"). Thẻ hiển thị: badge nguồn, điểm — GitHub dùng ★ + số rút
   gọn ("158K") + badge ngôn ngữ lập trình, nguồn khác dùng ▲ + số đầy đủ — thời gian tương đối,
@@ -213,7 +215,7 @@ Cache khiến lọc theo nguồn hiện tin cũ, mua tên miền riêng `bainews
 tạo cơ chế `plans/` (Codex/Antigravity → Claude bàn → `tasks/todo/`) + track nốt `tasks/` vào
 git (26/07), **luồng "🔥 Trending" thật daily/weekly + cải thiện thẻ GitHub (26/07)**, **gom 4
 nút lọc GitHub thành 1 nút + ô chọn phụ (27/07, lần đầu giao Antigravity làm — Codex hết token
-tháng)**, **đổi brand "SAI News" → "BAI News" + banner thông báo 3 ngày (27/07, Antigravity)**.
+tháng)**, **đổi brand "SAI News" → "BAI News" + banner thông báo 3 ngày (27/07, Antigravity)**, **mở rộng GitHub "Kinh điển" + "Trending tháng" + tách 6 nguồn GitHub khỏi feed "Tất cả" (27/07, Antigravity)**.
 
 ### Luồng "🔥 Trending" GitHub (26/07) — đã chạy
 Nguồn mới `github_trending_daily` + `github_trending_weekly`: đọc trang **github.com/trending**

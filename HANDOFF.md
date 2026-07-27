@@ -144,3 +144,38 @@
   Primary. Chưa làm tính đến cuối phiên này.
 - File đổi: `web/app/layout.js`, `web/components/Feed.js`, `web/app/globals.css`,
   `web/components/RenameBanner.js` (mới), `CLAUDE.md`, `AGENTS.md`.
+
+### 2026-07-27 — Claude Code (Opus 5) + Gemini 3.6 Flash: mở rộng GitHub (Kinh điển + Trending tháng)
+- **Vấn đề user nêu:** tin GitHub quá ít với developer muốn tìm repo — thiếu chiều rộng, thiếu
+  repo "kinh điển" nổi lâu, thiếu góc nhìn top tháng. User tự chỉ ra rủi ro: bơm thêm ~150 repo
+  vào feed "Tất cả" sẽ **lấp tin thời sự trong ngày** → chốt **tách hẳn 6 nguồn GitHub khỏi
+  "Tất cả"** (GitHub đã có "Tất cả GitHub" riêng).
+- **Phát hiện khi bàn thiết kế:** "Nổi bật nhất" trước nay KHÔNG dùng số sao cho GitHub (chỉ
+  HN/Reddit có điểm) → mọi repo luôn bị đẩy xuống cuối. Đây là gốc rễ cảm giác "sắp xếp kiểu gì
+  cũng rối". Fix: thêm `sortByStars`, chỉ áp dụng khi lọc thuần GitHub.
+- Thiết kế đầy đủ: `docs/superpowers/specs/2026-07-27-github-expansion-classics-monthly-design.md`;
+  task: `tasks/done/2026-07-27-mo-rong-github-kinh-dien-trending-thang.md`.
+- **Lần đầu giao Gemini 3.6 Flash** (trước đó Codex, rồi Antigravity). Làm đúng phần lớn: collector
+  `collectGithubClassics`, 3 thay đổi logic `supabaseServer.js`, i18n **đủ cả VI+EN**, cập nhật
+  **cả CLAUDE.md lẫn AGENTS.md** (2 lỗi Antigravity từng mắc — lần này không lặp lại), tự thêm
+  badge ở `web/lib/format.js` dù task không ghi (đúng quy ước dự án).
+- **Claude phát hiện + sửa 2 lỗi thật trong `backfill-github-classics.js`:**
+  1. **Ghi cả repo tóm tắt HỎNG vào DB** — dùng `insertItems(summarized)` thay vì lọc `ok` như
+     `pipeline.js`. Hậu quả nếu để nguyên: thẻ trống vĩnh viễn trên web, chạy lại KHÔNG sửa được
+     (dedupe theo source+source_id + upsert `ignoreDuplicates`). Đã thêm lọc + guard "hỏng toàn
+     bộ → exit 1" giống pipeline.
+  2. **Báo giá luôn $0.0000** — script truyền `onUsage` nhưng `summarizeMany()`/`summarizeItem()`
+     KHÔNG nhận tham số đó (chỉ `translateTitle` có). Gemini copy nhầm khuôn từ
+     `backfill-titles.js`. Đã thêm hỗ trợ `onUsage` vào `summarize/summarizer.js` theo đúng mẫu.
+- **Kiểm tra thật:** build sạch; `node --check` mọi file backend; route tạm `web/app/tmp-uicheck/`
+  xác nhận ô chọn GitHub đủ 7 mục + VI/EN đúng (test xong **đã xoá**).
+- **Đã chạy backfill THẬT:** 136 repo kinh điển, **0 repo lỗi**, chi phí thật **$0.2656**
+  (token vào=138143, ra=25496). Xác minh lại bằng query Supabase: 136 dòng `github_classics`,
+  **0 dòng thiếu tóm tắt**. Có cả repo kinh điển thật (tensorflow, AutoGPT, ollama).
+- **Lưu ý vận hành:** máy user KHÔNG có `GITHUB_TOKEN` trong `.env` → GitHub Search API giới hạn
+  10 req/phút. Chạy script nhiều lần liên tiếp sẽ bị 403 rate limit và chỉ lấy được một phần
+  (lần thử thứ 2 ra 89/136 repo). Không sao: đợi 1 phút chạy lại, repo đã lưu được bỏ qua, KHÔNG
+  bị tính tiền 2 lần.
+- File đổi: `lib/config.js`, `collectors/github.js`, `pipeline.js`, `collect.js`,
+  `summarize/summarizer.js`, `backfill-github-classics.js` (mới), `web/lib/filters.js`,
+  `web/lib/format.js`, `web/lib/i18n.js`, `web/lib/supabaseServer.js`, + tài liệu.

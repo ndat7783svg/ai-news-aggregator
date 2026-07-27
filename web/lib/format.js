@@ -20,6 +20,8 @@ export const SOURCE_META = {
   github_trending: { label: "GitHub Trending", color: "#24292e" },
   github_trending_daily: { label: "🔥 Trending (ngày)", color: "#f97316" },
   github_trending_weekly: { label: "🔥 Trending (tuần)", color: "#ea580c" },
+  github_trending_monthly: { label: "🔥 Trending (tháng)", color: "#c2410c" },
+  github_classics: { label: "Kinh điển", color: "#475569" },
   reddit: { label: "Reddit", color: "#ff4500" },
 };
 

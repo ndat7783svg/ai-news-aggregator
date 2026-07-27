@@ -63,8 +63,9 @@ function getClient() {
 /**
  * Tóm tắt 1 tin. Trả về item mới có thêm { summaryVi, summaryEn }.
  * Nếu lỗi, trả về item kèm summaryError để không làm chết cả mẻ.
+ * Có thể nhận response.usage qua tham số onUsage để đo chi phí (như translateTitle).
  */
-export async function summarizeItem(item) {
+export async function summarizeItem(item, { onUsage } = {}) {
   try {
     const res = await getClient().messages.create({
       model: MODEL,
@@ -73,6 +74,7 @@ export async function summarizeItem(item) {
       messages: [{ role: "user", content: buildUserContent(item) }],
       output_config: { format: { type: "json_schema", schema: OUTPUT_SCHEMA } },
     });
+    if (onUsage && res.usage) onUsage(res.usage);
 
     // Structured outputs trả JSON trong block text đầu tiên.
     const textBlock = res.content.find((b) => b.type === "text");
@@ -142,16 +144,16 @@ export async function translateTitles(items, { concurrency = 3, onUsage } = {}) 
 /**
  * Tóm tắt nhiều tin, chạy song song có giới hạn để tránh dồn quá nhiều request.
  * @param {Array} items
- * @param {{ concurrency?: number }} [opts]
+ * @param {{ concurrency?: number, onUsage?: (usage: object) => void }} [opts]
  */
-export async function summarizeMany(items, { concurrency = 3 } = {}) {
+export async function summarizeMany(items, { concurrency = 3, onUsage } = {}) {
   const results = new Array(items.length);
   let next = 0;
 
   async function worker() {
     while (next < items.length) {
       const idx = next++;
-      results[idx] = await summarizeItem(items[idx]);
+      results[idx] = await summarizeItem(items[idx], { onUsage });
     }
   }
 

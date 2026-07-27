@@ -31,10 +31,11 @@ Chi tiết đầy đủ & quyết định đã chốt: xem `CLAUDE.md` ở gốc
 | `collectors/hackernews.js` | Thu thập tin AI từ HN qua Algolia HN Search API. |
 | `collectors/arxiv.js` | Thu thập bài mới từ arXiv (cs.AI, cs.LG, cs.RO) qua Atom API. |
 | `collectors/blogs.js` | 13 blog/báo AI qua RSS/Atom: OpenAI, DeepMind, Hugging Face, Mistral, BAIR, Simon Willison, TechCrunch, The Verge, Ars Technica, VentureBeat, MIT Tech Review, Import AI, The Gradient. Parser đã nới `processEntities.maxTotalExpansions` (feed nhiều entity). Danh sách + slug ở `lib/config.js` (`BLOG_FEEDS`); slug phải khai báo ở `web/lib/filters.js` (xếp vào 1 trong 3 nhóm `blog_labs`/`blog_press`/`blog_news`) + `web/lib/format.js` (badge). |
-| `collectors/github.js` | GitHub Releases 8 repo + "Repo nổi bật" (`github_trending`) qua Search API (repo AI nhiều sao còn push gần đây) và **Trending thật** daily/weekly (`github_trending_daily`/`github_trending_weekly`): parse github.com/trending bằng Cheerio, giữ thứ hạng trang rồi gọi REST API để lọc AI theo topic/mô tả. |
+| `collectors/github.js` | GitHub Releases 8 repo + "Repo nổi bật" (`github_trending`), "Kinh điển" (`github_classics`), và **Trending thật** daily/weekly/monthly (`github_trending_daily`/`weekly`/`monthly`): parse github.com/trending bằng Cheerio + API REST/Search. |
 | `collectors/reddit.js` | Reddit OAuth (cần REDDIT_CLIENT_ID/SECRET); tự bỏ qua nếu thiếu. **CHƯA bật** — ISP người dùng chặn reddit.com nên chưa tạo được app (pipeline chạy cloud vẫn OK nếu có credential). |
 | `summarize/summarizer.js` | Tóm tắt AI song ngữ (VI+EN) + **dịch tiêu đề `title_vi`** bằng Claude Haiku (`claude-haiku-4-5`), structured outputs. `summarizeItem`/`summarizeMany`; `translateTitle`/`translateTitles` (dịch riêng tiêu đề cho backfill). |
 | `backfill-titles.js` | Script chạy 1 lần: dịch `title_vi` cho tin cũ chưa có (`--count`/`--limit`, in chi phí token). Cần cột `title_vi` (ALTER TABLE) trước. |
+| `backfill-github-classics.js` | Script chạy 1 lần: thu thập, tóm tắt và ghi repo GitHub "Kinh điển" vào DB (`--count` xem trước, in chi phí token). |
 | `summarize-test.js` | Test cột mốc 2: thu vài tin rồi tóm tắt, in ra để xem chất lượng. |
 | `pipeline.js` | **Pipeline chính (cột mốc 3):** thu thập → lọc tin mới → tóm tắt → ghi Supabase. GitHub Actions sẽ chạy file này. |
 | `db/supabase.js` | Kết nối Supabase (service_role): `fetchExistingKeys` (dedupe), `insertItems`. |
@@ -46,9 +47,9 @@ Chi tiết đầy đủ & quyết định đã chốt: xem `CLAUDE.md` ở gốc
 | `web/app/layout.js` | Root layout: title/meta "BAI News", script inline chống nháy cho `data-theme` (Sáng/Tối) trên `<html>`, render `<RenameBanner/>` trên cùng `<body>`. |
 | `web/app/page.js` | Server component: đọc `news_items` từ Supabase → `Feed`. ISR 5 phút. |
 | `web/components/Feed.js` | Client: VI/EN (localStorage), lọc nguồn, **sắp xếp Mới nhất/Nổi bật**, **lọc thời gian (dropdown)**, infinite scroll (gọi `/api/items` với filter+sort+time). |
-| `web/lib/supabaseServer.js` | Truy vấn Supabase (anon, chỉ đọc) DÙNG CHUNG cho page.js + API. `fetchItems({filter,sort,time,offset,limit})`: sắp/lọc phía server; chế độ "hot" lấy cửa sổ rồi `sortHot()` ở JS (chỉ HN+Reddit tính điểm). |
+| `web/lib/supabaseServer.js` | Truy vấn Supabase (anon, chỉ đọc) DÙNG CHUNG cho page.js + API. `fetchItems({filter,sort,time,offset,limit})`: loại 6 nguồn GitHub khỏi `filter="all"`; sắp xếp theo sao cho nguồn thuần GitHub; cửa sổ candidate + dedupe 6 nguồn cho `filter="github"`. |
 | `web/app/api/items/route.js` | API phân trang cho infinite scroll: nhận `filter/sort/time/offset/limit`. |
-| `web/lib/filters.js` | Định nghĩa bộ lọc nguồn (`SOURCE_FILTERS`, `PAGE_SIZE=40`) — dùng chung client+server. 13 blog chia 3 nhóm: `blog_labs` (hãng AI), `blog_press` (báo công nghệ), `blog_news` (newsletter); mỗi nhóm có `labelKey` để hiện nhãn VI/EN (chuỗi ở `web/lib/i18n.js`). |
+| `web/lib/filters.js` | Định nghĩa bộ lọc nguồn (`SOURCE_FILTERS`, `PAGE_SIZE=40`) — dùng chung client+server. 6 nguồn GitHub gộp vào 1 nút "GitHub" cha + 6 sub-filter con; export `GITHUB_ALL_SOURCES` và `GITHUB_TRENDING_FAMILY`. |
 | `web/components/NewsCard.js` | Thẻ 1 tin: badge nguồn, điểm, thời gian, tiêu đề (link), tóm tắt, link gốc. |
 | `web/components/RenameBanner.js` | **Tạm thời** — banner báo đổi tên SAI→BAI, tự ẩn sau 30/07/2026 (hằng số `BANNER_EXPIRES`), nút ✕ nhớ bằng localStorage. Style `.rename-banner` + biến `--banner-*` ở `globals.css`. Hết hạn thì tự ẩn, xoá code không cấp thiết. |
 | `web/lib/i18n.js` | Chuỗi giao diện VI/EN. `web/lib/format.js`: nhãn+màu nguồn, thời gian tương đối. |

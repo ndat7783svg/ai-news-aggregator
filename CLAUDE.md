@@ -83,6 +83,40 @@ CHƯA bật** (xem mục 3). X/Twitter **bỏ** (API đọc ~$100+/tháng, khôn
   lỗi `ERR_INVALID_URL`) — đã bỏ, chỉ giữ OG dạng chữ. Muốn có ảnh preview đẹp khi chia sẻ
   Facebook thì cần thiết kế ảnh tĩnh 1200×630 rồi gắn thủ công (chưa làm, không gấp). Đã commit
   + push (`77b4f84`), Vercel tự deploy.
+- **SEO nội dung — 2 trang song ngữ "GitHub AI nổi bật" (27/07, Claude bàn thiết kế + Antigravity
+  code, đã kiểm tra + deploy):** `/github-ai` (VI) + `/en/github-ai` (EN), Server Component,
+  ISR 5 phút, dữ liệu live từ `fetchItems({filter:"github", sort:"hot"})`. Có `alternates.
+  languages` (hreflang) liên kết chéo 2 bản, đã khai trong `web/app/sitemap.js`. File:
+  `web/app/github-ai/page.js`, `web/app/en/github-ai/page.js`, `web/components/GithubAiList.js`
+  (component hiển thị riêng, KHÔNG dùng chung `NewsCard.js`). Spec:
+  `docs/superpowers/specs/2026-07-27-seo-github-ai-bilingual-design.md`.
+- **Nút Lưu tin (localStorage) + nút Chia sẻ + trang chi tiết `/tin/[id]` (27/07, Claude bàn
+  thiết kế + Antigravity code, đã kiểm tra + deploy):** không cần tài khoản — danh sách lưu
+  trong `localStorage` khoá `bai_saved_lists` (module `web/lib/savedLists.js`: tạo/đổi tên/xoá
+  danh sách, lưu/bỏ lưu tin). Bấm 🔖 là lưu ngay vào danh sách mặc định "Đã lưu"; mũi tên cạnh đó
+  mở popup (`SaveListPopup.js`) để chọn/tạo danh sách khác. Nút Chia sẻ (`web/lib/share.js`)
+  dùng `navigator.share()` trên di động, fallback copy link trên desktop — **link chia sẻ luôn
+  trỏ về `bainews.site/tin/{id}`** (trang chi tiết mới, `web/app/tin/[id]/page.js` +
+  `DetailContent.js`), không chia sẻ thẳng link bài gốc — mục tiêu giữ traffic quay lại web.
+  Trang "Đã lưu" ở `/da-luu` (không cache dữ liệu cũ — luôn gọi `/api/saved-items?ids=...` lấy
+  bản mới nhất từ Supabase). Spec: `docs/superpowers/specs/2026-07-27-save-share-buttons-design.md`.
+  **Phạm vi hiện tại: chỉ trang chủ** (`NewsCard.js`), CHƯA có trên `/github-ai`/`/en/github-ai`.
+- **Nút Lưu/Chia sẻ đổi giao diện (27/07, Claude Sonnet 5):** bản đầu Antigravity làm dùng emoji
+  (🔖🔗▾) trong khung viền mảnh — user chê xấu, yêu cầu làm theo kiểu "pill" bo tròn nền đặc
+  giống YouTube. Đã thay bằng icon SVG vẽ nét (`web/components/icons.js`: `ShareIcon`,
+  `BookmarkIcon`, `ChevronDownIcon`, dùng `currentColor` nên tự đổi màu theo theme/trạng thái),
+  style `.pill`/`.pill-group` trong `globals.css` (biến `--chip`/`--chip-hover` cho cả 2 theme).
+  **Bug kỹ thuật gặp phải:** dùng thuộc tính viết tắt `background: var(--chip)` với
+  `transition: background 0.12s` khiến khi đổi theme (sáng↔tối) mà KHÔNG tải lại trang, nền nút
+  không cập nhật theo giá trị biến CSS mới (kẹt ở giá trị cũ) — đổi sang `background-color` +
+  `transition: background-color 0.12s` mới nội suy đúng qua biến CSS thay đổi động. **Nếu sau
+  này thêm phần tử có nền đổi theo `data-theme` + có transition, LUÔN dùng `background-color`,
+  KHÔNG dùng shorthand `background`.**
+- **Nút menu ☰ ở header (27/07, Claude Sonnet 5):** góc phải header, cùng hàng và đứng SAU nút
+  sáng/tối + VI/EN (ngoài cùng bên phải) — `web/components/HeaderMenu.js`, dropdown neo dưới nút
+  canh phải, đóng khi bấm ra ngoài/Esc/bấm lại nút. 3 mục: Trang chủ, GitHub AI nổi bật (tự trỏ
+  `/en/github-ai` khi đang chế độ EN), Tin đã lưu. Chân trang (`Feed.js`) rút gọn lại còn 1 link
+  GitHub AI (bỏ bớt link trùng với menu, giữ 1 link để có liên kết nội bộ tĩnh trong HTML cho SEO).
 - **DB:** Supabase bảng `news_items`, RLS = **đọc công khai / ghi chỉ service_role**. Hiện ~170+ tin
   (tăng dần sau khi thêm nguồn).
 - **Cơ chế `plans/` (mới, 26/07):** chiều ngược lại `tasks/` — Codex hoặc Antigravity thả ý
@@ -115,10 +149,11 @@ CHƯA bật** (xem mục 3). X/Twitter **bỏ** (API đọc ~$100+/tháng, khôn
   bấp bênh (phụ thuộc 1 kênh Facebook không đều, dao động -48%/ngày) để quảng cáo có ý nghĩa. Mốc
   tham khảo để cân nhắc lại: traffic ổn định vài trăm–1000+/ngày *liên tục* (không phải 1 đỉnh
   rồi tụt). Đừng đề xuất bật quảng cáo trước khi đạt mốc này.
-- **Nội dung SEO dài hạn (bài viết/landing riêng để lên top tìm kiếm): CHƯA làm.** Mới làm xong
-  phần kỹ thuật (robots/sitemap/metadata — xem mục 2). Trang chủ là SPA 1 trang nên khó tối ưu
-  sâu cho nhiều từ khoá khác nhau — cần nghĩ thêm hướng (có thể thêm trang/bài viết riêng?) nếu
-  muốn đẩy SEO xa hơn.
+- **Nội dung SEO dài hạn — ĐÃ BẮT ĐẦU (27/07), còn nhỏ.** Đã có 2 trang chuyên đề song ngữ
+  GitHub AI (`/github-ai`, `/en/github-ai`) + trang chi tiết từng tin (`/tin/[id]`, chủ yếu để
+  phục vụ nút Chia sẻ nhưng đồng thời cũng là nội dung SEO dài-tail) — xem mục 2. **Còn thiếu:**
+  chưa mở rộng trang chuyên đề sang chủ đề khác (blog hãng, arXiv...), chưa đo được hiệu quả thật
+  (traffic/index) vì mới deploy, cần đợi vài tuần rồi xem lại Google Search Console + Analytics.
 - **Reddit: CHƯA bật, đang KẸT ở bước tạo app (thử 25/07, tạm gác lại theo yêu cầu user).**
   Code `collectors/reddit.js` sẵn sàng, tự bỏ qua nếu thiếu `REDDIT_CLIENT_ID`/`SECRET`. Vướng
   2 lớp: (1) ISP chặn `reddit.com` → user phải dùng 4G/VPN mới vào được `reddit.com/prefs/apps`;
@@ -198,8 +233,12 @@ CHƯA bật** (xem mục 3). X/Twitter **bỏ** (API đọc ~$100+/tháng, khôn
   `ai-news-actions-queue-stuck-fix`.
 - **Vercel đổi tên domain không giới hạn số lần** (Settings → Domains). Hiện là `sainews`.
 - **Khung trình duyệt tự động của Claude không "vẽ khung hình"** → click mô phỏng &
-  IntersectionObserver không kích hoạt trong đó. Kiểm tra tính năng tương tác (nút, lọc, cuộn)
-  bằng `dispatchEvent` hoặc trên **web thật**, đừng kết luận "lỗi" từ công cụ.
+  IntersectionObserver không kích hoạt trong đó, **CSS `transition` cũng không chạy** (đã gặp lại
+  27/07 khi kiểm tra nút pill: nền không đổi khi chuyển theme động — tưởng là bug thật, hoá ra do
+  pane không compositing frame nên hiệu ứng đứng yên; tắt `transition` tạm thời bằng `<style>*{
+  transition:none!important}</style>` để đo lại mới thấy đúng). Kiểm tra tính năng tương tác
+  (nút, lọc, cuộn, đổi theme/màu có transition) bằng `dispatchEvent` + tắt transition khi cần đo,
+  hoặc kiểm trên **web thật**, đừng vội kết luận "lỗi" chỉ từ công cụ này.
 - **ĐÃ SỬA (25/07) — Next.js Data Cache làm lọc theo nguồn hiện tin cũ:** `export const dynamic
   = "force-dynamic"` trong route API **KHÔNG** tự tắt cache cho từng lệnh `fetch` bên trong (Supabase
   đọc qua `fetch`). Mỗi tổ hợp filter/sort/time là 1 URL bị Next Data Cache "đóng băng" riêng, chỉ
@@ -232,14 +271,19 @@ CHƯA bật** (xem mục 3). X/Twitter **bỏ** (API đọc ~$100+/tháng, khôn
    `D:\bai-news-video-project` để làm video test đầu tiên (không làm trong project này).
 1. **Kiểm tra `plans/incoming/` trước tiên:** nếu Codex/Antigravity có thả plan mới thì đọc +
    bàn với user trước khi làm việc khác (xem `plans/README.md`). Hiện đang RỖNG (26/07).
-2. **Reddit (đang kẹt CAPTCHA/IP 4G, xem mục 3):** hỏi user đã thử bật/tắt máy bay hoặc mạng
+2. **Đo hiệu quả 2 trang SEO GitHub AI + nút Lưu/Chia sẻ (deploy 27/07):** đợi vài tuần rồi xem
+   Google Search Console có index `/github-ai`/`/en/github-ai`/`/tin/[id]` không, Analytics có
+   traffic từ tìm kiếm tăng không. Nếu hiệu quả, cân nhắc nhân rộng trang chuyên đề sang chủ đề
+   khác (blog hãng, arXiv).
+3. **Reddit (đang kẹt CAPTCHA/IP 4G, xem mục 3):** hỏi user đã thử bật/tắt máy bay hoặc mạng
    khác chưa; nếu vẫn kẹt, cân nhắc gác hẳn hoặc thử cách khác (nhờ người khác tạo app hộ ở mạng
    sạch). Khi có `client_id`/`secret` → thêm vào **GitHub secrets**, nút lọc Reddit tự hiện.
-3. **Thêm nguồn cập nhật cho các AI lớn** (Anthropic/Claude, Gemini, Grok, Kimi) vào nhóm "Blog
+4. **Thêm nguồn cập nhật cho các AI lớn** (Anthropic/Claude, Gemini, Grok, Kimi) vào nhóm "Blog
    hãng AI" — user yêu cầu 25/07, chưa khảo sát nguồn khả thi (RSS chính thức có/không, hay mở
    rộng từ khoá HN/blog hiện có).
-4. Về sau: PWA/app điện thoại, thêm nguồn nữa, trau chuốt giao diện, có thể thêm lọc từ khoá AI cho
-   các nguồn báo phổ thông (TechCrunch/Verge... hiện lấy toàn bộ mục AI, chưa lọc thêm).
+5. Về sau: PWA/app điện thoại, thêm nguồn nữa, trau chuốt giao diện, có thể thêm lọc từ khoá AI cho
+   các nguồn báo phổ thông (TechCrunch/Verge... hiện lấy toàn bộ mục AI, chưa lọc thêm), thêm nút
+   Lưu/Chia sẻ cho `/github-ai`/`/en/github-ai` (`GithubAiList.js`) nếu tính năng này hiệu quả.
 
 **Đã xong (đừng đề xuất lại):** cron-job.org (nhịp tự động), dịch tiêu đề `title_vi` + backfill,
 nút sắp xếp Mới nhất/Nổi bật, lọc thời gian, dark mode, Vercel Analytics (đã xem số liệu 25/07 —
@@ -259,7 +303,11 @@ không giữ sau tải lại trang + thiếu dịch badge/banner GitHub (27/07, 
 cơ bản: robots.txt/sitemap.xml/favicon/metadata (27/07, Claude Sonnet 5, xem mục 2)**, **xem số
 liệu Analytics thật + chốt chiến lược quảng bá Facebook đều tay + SEO song song (27/07, xem mục
 4)**, **setup xong dự án phụ trợ video NotebookLM ở `D:\bai-news-video-project` — chưa chạy thử
-(27/07, xem mục 8)**.
+(27/07, xem mục 8)**, **2 trang SEO song ngữ GitHub AI nổi bật `/github-ai` + `/en/github-ai`
+(27/07, Claude bàn + Antigravity code, đã kiểm tra + deploy, xem mục 2)**, **nút Lưu tin
+(localStorage, có danh sách) + nút Chia sẻ + trang chi tiết `/tin/[id]` + trang "Đã lưu"
+`/da-luu` (27/07, Claude bàn + Antigravity code)**, **làm lại giao diện nút Lưu/Chia sẻ theo
+kiểu pill YouTube + nút menu ☰ ở header dẫn tới 3 trang (27/07, Claude Sonnet 5)**.
 
 ### Luồng "🔥 Trending" GitHub (26/07) — đã chạy
 Nguồn mới `github_trending_daily` + `github_trending_weekly`: đọc trang **github.com/trending**

@@ -7,6 +7,11 @@
 > **Khi cập nhật file này:** chỉ ghi **trạng thái hiện tại** (không ngày tháng, không kể chuyện
 > điều tra/nguyên nhân). Mọi diễn biến, lý do quyết định, bug đã sửa → ghi vào `HANDOFF.md`. Nếu
 > 1 gạch đầu dòng sắp vượt 3-4 dòng, đó là dấu hiệu nó thuộc về HANDOFF.md, không phải ở đây.
+>
+> **Trước khi bắt tay vào 1 nhiệm vụ mới, LUÔN hỏi user trước: để Claude làm hay để AI khác
+> (Codex/Antigravity...) làm?** User chủ động chia việc cho nhiều AI để tiết kiệm token — đừng tự
+> ý bắt tay vào việc lớn/tốn token mà chưa hỏi. Việc nhỏ, rõ ràng, ít bước (sửa 1-2 dòng, trả lời
+> câu hỏi, đọc/kiểm tra file) thì cứ làm luôn không cần hỏi.
 
 ## 1. Tổng quan
 Website tổng hợp & **tóm tắt** tin AI (mô hình Techmeme/TLDR): thu tin nhiều nguồn → tóm tắt

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getState, renameList, deleteList, removeItem } from "../../lib/savedLists";
+import { getState, renameList, deleteList } from "../../lib/savedLists";
 import { t } from "../../lib/i18n";
 import NewsCard from "../../components/NewsCard";
 
@@ -52,11 +52,6 @@ export default function DaLuuPage() {
   function refresh() {
     setSavedState(getState());
     loadData();
-  }
-
-  function handleUnsave(itemId, listId) {
-    removeItem(itemId, listId);
-    refresh();
   }
 
   function startRename(listId, currentName) {
@@ -172,16 +167,7 @@ export default function DaLuuPage() {
 
             <div className="feed">
               {items.map((item) => (
-                <div key={item.id} style={{ position: "relative" }}>
-                  <NewsCard item={item} lang={lang} />
-                  <button
-                    className="small-btn danger"
-                    style={{ position: "absolute", top: 12, right: 12 }}
-                    onClick={() => handleUnsave(item.id, listId)}
-                  >
-                    {t(lang, "unsave")}
-                  </button>
-                </div>
+                <NewsCard key={item.id} item={item} lang={lang} />
               ))}
               {listSaved.length > items.length && (
                 <p style={{ color: "var(--muted)", fontSize: "0.85rem" }}>

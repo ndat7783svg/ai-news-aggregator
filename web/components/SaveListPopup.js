@@ -78,8 +78,9 @@ export default function SaveListPopup({ itemId, lang, onClose, onUpdate }) {
     >
       <div
         style={{
-          background: "var(--card-bg, #fff)",
-          border: "1px solid var(--border, #e5e7eb)",
+          background: "var(--card)",
+          color: "var(--text)",
+          border: "1px solid var(--border)",
           borderRadius: 12,
           padding: "1.25rem",
           minWidth: 260,

@@ -14,15 +14,20 @@ Chi tiết & nguyên tắc: `docs/superpowers/specs/2026-07-22-ai-news-aggregato
 - Database: Supabase project ref `huqbirxwvrprqkhrwnsl` (bảng `news_items`), RLS đọc-công-khai/ghi-chỉ-service_role
 
 ## Tình trạng
-- [x] Cột mốc 1–5: collector (7 nguồn) → tóm tắt song ngữ Haiku → dedupe/Supabase → frontend feed → Actions+Vercel. Đã live, ~130 tin.
-- [x] Dịch tiêu đề (`title_vi`) trong bước tóm tắt + backfill 149 tin cũ xong.
+- [x] Cột mốc 1–5: collector (nhiều nguồn) → tóm tắt song ngữ Haiku → dedupe/Supabase → frontend
+      feed → Actions+Vercel. Đã live, ~170+ tin.
+- [x] Dịch tiêu đề (`title_vi`) trong bước tóm tắt + backfill tin cũ xong.
 - [x] Sắp xếp Mới nhất/Nổi bật + lọc thời gian (Hôm nay/Tuần/Tháng/Năm/Mọi lúc).
-- [x] Chế độ Sáng/Tối (theo hệ thống + nhớ lựa chọn) + đổi tên hiển thị "SAI News".
+- [x] Chế độ Sáng/Tối (theo hệ thống + nhớ lựa chọn). Brand hiển thị "BAI News",
+      `bainews.site` đã đặt làm domain chính trên Vercel.
+- [x] GitHub: 6 nguồn con gộp 1 nút, tách khỏi feed "Tất cả".
+- [x] SEO cơ bản (robots/sitemap/favicon) + 2 trang chuyên đề song ngữ `/github-ai`/`/en/github-ai`.
+- [x] Lưu tin (localStorage, có danh sách) + Chia sẻ + trang chi tiết `/tin/[id]` + `/da-luu` +
+      menu ☰ ở header.
 - [ ] Reddit: code sẵn (`collectors/reddit.js`), CHƯA bật — cần REDDIT_CLIENT_ID/SECRET.
-- [x] Tên miền riêng `bainews.site` — đã mua + nối Vercel (26/07), chạy song song
-      `sainews.vercel.app`. CHƯA đổi brand/đặt domain chính (xem CLAUDE.md mục 2, 3).
 
-Chi tiết đầy đủ & quyết định đã chốt: xem `CLAUDE.md` ở gốc dự án (nguồn thông tin mới nhất).
+Chi tiết đầy đủ & quyết định đã chốt: xem `CLAUDE.md` ở gốc dự án (nguồn thông tin mới nhất);
+lịch sử/diễn biến theo ngày: xem `HANDOFF.md`.
 
 ## File / thư mục chính
 | Đường dẫn | Vai trò |

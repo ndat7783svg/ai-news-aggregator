@@ -263,3 +263,57 @@
   Chia sẻ trên thẻ tin thật, mở thử link `/tin/<id>` được chia sẻ.
 - Lặp lại bài học cũ: Antigravity làm đúng phần lớn nhưng vẫn sót chi tiết khác nhau mỗi lần —
   lần này là i18n (đúng loại lỗi đã từng xảy ra 27/07). Luôn phải đọc diff + chạy thử thật.
+
+### 2026-07-27 — Claude Code (Sonnet 5): SEO cơ bản + xem số liệu Analytics thật + domain chính
+- **SEO kỹ thuật cơ bản (trước đó web KHÔNG có favicon/sitemap/robots):** thêm
+  `web/app/robots.js` (cho phép crawl + trỏ sitemap), `web/app/sitemap.js` (khai trang chủ),
+  `web/app/icon.svg` (favicon), mở rộng metadata trong `web/app/layout.js` (`keywords`,
+  `openGraph`, `twitter`, `metadataBase`, title/description có từ khoá tiếng Việt). Thử thêm ảnh
+  OG tự sinh bằng `next/og` `ImageResponse` nhưng gặp lỗi Next.js đã biết **trên Windows** (load
+  font mặc định qua `file://` URL sai định dạng, `ERR_INVALID_URL`) — bỏ, chỉ giữ OG dạng chữ.
+  Commit `77b4f84`, đã push, Vercel tự deploy.
+- **Xem số liệu Vercel Web Analytics thật lần đầu (24h):** 174 visitor, 275 pageview, bounce rate
+  88%, đỉnh ~20 visitor/giờ. Referrer **~64% từ Facebook** (gộp facebook.com/l.facebook.com/
+  lm.facebook.com/m.facebook.com), **gần như 0% từ tìm kiếm** (bing.com chỉ 1 lượt, không có
+  Google organic). Kết luận cùng user: traffic phụ thuộc gần hoàn toàn 1 kênh không đều →
+  nguyên nhân gốc rễ traffic dao động mạnh theo ngày. **Quyết định:** chưa bật quảng cáo (traffic
+  quá nhỏ/bấp bênh để có ý nghĩa), ưu tiên đa dạng hoá kênh trước — mốc để cân nhắc lại: traffic
+  ổn định vài trăm–1000+/ngày *liên tục*.
+- **Chốt chiến lược quảng bá:** Facebook đăng đều tay (đang có traffic thật nhưng chỉ đăng 1 lần
+  rồi thôi) song song SEO làm nền tảng lâu dài. KHÔNG dùng Product Hunt/Indie Hackers (đối tượng
+  ở đó là dev/founder quốc tế, lệch với 97% traffic hiện tại là người Việt).
+- **User tự đặt `bainews.site` làm domain chính trên Vercel** (Settings → Domains → "Redirect to
+  another Domain") — `sainews.vercel.app` giờ tự redirect 308 sang `bainews.site`, link
+  Facebook/bookmark cũ không gãy. Đã xác nhận qua ảnh chụp Vercel Dashboard.
+- File đổi: `web/app/robots.js` (mới), `web/app/sitemap.js` (mới), `web/app/icon.svg` (mới),
+  `web/app/layout.js`.
+
+### 2026-07-27 — Claude Code (Sonnet 5): làm lại nút Lưu/Chia sẻ theo kiểu pill YouTube + menu ☰ header
+- **User phản hồi:** bản đầu Antigravity làm nút Lưu/Chia sẻ dùng emoji (🔖🔗▾) trong khung viền
+  mảnh — chê xấu, yêu cầu làm theo kiểu "pill" bo tròn nền đặc giống YouTube. Dựng bản xem trước
+  bằng widget trước khi code để chốt hướng.
+- **Đổi giao diện:** bỏ emoji, vẽ icon SVG nét đơn (`web/components/icons.js`: `ShareIcon`,
+  `BookmarkIcon`, `ChevronDownIcon`, dùng `currentColor` tự đổi màu theo theme/trạng thái); style
+  `.pill`/`.pill-group` mới trong `globals.css` (biến `--chip`/`--chip-hover` cho cả 2 theme);
+  nút Lưu + mũi tên gộp chung 1 pill; trạng thái đã lưu đảo màu nền.
+- **Bug kỹ thuật phát hiện khi kiểm tra đổi theme động (không tải lại trang):** dùng thuộc tính
+  viết tắt `background: var(--chip)` cùng `transition: background 0.12s` khiến nền nút không cập
+  nhật theo giá trị biến CSS mới khi đổi theme — kẹt ở màu cũ. Fix: đổi toàn bộ sang
+  `background-color` + `transition: background-color 0.12s`. **Lúc đầu tưởng là bug thật, đo lại
+  hoá ra một phần do trình duyệt tự động không compositing frame nên transition đứng yên (xem
+  CLAUDE.md mục 5) — verify lại bằng cách tắt transition tạm thời mới phân biệt được bug thật
+  (background shorthand) với hạn chế công cụ (transition không chạy).**
+  Dựng trang tạm `web/app/preview-card-tmp/` với dữ liệu giả để đo màu (máy này không có
+  `web/.env.local`), xoá sau khi xong.
+- **Thêm nút menu ☰ ở header** (`web/components/HeaderMenu.js`): đặt ngoài cùng bên phải, sau nút
+  sáng/tối + VI/EN — theo đúng yêu cầu user (dựng preview bằng widget trước khi code). Dropdown
+  neo dưới nút, canh phải, đóng khi bấm ra ngoài/Esc/bấm lại nút, 3 mục: Trang chủ, GitHub AI nổi
+  bật (tự trỏ `/en/github-ai` khi đang chế độ EN), Tin đã lưu. Rút gọn footer `Feed.js` chỉ còn 1
+  link GitHub AI (bỏ 2 link emoji trùng với menu).
+- **Kiểm tra thật:** build sạch cả 2 lần; dựng dev server, dùng `dispatchEvent` mô phỏng bấm nút
+  (đóng/mở bằng 4 cách: click ngoài/Esc/bấm lại nút/bấm 1 mục), đo màu bằng
+  `getComputedStyle` ở cả 2 theme sau khi tắt transition, xác nhận đổi VI/EN đúng (link GitHub
+  đổi route), không lỗi console.
+- File đổi: `web/components/icons.js`, `web/app/globals.css`, `web/components/NewsCard.js`,
+  `web/components/HeaderMenu.js` (mới), `web/components/Feed.js`, `web/lib/i18n.js`.
+- Đã commit (`8d70576` pill, `d3a5fad` menu), đã push, Vercel tự deploy.

@@ -3,6 +3,7 @@
 
 import { fetchText } from "../lib/http.js";
 import { XMLParser } from "fast-xml-parser";
+import { decodeHTML } from "entities";
 import { BLOG_FEEDS, MAX_ITEMS_PER_SOURCE } from "../lib/config.js";
 
 // Nới giới hạn "entity expansion" (mặc định 1000). Vài feed Atom (BAIR, Simon
@@ -21,10 +22,14 @@ function toArray(x) {
 }
 
 // Bỏ thẻ HTML + gộp khoảng trắng (mô tả RSS thường lẫn HTML).
+// decodeHTML 2 lần: vài feed (vd TechCrunch/WordPress) double-encode entity trong
+// CDATA (vd "&amp;#8217;" -> XML parser chỉ decode 1 lớp ra "&#8217;" dạng chữ),
+// 1 lần decode không đủ để ra ký tự thật ("'").
 function clean(s) {
   if (typeof s === "object" && s) s = s["#text"] ?? "";
   if (typeof s !== "string") return "";
-  return s.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+  const stripped = s.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+  return decodeHTML(decodeHTML(stripped));
 }
 
 function toIso(d) {

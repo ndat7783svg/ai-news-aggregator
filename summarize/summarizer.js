@@ -28,7 +28,9 @@ Nguyên tắc bắt buộc:
 - Tóm tắt chỉ dựa vào thông tin được cung cấp (tiêu đề, và tóm lược gốc nếu có). KHÔNG bịa thêm số liệu, tên, kết quả không có trong dữ liệu.
 - Nếu chỉ có tiêu đề (không có tóm lược), diễn giải ý của tiêu đề một cách khách quan, không thêm chi tiết cụ thể không chắc chắn.
 - Văn phong trung lập, thông tin, không lời mở đầu kiểu "Đây là...".
-- Không sao chép nguyên văn đoạn dài từ nguồn — viết lại bằng lời của bạn.`;
+- Không sao chép nguyên văn đoạn dài từ nguồn — viết lại bằng lời của bạn.
+- title_vi và summary_vi PHẢI viết hoàn toàn bằng tiếng Việt (chữ Quốc ngữ), TUYỆT ĐỐI không lẫn
+  chữ Hán/Trung/Nhật/Hàn hay ký tự ngôn ngữ khác, kể cả khi nguồn gốc có nhắc tới Trung Quốc/Nhật/Hàn.`;
 
 // Tạo phần nội dung gửi cho model từ 1 item theo khuôn dữ liệu chung.
 function buildUserContent(item) {
@@ -101,7 +103,7 @@ const TITLE_SCHEMA = {
   additionalProperties: false,
 };
 
-const TITLE_SYSTEM = `Bạn dịch tiêu đề tin công nghệ AI sang tiếng Việt. ${TITLE_RULES} Chỉ trả tiêu đề tiếng Việt, không thêm gì khác.`;
+const TITLE_SYSTEM = `Bạn dịch tiêu đề tin công nghệ AI sang tiếng Việt. ${TITLE_RULES} Chỉ trả tiêu đề tiếng Việt, không thêm gì khác. title_vi PHẢI viết hoàn toàn bằng tiếng Việt (chữ Quốc ngữ), TUYỆT ĐỐI không lẫn chữ Hán/Trung/Nhật/Hàn hay ký tự ngôn ngữ khác.`;
 
 /**
  * Dịch riêng tiêu đề 1 tin. Trả về item kèm { titleVi } (hoặc titleError nếu lỗi).

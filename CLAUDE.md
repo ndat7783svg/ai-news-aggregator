@@ -185,9 +185,13 @@ chung, chỉ đọc, như mục 8) — tự động đăng tin lên Trang Facebo
 (`facebook.com/thungumon`) 4 lần/ngày, dùng `summary_vi` có sẵn làm caption, link về
 `bainews.site/tin/{id}` (đã có ảnh preview `og-banner.png` — xem mục 5 phần OG image).
 
-**Trạng thái:** đã viết đặc tả đầy đủ + scaffold (`CLAUDE.md`, `package.json`, `.env.example`,
-khung `scripts/post.mjs`) tại dự án đó — **CHƯA có logic thật, chưa chạy thử lần nào**. Đặc tả đã
-ghi rõ bài học cron-job.org/`workflow_dispatch` từ dự án web để không lặp lại lỗi cũ.
+**Trạng thái:** đã qua brainstorming + viết xong spec
+(`docs/superpowers/specs/2026-07-29-facebook-auto-post-design.md`) và implementation plan 7 task
+theo TDD (`docs/superpowers/plans/2026-07-29-facebook-auto-post.md`) tại dự án đó, đã commit
+local (chưa có repo GitHub). Plan có sẵn code + lệnh test đầy đủ, sẵn sàng giao AI khác thực thi.
+**CHƯA có logic thật (`lib/*.mjs`, workflow), CHƯA có Facebook Page Access Token, CHƯA có repo
+GitHub cho dự án đó** — 2 việc sau là thao tác tay của user, Claude cần hướng dẫn trực tiếp ở
+phiên chat tiếp theo (xem `D:\bai-news-facebook-bot\CLAUDE.md` mục 4 để biết việc cần làm tiếp).
 
 Bài học điều phối nhiều AI (Codex/Antigravity) làm task — đã đúc kết vào skill `app-web-sk`
 mục 8, áp dụng cho mọi project, không lặp lại ở đây.

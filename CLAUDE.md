@@ -136,6 +136,11 @@ X/Twitter **bỏ hẳn** (API đọc ~$100+/tháng, không hợp chi phí).
 - **Lọc theo từ khoá AI phải dùng ranh giới từ (`\bkeyword\b`), KHÔNG "chứa chuỗi con"** — vd
   `rag` dính vào *storage*/*fragment*/*dragon* làm lọt repo không liên quan.
 - **Ngưỡng `github_trending` (Search API) là 500 sao — đã cân nhắc kỹ, đừng hạ.**
+- **`next/og` (`ImageResponse`) KHÔNG dùng được trên máy Windows này** (lỗi `ERR_INVALID_URL` khi
+  load font mặc định) — **quy ước file tĩnh `opengraph-image.png` cũng KHÔNG hoạt động** (Next.js
+  dev không đăng ký route dù đúng tên/định dạng, chưa rõ nguyên nhân). Ảnh OG hiện dùng: file tĩnh
+  ở `web/public/og-banner.png` + khai báo thẳng URL trong `openGraph.images` của
+  `generateMetadata` — đây là cách CHẮC CHẮN hoạt động, đừng thử lại 2 cách trên.
 - Chạy web cục bộ: `cd web && npm run dev` (cần `web/.env.local` — mẫu `.env.local.example`,
   lấy `anon` key ở Supabase Dashboard → Settings → API Keys → tab "Legacy"). Pipeline cục bộ:
   `npm run pipeline` (cần `.env` ở gốc, mẫu `.env.example`).
@@ -173,6 +178,16 @@ YouTube Shorts/TikTok/Facebook Reels để có thêm kênh quảng bá ngoài Fa
 
 **Trạng thái:** đã setup xong tài liệu/quy trình (xem `D:\bai-news-video-project\CLAUDE.md`),
 kênh YouTube "AisuoG" + tài khoản NotebookLM đã có — **CHƯA chạy thử làm video lần nào**.
+
+## 9. Dự án phụ trợ: bot đăng Facebook tự động
+Dự án **RIÊNG BIỆT** tại `D:\bai-news-facebook-bot` (cùng mô hình liên kết qua Supabase dùng
+chung, chỉ đọc, như mục 8) — tự động đăng tin lên Trang Facebook "BAI News"
+(`facebook.com/thungumon`) 4 lần/ngày, dùng `summary_vi` có sẵn làm caption, link về
+`bainews.site/tin/{id}` (đã có ảnh preview `og-banner.png` — xem mục 5 phần OG image).
+
+**Trạng thái:** đã viết đặc tả đầy đủ + scaffold (`CLAUDE.md`, `package.json`, `.env.example`,
+khung `scripts/post.mjs`) tại dự án đó — **CHƯA có logic thật, chưa chạy thử lần nào**. Đặc tả đã
+ghi rõ bài học cron-job.org/`workflow_dispatch` từ dự án web để không lặp lại lỗi cũ.
 
 Bài học điều phối nhiều AI (Codex/Antigravity) làm task — đã đúc kết vào skill `app-web-sk`
 mục 8, áp dụng cho mọi project, không lặp lại ở đây.

@@ -23,6 +23,7 @@ export async function generateMetadata({ params }) {
       description: description.slice(0, 160),
       url,
       siteName: "BAI News",
+      images: [{ url: "https://bainews.site/og-banner.png", width: 1200, height: 630 }],
     },
   };
 }

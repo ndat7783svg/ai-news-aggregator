@@ -72,8 +72,12 @@ X/Twitter **bỏ hẳn** (API đọc ~$100+/tháng, không hợp chi phí).
 - Supabase project ref: **huqbirxwvrprqkhrwnsl** (`https://huqbirxwvrprqkhrwnsl.supabase.co`)
 
 ## 3. CHƯA làm / dang dở (đừng tưởng đã có)
-- **Quảng cáo: CHƯA bật.** Traffic hiện quá nhỏ/bấp bênh (phụ thuộc 1 kênh Facebook). Mốc để cân
-  nhắc lại: traffic ổn định vài trăm–1000+/ngày *liên tục*. Đừng đề xuất trước khi đạt mốc này.
+- **Quảng cáo (Google AdSense): đang xin duyệt, CHƯA hiển thị quảng cáo thật nào.** User chủ động
+  đổi quyết định cũ (đợi traffic lớn) — muốn bật sớm dù traffic nhỏ để có động lực. Đã tạo tài
+  khoản, gắn script xác minh vào `web/app/layout.js`, đã xác minh quyền sở hữu domain thành công.
+  Còn thiếu: bấm "Yêu cầu xem xét" để Google duyệt theo chính sách, nhập thông tin thanh toán, và
+  sau khi duyệt xong mới gắn ô quảng cáo thật vào giao diện. Chi tiết:
+  `docs/handoff/adsense-monetization.md`.
 - **SEO nội dung dài hạn — mới có GitHub AI.** Chưa mở rộng trang chuyên đề sang chủ đề khác
   (blog hãng, arXiv), chưa đo được hiệu quả traffic/index thật (mới deploy, cần đợi vài tuần rồi
   xem Google Search Console + Analytics).
@@ -129,6 +133,11 @@ X/Twitter **bỏ hẳn** (API đọc ~$100+/tháng, không hợp chi phí).
   kết quả theo từng URL filter/sort/time. Chi tiết: memory `ai-news-nextjs-data-cache-filter`.
 - **CSS: phần tử có nền đổi theo `data-theme` + có `transition` → LUÔN dùng `background-color`,
   KHÔNG dùng shorthand `background`** (shorthand không nội suy đúng khi biến CSS đổi động).
+- **Script xác minh quyền sở hữu domain (AdSense, Search Console...) phải dùng thẻ `<script>` HTML
+  thuần trong `<head>` của `web/app/layout.js`, KHÔNG dùng component `next/script`** — kể cả
+  `strategy="beforeInteractive"` — vì Next.js chèn qua cơ chế JS runtime
+  (`self.__next_s.push(...)`/RSC payload), không ra `<script src=...>` tĩnh trong HTML gốc, nên
+  bot xác minh bên thứ 3 không đọc được. Chi tiết: `docs/handoff/adsense-monetization.md`.
 - **Khung trình duyệt tự động của Claude không compositing frame** → click mô phỏng,
   IntersectionObserver, CSS `transition` đều không chạy trong đó. Kiểm tra bằng `dispatchEvent` +
   tắt transition tạm thời (`<style>*{transition:none!important}</style>`) khi cần đo màu/hiệu

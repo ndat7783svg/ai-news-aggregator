@@ -36,3 +36,5 @@
   Codex/Antigravity, bài học về quy trình subagent-driven-development tốn token.
 - [Độ tin cậy hạ tầng](docs/handoff/infra-reliability.md) — sự cố Actions kẹt hàng đợi, fix
   `cancel-in-progress`.
+- [Quảng cáo (Google AdSense)](docs/handoff/adsense-monetization.md) — bật ads sớm dù traffic
+  nhỏ (đổi quyết định cũ), bài học `next/script` không tĩnh, đã xác minh quyền sở hữu.

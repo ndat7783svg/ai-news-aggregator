@@ -1,5 +1,4 @@
 import "./globals.css";
-import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 import RenameBanner from "../components/RenameBanner";
 
@@ -41,12 +40,11 @@ export default function RootLayout({ children }) {
   return (
     <html lang="vi" suppressHydrationWarning>
       <head>
-        <Script
+        <script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3734960989036733"
           crossOrigin="anonymous"
-          strategy="beforeInteractive"
-        />
+        ></script>
       </head>
       <body>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />

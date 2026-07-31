@@ -182,16 +182,16 @@ kênh YouTube "AisuoG" + tài khoản NotebookLM đã có — **CHƯA chạy th�
 ## 9. Dự án phụ trợ: bot đăng Facebook tự động
 Dự án **RIÊNG BIỆT** tại `D:\bai-news-facebook-bot` (cùng mô hình liên kết qua Supabase dùng
 chung, chỉ đọc, như mục 8) — tự động đăng tin lên Trang Facebook "BAI News"
-(`facebook.com/thungumon`) 4 lần/ngày, dùng `summary_vi` có sẵn làm caption, link về
-`bainews.site/tin/{id}` (đã có ảnh preview `og-banner.png` — xem mục 5 phần OG image).
+(`facebook.com/thungumon`), dùng `title_vi`/`summary_vi` có sẵn làm caption, link về
+`bainews.site/tin/{id}?lang=vi` (đã có ảnh preview `og-banner.png` — xem mục 5 phần OG image;
+tham số `?lang=vi` do trang `/tin/[id]` ưu tiên đọc từ URL trước `localStorage`, xem
+`web/app/tin/[id]/DetailContent.js`).
 
-**Trạng thái:** đã qua brainstorming + viết xong spec
-(`docs/superpowers/specs/2026-07-29-facebook-auto-post-design.md`) và implementation plan 7 task
-theo TDD (`docs/superpowers/plans/2026-07-29-facebook-auto-post.md`) tại dự án đó, đã commit
-local (chưa có repo GitHub). Plan có sẵn code + lệnh test đầy đủ, sẵn sàng giao AI khác thực thi.
-**CHƯA có logic thật (`lib/*.mjs`, workflow), CHƯA có Facebook Page Access Token, CHƯA có repo
-GitHub cho dự án đó** — 2 việc sau là thao tác tay của user, Claude cần hướng dẫn trực tiếp ở
-phiên chat tiếp theo (xem `D:\bai-news-facebook-bot\CLAUDE.md` mục 4 để biết việc cần làm tiếp).
+**Trạng thái:** repo GitHub `github.com/ndat7783svg/bai-news-facebook-bot`, code + secrets đầy
+đủ, **đã đăng thật thành công lên Trang ít nhất 1 lần**. Đang ổn định lại
+`FB_PAGE_ACCESS_TOKEN` (hay hết hạn nếu lấy sai quy trình) trước khi bật lịch cron-job.org tự
+động — chi tiết đầy đủ ở `D:\bai-news-facebook-bot\CLAUDE.md` + `HANDOFF.md`, đọc trước khi làm
+tiếp.
 
 Bài học điều phối nhiều AI (Codex/Antigravity) làm task — đã đúc kết vào skill `app-web-sk`
 mục 8, áp dụng cho mọi project, không lặp lại ở đây.

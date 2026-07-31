@@ -17,8 +17,16 @@ traffic còn nhỏ, để có động lực (thấy tiền về, dù ít) thay v
 - Trạng thái hiện tại: quyền sở hữu đã xác minh (dấu tick xanh). Còn thiếu bước **"Yêu cầu xem
   xét"** (request review) để Google duyệt site theo chính sách chương trình AdSense — chưa bấm,
   cần làm ở buổi sau (hoặc user tự bấm, không cần code).
-- Còn dang dở: nhập thông tin thanh toán (mục "Thanh toán" trong AdSense, bắt buộc trước khi nhận
-  tiền, chưa cần gấp vì phải đợi duyệt xong). Sau khi duyệt xong mới có mã quảng cáo (ad unit) thật
-  để code gắn 1 ô quảng cáo vào giao diện — việc đó chưa làm, cần quay lại khi AdSense duyệt xong.
 - File đổi: `web/app/layout.js` (chỉ gắn script xác minh domain, CHƯA có ô quảng cáo hiển thị nào
   trên giao diện).
+
+### 2026-07-31 — Claude: đã bấm "Yêu cầu xem xét", đang chờ Google duyệt
+
+- Đã chọn CMP của Google (thông báo đồng ý 3 lựa chọn: Đồng ý/Không đồng ý/Quản lý lựa chọn, đúng
+  chuẩn GDPR) cho người dùng khu vực EEA/UK/Thuỵ Sĩ — trang chủ yếu người Việt nên ít ảnh hưởng,
+  chọn cho đủ thủ tục.
+- Đã bấm "Yêu cầu xem xét" lúc 09:37 31/7/2026. Google báo thời gian duyệt: **vài ngày, có thể tới
+  2-4 tuần**. Không cần làm gì thêm, chỉ đợi email kết quả.
+- Còn dang dở: nhập thông tin thanh toán (mục "Thanh toán" trong AdSense — không gấp, có thể làm
+  bất cứ lúc nào trước khi duyệt xong). Sau khi duyệt xong mới có mã quảng cáo (ad unit) thật để
+  code gắn 1 ô quảng cáo vào giao diện — việc đó chưa làm, cần quay lại khi AdSense duyệt xong.

@@ -38,3 +38,5 @@
   `cancel-in-progress`.
 - [Quảng cáo (Google AdSense)](docs/handoff/adsense-monetization.md) — bật ads sớm dù traffic
   nhỏ (đổi quyết định cũ), bài học `next/script` không tĩnh, đã xác minh quyền sở hữu.
+- [Cân nhắc đổi model tóm tắt](docs/handoff/cost-model-switch.md) — Haiku vs GPT-5.6 Luna, chưa
+  đổi, đợi hết credit Anthropic.

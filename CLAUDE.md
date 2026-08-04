@@ -96,6 +96,12 @@ X/Twitter **bỏ hẳn** (API đọc ~$100+/tháng, không hợp chi phí).
   làm phải thêm logic UPDATE trong pipeline (hiện chỉ INSERT) — cân nhắc kỹ, không cấp thiết.
 - **Nút Lưu/Chia sẻ chưa có trên `/github-ai`, `/en/github-ai`** (`GithubAiList.js`) — cân nhắc
   thêm nếu tính năng ở trang chủ hiệu quả.
+- **Cân nhắc đổi model tóm tắt sang GPT-5.6 Luna (OpenAI) khi hết tiền Anthropic.** User chủ động
+  đề xuất vì giá rẻ hơn Haiku 4.5 ~4-5 lần ($0.20/$1.20 mỗi triệu token so với $1/$5). **CHƯA đổi
+  ngay** — đợi hết credit Anthropic hiện tại mới thay. Cần: viết lại phần gọi API trong
+  `summarize/summarizer.js` (đang dùng Anthropic SDK + structured outputs) sang OpenAI SDK, và
+  test lại chất lượng tóm tắt song ngữ VI+EN trước khi chuyển hẳn — rẻ mà tóm tệ thì không đáng
+  đổi. Chi tiết: `docs/handoff/cost-model-switch.md`.
 
 ## 4. Quyết định đã chốt (ĐỪNG đề xuất lại)
 - **Chiến lược quảng bá:** Facebook đăng đều tay (kênh có traffic thật nhưng cần đăng đều, không
@@ -106,6 +112,8 @@ X/Twitter **bỏ hẳn** (API đọc ~$100+/tháng, không hợp chi phí).
   (tracking/redirect) dễ sót; cùng 1 bài ở 2 nguồn thì giữ cả 2 (thể hiện độ nóng).
 - **Dùng Claude Haiku (`claude-haiku-4-5`), không đổi sang Gemini/GPT.** Rất rẻ, chất lượng tóm
   tắt 2-4 câu VI+EN đã kiểm tra tốt, structured outputs cho JSON sạch, giữ đồng bộ hệ Claude.
+  **Cập nhật:** đang cân nhắc lại vì lý do giá (xem mục 3, "Cân nhắc đổi model... GPT-5.6 Luna") —
+  chưa đổi, chỉ đổi khi hết credit Anthropic.
 - **Chưa làm login/thanh toán:** ưu tiên chạy ổn định; code đã tách module (collect/summarize/
   db/web) để gắn thêm sau mà không viết lại.
 - **Giao diện feed thẻ (Techmeme/TLDR), KHÔNG làm kiểu swipe/TikTok.** Hợp mô hình "tóm tắt + dẫn

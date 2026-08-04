@@ -251,7 +251,10 @@ export default function Feed({
         </div>
       </header>
 
-      <HeaderAdBanner />
+      {/* TẮT TẠM: quảng cáo Adsterra bị người dùng phản ánh gây bung quảng cáo/popup khi bấm
+          link trên trang — xem docs/handoff/adsense-monetization.md để biết diễn biến trước khi
+          bật lại (đổi network khác hoặc kiểm tra lại cấu hình ad unit). */}
+      {false && <HeaderAdBanner />}
 
       {!configMissing && !error && availableFilters.length > 0 && (
         <div className="controls">

@@ -98,6 +98,13 @@ body {
   font-size: 0.95rem;
 }
 
+.header-ad-banner {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
 /* Cụm nút góc trên phải: chuyển theme + chuyển ngôn ngữ */
 .header-actions {
   display: inline-flex;

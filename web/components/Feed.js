@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import NewsCard from "./NewsCard";
 import HeaderMenu from "./HeaderMenu";
+import HeaderAdBanner from "./HeaderAdBanner";
 import { t } from "../lib/i18n";
 import { SOURCE_FILTERS, PAGE_SIZE } from "../lib/filters";
 
@@ -244,6 +245,8 @@ export default function Feed({
           <HeaderMenu lang={lang} />
         </div>
       </header>
+
+      <HeaderAdBanner />
 
       {!configMissing && !error && availableFilters.length > 0 && (
         <div className="controls">

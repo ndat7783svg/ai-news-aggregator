@@ -55,6 +55,7 @@ export default async function EnglishPage() {
       error={error || null}
       configMissing={!!configMissing}
       initialLang="en"
+      respectStoredLang={false}
     />
   );
 }

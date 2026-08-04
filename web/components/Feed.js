@@ -31,6 +31,7 @@ export default function Feed({
   error,
   configMissing,
   initialLang = "vi",
+  respectStoredLang = true,
 }) {
   const [lang, setLang] = useState(initialLang);
   const [theme, setTheme] = useState("light"); // "light" | "dark" (thực tế set sau khi mount)
@@ -46,13 +47,16 @@ export default function Feed({
   const sentinelRef = useRef(null);
   const didMount = useRef(false); // bỏ qua lần fetch đầu cho "all" (đã có dữ liệu SSR)
 
-  // Nhớ ngôn ngữ đã chọn.
+  // Nhớ ngôn ngữ đã chọn — chỉ áp dụng cho route mặc định (trang chủ VI). Route ép ngôn ngữ
+  // riêng (vd `/en`) không đọc localStorage lúc mount, tránh bị đổi ngược lại ngôn ngữ đã lưu
+  // từ lần ghé trang khác, phá mục đích SEO/URL tường minh của route đó.
   useEffect(() => {
+    if (!respectStoredLang) return;
     try {
       const saved = localStorage.getItem("lang");
       if (saved === "vi" || saved === "en") setLang(saved);
     } catch {}
-  }, []);
+  }, [respectStoredLang]);
 
   function pick(l) {
     setLang(l);

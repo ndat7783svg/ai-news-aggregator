@@ -70,12 +70,12 @@ X/Twitter **bỏ hẳn** (API đọc ~$100+/tháng, không hợp chi phí).
 - Supabase project ref: **huqbirxwvrprqkhrwnsl** (`https://huqbirxwvrprqkhrwnsl.supabase.co`)
 
 ## 3. CHƯA làm / dang dở (đừng tưởng đã có)
-- **Quảng cáo (Google AdSense): đang xin duyệt, CHƯA hiển thị quảng cáo thật nào.** User chủ động
-  đổi quyết định cũ (đợi traffic lớn) — muốn bật sớm dù traffic nhỏ để có động lực. Đã tạo tài
-  khoản, gắn script xác minh vào `web/app/layout.js`, đã xác minh quyền sở hữu domain, đã bấm
-  "Yêu cầu xem xét" (31/7/2026) — **đang chờ Google duyệt, thường vài ngày tới 2-4 tuần**. Còn
-  thiếu: nhập thông tin thanh toán, và sau khi duyệt xong mới gắn ô quảng cáo thật vào giao diện
-  (cần mã ad unit thật, chưa có). Chi tiết: `docs/handoff/adsense-monetization.md`.
+- **Quảng cáo: AdSense bị vô hiệu hoá (đã khiếu nại, chưa có kết quả) — Adsterra đang TẮT TẠM.**
+  Đã gắn banner Adsterra ở đầu trang chủ (`web/components/AdsterraBanner.js`,
+  `HeaderAdBanner.js`), có lên tin thật, nhưng đang **tắt** trong `web/components/Feed.js`
+  (`{false && <HeaderAdBanner />}`) vì người dùng báo bị bung quảng cáo/popup khi bấm link —
+  chưa xác nhận chắc chắn nguyên nhân, cần điều tra thêm trước khi bật lại hoặc đổi network khác.
+  Chi tiết đầy đủ: `docs/handoff/adsense-monetization.md`.
 - **SEO nội dung dài hạn — mới có GitHub AI.** Chưa mở rộng trang chuyên đề sang chủ đề khác
   (blog hãng, arXiv), chưa đo được hiệu quả traffic/index thật (mới deploy, cần đợi vài tuần rồi
   xem Google Search Console + Analytics).

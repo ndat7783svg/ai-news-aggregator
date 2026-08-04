@@ -42,9 +42,7 @@ X/Twitter **bỏ hẳn** (API đọc ~$100+/tháng, không hợp chi phí).
   Thẻ hiển thị ★ + số rút gọn + badge ngôn ngữ lập trình.
 - **Tiêu đề dịch (`title_vi`):** chế độ VI hiện tiêu đề tiếng Việt, EN giữ gốc — sinh trong bước
   tóm tắt (`summarizer.js`).
-- **SEO:** `robots.js`/`sitemap.js`/`icon.svg`/metadata mở rộng (`layout.js`). 2 trang chuyên đề
-  song ngữ **"GitHub AI nổi bật"**: `/github-ai` (VI) + `/en/github-ai` (EN), server-rendered ISR
-  5 phút, hreflang liên kết chéo (`GithubAiList.js`, KHÔNG dùng chung `NewsCard.js`).
+- **SEO:** `robots.js`/`sitemap.js`/`icon.svg`/metadata mở rộng (`layout.js`). Trang chủ tiếng Anh `/en` (metadata + Open Graph + hreflang tiếng Anh độc lập). 2 trang chuyên đề song ngữ **"GitHub AI nổi bật"**: `/github-ai` (VI) + `/en/github-ai` (EN), server-rendered ISR 5 phút, hreflang liên kết chéo (`GithubAiList.js`, KHÔNG dùng chung `NewsCard.js`).
 - **Lưu tin + Chia sẻ (chỉ trang chủ, chưa có ở `/github-ai`):** nút 🔖 lưu vào danh sách
   `localStorage` (khoá `bai_saved_lists`, module `web/lib/savedLists.js`) — bấm là lưu ngay vào
   "Đã lưu" mặc định, mũi tên mở popup chọn/tạo danh sách khác (`SaveListPopup.js`). Nút Chia sẻ

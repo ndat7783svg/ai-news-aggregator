@@ -50,7 +50,8 @@ lịch sử/diễn biến theo ngày: xem `HANDOFF.md`.
 | `lib/http.js` | fetch dùng chung: timeout, User-Agent; helper `fetchJson` / `fetchText`. |
 | `web/` | **Frontend Next.js (cột mốc 4).** App Router, đọc Supabase (anon key) phía server. |
 | `web/app/layout.js` | Root layout: title/meta "BAI News", script inline chống nháy cho `data-theme` (Sáng/Tối) trên `<html>`, render `<RenameBanner/>` trên cùng `<body>`. |
-| `web/app/page.js` | Server component: đọc `news_items` từ Supabase → `Feed`. ISR 5 phút. |
+| `web/app/page.js` | Server component: đọc `news_items` từ Supabase → `Feed`. ISR 5 phút. Metadata VI + canonical/hreflang. |
+| `web/app/en/page.js` | **Trang chủ tiếng Anh** `/en`: mirror của `page.js` với metadata/hreflang tiếng Anh và `initialLang="en"`. |
 | `web/app/tin/[id]/page.js` | **Trang chi tiết** `/tin/[id]`: Server Component, `generateMetadata` với title/desc từ tin thật, render `DetailContent`. |
 | `web/app/tin/[id]/DetailContent.js` | Client component con: đọc `lang` từ localStorage (mặc định VI), hiển thị badge/điểm/tiêu đề/tóm tắt/nút đọc bài gốc. |
 | `web/app/da-luu/page.js` | **Trang Đã lưu** `/da-luu`: Client Component, đọc localStorage + gọi `/api/saved-items`, chia theo danh sách, đổi tên/xoá danh sách, nút Bỏ lưu nhanh. |

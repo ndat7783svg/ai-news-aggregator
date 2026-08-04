@@ -30,8 +30,9 @@ export default function Feed({
   availableSources = [],
   error,
   configMissing,
+  initialLang = "vi",
 }) {
-  const [lang, setLang] = useState("vi");
+  const [lang, setLang] = useState(initialLang);
   const [theme, setTheme] = useState("light"); // "light" | "dark" (thực tế set sau khi mount)
   const [filter, setFilter] = useState("all");
   const [sort, setSort] = useState("new"); // "new" = Mới nhất, "hot" = Nổi bật nhất

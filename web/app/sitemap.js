@@ -7,6 +7,12 @@ export default function sitemap() {
       priority: 1,
     },
     {
+      url: "https://bainews.site/en",
+      lastModified: new Date(),
+      changeFrequency: "hourly",
+      priority: 0.9,
+    },
+    {
       url: "https://bainews.site/github-ai",
       lastModified: new Date(),
       changeFrequency: "hourly",
@@ -20,3 +26,4 @@ export default function sitemap() {
     },
   ];
 }
+

@@ -74,3 +74,37 @@ chưa biết). Trong lúc chờ, user chủ động chuyển sang dùng **Adster
 - **Việc cần làm ở phiên sau:** xác nhận thật sự banner Adsterra là nguyên nhân (hỏi lại người
   bình luận chi tiết hơn, hoặc theo dõi xem sau khi tắt còn ai báo lỗi tương tự không). Nếu đúng,
   cân nhắc bỏ hẳn Adsterra, tìm network khác uy tín hơn hoặc quay lại chờ AdSense.
+- **Đã xác nhận nguyên nhân qua bình luận Facebook thật:** 1 người dùng mô tả rõ "bấm vào thấy
+  hiện ra tùm lum, rồi nhảy link Shopee" — site không có link Shopee nào, xác nhận đây là hành vi
+  chuyển hướng độc hại (popunder/clickjack) từ creative Adsterra, không phải hiểu lầm. Kết luận:
+  không bật lại Adsterra.
+
+### 2026-08-04/05 — Claude: tìm mạng quảng cáo thay thế — không có lựa chọn nào phù hợp
+
+Đã research Media.net (ưu tiên traffic Tier 1 Mỹ/Anh/Canada + tiếng Anh, không hợp trang tiếng
+Việt), Setupad (cần ~100k lượt/tháng), Newor Media (gói không giới hạn traffic bắt buộc tiếng
+Anh, gói khác cần 30-60k lượt/tháng) — đều không phù hợp quy mô/traffic hiện tại. Các mạng dễ vào
+khác (PopCash, PopAds, AdCash, TinyAdz, PropellerAds, Monetag) đều cùng nhóm "remnant" rủi ro như
+Adsterra. **Quyết định: không gắn mạng thay thế nào, tập trung chờ AdSense.**
+
+### 2026-08-05 — phát hiện lý do AdSense bị vô hiệu hoá: liên kết tài khoản, không phải nội dung
+
+Đọc email chính thức Google (3/8/2026): tài khoản AdSense (`pub-3734960989036733`) bị vô hiệu hoá
+vì **"liên quan đến một tài khoản đã bị vô hiệu do vi phạm chính sách AdSense"** — không phải do
+nội dung/traffic của bainews.site. Đã dò tìm qua Gmail (`ndat7783@gmail.com` +
+`aisuo782@gmail.com`, kênh YouTube cũ "Aiyuo"/"SAiyuo") nhưng không tìm được bằng chứng cụ thể
+tài khoản/kênh nào là nguồn gốc liên kết — khả năng cao là 1 tài khoản Google khác đã mất
+quyền truy cập hoàn toàn, không còn trên thiết bị nào hiện có.
+
+**Quyết định (2026-08-05): dùng danh tính em gái để tạo tài khoản AdSense mới**, vì việc dò tìm/
+kháng cáo tài khoản cũ không có tiến triển. Đã cân nhắc và **từ chối** các hướng lách/né (VPN +
+số điện thoại mới, mua điện thoại mới, đăng nhập tài khoản em gái trên thiết bị của ndat) vì đây
+là hành vi Google coi là "circumventing" — rủi ro liên luỵ tới cả tài khoản Google chính đang
+dùng, không chỉ AdSense. Hướng đã chọn: **em gái tự đăng ký + xác minh thanh toán bằng chính
+thiết bị/thông tin của cô ấy** (không phải chỉ đứng tên suông).
+
+- Tài khoản AdSense mới: `ca-pub-5459662308637363` (đứng tên em gái ndat).
+- Đã thay mã xác minh domain trong `web/app/layout.js` từ `ca-pub-3734960989036733` (cũ, vô hiệu
+  hoá) sang `ca-pub-5459662308637363` (mới), push production (commit `5784a05`).
+- **Việc cần làm ở phiên sau:** theo dõi email xác nhận quyền sở hữu domain thành công cho tài
+  khoản mới, sau đó bấm "Yêu cầu xem xét" như quy trình cũ (xem mục 2026-07-31 ở trên).

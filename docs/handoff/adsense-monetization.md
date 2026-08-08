@@ -103,8 +103,26 @@ là hành vi Google coi là "circumventing" — rủi ro liên luỵ tới cả 
 dùng, không chỉ AdSense. Hướng đã chọn: **em gái tự đăng ký + xác minh thanh toán bằng chính
 thiết bị/thông tin của cô ấy** (không phải chỉ đứng tên suông).
 
-- Tài khoản AdSense mới: `ca-pub-5459662308637363` (đứng tên em gái ndat).
-- Đã thay mã xác minh domain trong `web/app/layout.js` từ `ca-pub-3734960989036733` (cũ, vô hiệu
-  hoá) sang `ca-pub-5459662308637363` (mới), push production (commit `5784a05`).
-- **Việc cần làm ở phiên sau:** theo dõi email xác nhận quyền sở hữu domain thành công cho tài
-  khoản mới, sau đó bấm "Yêu cầu xem xét" như quy trình cũ (xem mục 2026-07-31 ở trên).
+- Tài khoản AdSense mới: `ca-pub-5459662308637363`. Đã thay mã xác minh domain trong
+  `web/app/layout.js` từ `ca-pub-3734960989036733` (cũ, vô hiệu hoá) sang `ca-pub-5459662308637363`,
+  push production (commit `5784a05`).
+
+### 2026-08-06 — thực ra `ca-pub-5459662308637363` là tài khoản khác của chính ndat, không phải em gái; đã không qua
+
+Ndat làm rõ lại: tài khoản `ca-pub-5459662308637363` ở mục trên **thực ra là ndat tự thử 1 tài
+khoản Google khác của chính mình**, không phải em gái như ban đầu nói. Sau vài ngày, tài khoản
+này **cũng không qua được** (không rõ chi tiết lý do).
+
+**Đổi sang tài khoản AdSense thật sự của em gái ndat: `ca-pub-4228692528546788`** — lần đầu em
+gái thử. Đã thay mã xác minh domain trong `web/app/layout.js`, push production (commit
+`6afd3ed`).
+
+**Lưu ý:** domain `bainews.site` đã đổi qua 3 tài khoản AdSense khác nhau chỉ trong vài ngày
+(ndat gốc → ndat thử lần 2 → em gái). Đã cảnh báo ndat về rủi ro đổi tài khoản dồn dập trên cùng
+1 domain có thể tự nó là tín hiệu đáng ngờ với Google — nếu lần này (em gái) cũng không qua, nên
+dừng thử thêm tài khoản mới một thời gian.
+
+- **Việc cần làm ở phiên sau:** theo dõi email xác nhận quyền sở hữu domain thành công cho
+  `ca-pub-4228692528546788`, sau đó bấm "Yêu cầu xem xét" như quy trình cũ (xem mục 2026-07-31 ở
+  trên). Khi mã AdSense mới được đưa để dán, hỏi rõ đây là tài khoản của ai, thử lần thứ mấy —
+  đã có tiền lệ khai nhầm "của em tôi".

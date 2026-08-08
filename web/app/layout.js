@@ -42,7 +42,7 @@ export default function RootLayout({ children }) {
       <head>
         <script
           async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5459662308637363"
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4228692528546788"
           crossOrigin="anonymous"
         ></script>
       </head>

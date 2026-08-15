@@ -43,7 +43,7 @@ async function safeCollect(name, fn) {
 
 async function main() {
   // Kiểm tra biến môi trường cần thiết.
-  for (const k of ["ANTHROPIC_API_KEY", "SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"]) {
+  for (const k of ["OPENAI_API_KEY", "SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"]) {
     if (!process.env[k]) {
       console.error(`Thiếu ${k} trong .env`);
       process.exit(1);
@@ -71,7 +71,7 @@ async function main() {
     return;
   }
 
-  console.log(`3) Tóm tắt ${fresh.length} tin mới bằng Claude Haiku…`);
+  console.log(`3) Tóm tắt ${fresh.length} tin mới bằng GPT-5.6 Luna…`);
   const summarized = await summarizeMany(fresh, { concurrency: 3 });
   const ok = summarized.filter((s) => s.summaryVi && s.summaryEn && !s.summaryError);
   const failed = summarized.length - ok.length;
@@ -84,7 +84,7 @@ async function main() {
   // Nếu CÓ tin mới mà tóm tắt hỏng TOÀN BỘ → lỗi hệ thống (key sai/hết hạn/hết credit).
   // Thoát mã 1 để GitHub Actions báo ĐỎ, tránh "success" giả che mất lỗi.
   if (fresh.length > 0 && ok.length === 0) {
-    console.error("LỖI: không tóm tắt được tin nào. Kiểm tra ANTHROPIC_API_KEY (sai/hết hạn) hoặc credit ở console.anthropic.com.");
+    console.error("LỖI: không tóm tắt được tin nào. Kiểm tra OPENAI_API_KEY (sai/hết hạn) hoặc credit ở platform.openai.com.");
     process.exit(1);
   }
 

@@ -35,7 +35,7 @@ jobs:
       - name: Chạy pipeline (thu thập → tóm tắt → ghi Supabase)
         run: node pipeline.js
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           # Token GitHub tự cấp sẵn cho mỗi lần chạy (giúp phần GitHub collector chạy mượt).

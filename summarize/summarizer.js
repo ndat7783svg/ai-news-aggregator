@@ -1,15 +1,15 @@
-// Tóm tắt AI song ngữ (Việt + Anh) cho mỗi tin, dùng Claude Haiku.
-// Đọc API key từ biến môi trường ANTHROPIC_API_KEY (SDK tự lấy).
+// Tóm tắt AI song ngữ (Việt + Anh) cho mỗi tin, dùng GPT-5.6 Luna (OpenAI).
+// Đọc API key từ biến môi trường OPENAI_API_KEY.
 
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 
-// Haiku 4.5: rẻ, nhanh, đủ tốt cho tóm tắt ngắn. Đây là model spec đã chọn.
-const MODEL = "claude-haiku-4-5";
+// GPT-5.6 Luna: rẻ, nhanh, đủ tốt cho tóm tắt ngắn. Model ID chính thức trên OpenAI API.
+const MODEL = "gpt-5.6-luna";
 
 // Nguyên tắc dịch tiêu đề — dùng chung cho bước tóm tắt và bước backfill.
 const TITLE_RULES = `Dịch tiêu đề sang tiếng Việt tự nhiên, gọn. GIỮ NGUYÊN, KHÔNG dịch: tên riêng; tên người/công ty/sản phẩm; tên repo/dự án (vd "ggml-org/llama.cpp"); tên giao thức/công nghệ/viết tắt (vd BitTorrent, LLM, GPU, API, RAG, Transformer); mã phiên bản/build (vd "b10092"); tên người dùng. Chỉ dịch phần câu chữ mô tả xung quanh các tên đó. Ví dụ: "Petals: Run LLMs at home, BitTorrent-style" -> "Petals: Chạy LLM tại nhà, theo phong cách BitTorrent".`;
 
-// Ràng buộc đầu ra thành đúng JSON (structured outputs): dịch tiêu đề + tóm tắt song ngữ.
+// JSON Schema cho structured outputs (Chat Completions response_format).
 const OUTPUT_SCHEMA = {
   type: "object",
   properties: {
@@ -51,14 +51,14 @@ function buildUserContent(item) {
 function cleanKey(raw) {
   return (raw || "")
     .trim()
-    .replace(/^ANTHROPIC_API_KEY\s*=\s*/, "")
+    .replace(/^OPENAI_API_KEY\s*=\s*/, "")
     .replace(/^["']|["']$/g, "")
     .trim();
 }
 
 let client = null;
 function getClient() {
-  if (!client) client = new Anthropic({ apiKey: cleanKey(process.env.ANTHROPIC_API_KEY) });
+  if (!client) client = new OpenAI({ apiKey: cleanKey(process.env.OPENAI_API_KEY) });
   return client;
 }
 
@@ -69,18 +69,26 @@ function getClient() {
  */
 export async function summarizeItem(item, { onUsage } = {}) {
   try {
-    const res = await getClient().messages.create({
+    const res = await getClient().chat.completions.create({
       model: MODEL,
       max_tokens: 1024,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: "user", content: buildUserContent(item) }],
-      output_config: { format: { type: "json_schema", schema: OUTPUT_SCHEMA } },
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: buildUserContent(item) },
+      ],
+      response_format: {
+        type: "json_schema",
+        json_schema: {
+          name: "news_summary",
+          strict: true,
+          schema: OUTPUT_SCHEMA,
+        },
+      },
     });
     if (onUsage && res.usage) onUsage(res.usage);
 
-    // Structured outputs trả JSON trong block text đầu tiên.
-    const textBlock = res.content.find((b) => b.type === "text");
-    const parsed = JSON.parse(textBlock.text);
+    // Structured outputs trả JSON trong content của message đầu tiên.
+    const parsed = JSON.parse(res.choices[0].message.content);
 
     return {
       ...item,
@@ -93,7 +101,7 @@ export async function summarizeItem(item, { onUsage } = {}) {
   }
 }
 
-// Chỉ dịch TIÊU ĐỀ (cho backfill tin cũ — không tạo lại tóm tắt, rẻ hơn).
+// Chỉ dịch TIÊU ĐỀ (cho backfill tin cũ — không tạo lại tóm tắt, rẻ hơn)
 const TITLE_SCHEMA = {
   type: "object",
   properties: {
@@ -111,16 +119,24 @@ const TITLE_SYSTEM = `Bạn dịch tiêu đề tin công nghệ AI sang tiếng 
  */
 export async function translateTitle(item, { onUsage } = {}) {
   try {
-    const res = await getClient().messages.create({
+    const res = await getClient().chat.completions.create({
       model: MODEL,
       max_tokens: 300,
-      system: TITLE_SYSTEM,
-      messages: [{ role: "user", content: `Tiêu đề: ${item.title}` }],
-      output_config: { format: { type: "json_schema", schema: TITLE_SCHEMA } },
+      messages: [
+        { role: "system", content: TITLE_SYSTEM },
+        { role: "user", content: `Tiêu đề: ${item.title}` },
+      ],
+      response_format: {
+        type: "json_schema",
+        json_schema: {
+          name: "title_translation",
+          strict: true,
+          schema: TITLE_SCHEMA,
+        },
+      },
     });
     if (onUsage && res.usage) onUsage(res.usage);
-    const textBlock = res.content.find((b) => b.type === "text");
-    return { ...item, titleVi: JSON.parse(textBlock.text).title_vi };
+    return { ...item, titleVi: JSON.parse(res.choices[0].message.content).title_vi };
   } catch (err) {
     return { ...item, titleError: err.message, titleErrorStatus: err.status };
   }

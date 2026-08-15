@@ -41,7 +41,10 @@ export async function fetchExistingKeys(items) {
 
   const sourceIds = [...new Set(items.map((i) => i.sourceId))];
   const existing = new Set();
-  const BATCH = 200; // chia lô để không tạo query quá dài
+  // Chia lô để không tạo query quá dài — 200 từng đủ an toàn khi sourceId ngắn (ID số/slug),
+  // nhưng sourceId của blog (guid/link RSS) có thể là URL dài, dễ vượt giới hạn header 16KB
+  // của Supabase/PostgREST khi gộp vào query .in(). Giảm xuống 50 để an toàn với mọi loại nguồn.
+  const BATCH = 50;
 
   for (let i = 0; i < sourceIds.length; i += BATCH) {
     const chunk = sourceIds.slice(i, i + BATCH);

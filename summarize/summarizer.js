@@ -71,7 +71,7 @@ export async function summarizeItem(item, { onUsage } = {}) {
   try {
     const res = await getClient().chat.completions.create({
       model: MODEL,
-      max_tokens: 1024,
+      max_completion_tokens: 1024,
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
         { role: "user", content: buildUserContent(item) },
@@ -121,7 +121,7 @@ export async function translateTitle(item, { onUsage } = {}) {
   try {
     const res = await getClient().chat.completions.create({
       model: MODEL,
-      max_tokens: 300,
+      max_completion_tokens: 300,
       messages: [
         { role: "system", content: TITLE_SYSTEM },
         { role: "user", content: `Tiêu đề: ${item.title}` },

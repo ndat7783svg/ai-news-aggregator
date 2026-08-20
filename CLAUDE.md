@@ -70,11 +70,18 @@ X/Twitter **bỏ hẳn** (API đọc ~$100+/tháng, không hợp chi phí).
 - Supabase project ref: **huqbirxwvrprqkhrwnsl** (`https://huqbirxwvrprqkhrwnsl.supabase.co`)
 
 ## 3. CHƯA làm / dang dở (đừng tưởng đã có)
-- **Quảng cáo: AdSense bị vô hiệu hoá (đã khiếu nại, chưa có kết quả) — Adsterra đang TẮT TẠM.**
-  Đã gắn banner Adsterra ở đầu trang chủ (`web/components/AdsterraBanner.js`,
-  `HeaderAdBanner.js`), có lên tin thật, nhưng đang **tắt** trong `web/components/Feed.js`
-  (`{false && <HeaderAdBanner />}`) vì người dùng báo bị bung quảng cáo/popup khi bấm link —
-  chưa xác nhận chắc chắn nguyên nhân, cần điều tra thêm trước khi bật lại hoặc đổi network khác.
+- **Quảng cáo: chưa có quảng cáo nào hiển thị thật trên site.**
+  - **AdSense:** tài khoản gốc (`ndat7783@gmail.com`) đã bị vô hiệu hoá (lý do: liên kết tới 1
+    tài khoản khác từng vi phạm — không phải do nội dung site), đã khiếu nại, chưa có kết quả.
+    Đã đổi sang tài khoản AdSense đứng tên em gái (`ca-pub-4228692528546788`, mã xác minh domain
+    đã gắn trong `web/app/layout.js`) — **đang chờ Google xác minh quyền sở hữu domain**, chưa
+    bấm "Yêu cầu xem xét". Domain đã đổi qua 3 tài khoản AdSense trong vài ngày, tránh đổi thêm.
+  - **Adsterra:** đã XÁC NHẬN gây hành vi độc hại thật (popup/chuyển hướng lạ khi bấm link, có
+    bằng chứng người dùng bị nhảy sang link Shopee lạ) — đã tắt hẳn trong `web/components/Feed.js`
+    (`{false && <HeaderAdBanner />}`), quyết định không dùng lại.
+  - **Đã tìm mạng thay thế:** Monetag bị loại (cùng nhóm "remnant"/popunder rủi ro như Adsterra).
+    **Infolinks** là lựa chọn an toàn hơn nếu AdSense không thành (không phải popup, nhưng doanh
+    thu rất thấp) — CHƯA triển khai, chỉ mới xác định là phương án dự phòng.
   Chi tiết đầy đủ: `docs/handoff/adsense-monetization.md`.
 - **SEO nội dung dài hạn — mới có GitHub AI.** Chưa mở rộng trang chuyên đề sang chủ đề khác
   (blog hãng, arXiv), chưa đo được hiệu quả traffic/index thật (mới deploy, cần đợi vài tuần rồi

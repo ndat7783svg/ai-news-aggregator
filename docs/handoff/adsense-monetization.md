@@ -126,3 +126,26 @@ dừng thử thêm tài khoản mới một thời gian.
   `ca-pub-4228692528546788`, sau đó bấm "Yêu cầu xem xét" như quy trình cũ (xem mục 2026-07-31 ở
   trên). Khi mã AdSense mới được đưa để dán, hỏi rõ đây là tài khoản của ai, thử lần thứ mấy —
   đã có tiền lệ khai nhầm "của em tôi".
+
+### 2026-08-15 — Claude: đánh giá thêm Monetag (bị loại) + xác định Infolinks là phương án dự phòng
+
+Trong lúc chờ AdSense mới, user tìm thấy Monetag (qua quảng cáo Google Pmax). Đã tra cứu:
+**Monetag cùng nhóm "remnant"/popunder rủi ro như Adsterra** (chuyên định dạng Popunder, review
+công khai có người dùng 4 năm cho trang web người lớn) — **bị loại**, không dùng.
+
+Đồng thời đánh giá lại tài liệu do 1 AI khác (không rõ nguồn) đưa ra gợi ý Yllix/Infolinks/
+ExoClick: **ExoClick bị loại** (mạng quảng cáo web người lớn, traffic 90%+ nội dung 18+, hoàn
+toàn không hợp trang tin AI). **Yllix bị loại** (bản chất cũng là mạng popup/popunder, có
+report gian lận doanh thu). **Infolinks được xác định là phương án dự phòng an toàn hơn** — quảng
+cáo dạng gạch chân từ khoá + banner góc màn hình, không phải popup/popunder, thành lập 2007, phù
+hợp site nhỏ dưới 10k view/tháng. Nhược điểm: doanh thu rất thấp (nhiều review nói "không đáng"
+với site nhỏ) — không giải quyết vấn đề tiền bạc, nhưng an toàn.
+
+**Cũng đã soạn sẵn 1 đoạn tin nhắn để user gửi bộ phận hỗ trợ Adsterra** (báo cáo cụ thể hành vi
+redirect/Shopee, yêu cầu họ lọc lại creative độc hại cho zone Banner) — **CHƯA rõ user đã gửi hay
+chưa, chưa có phản hồi từ Adsterra ghi nhận**. Nếu Adsterra xác nhận đã xử lý, có thể cân nhắc bật
+lại; nếu không, Infolinks là hướng thử tiếp theo.
+
+**Trạng thái/thứ tự ưu tiên hiện tại:** (1) chờ AdSense em gái duyệt xong — ưu tiên cao nhất;
+(2) nếu AdSense không thành, thử Infolinks; (3) Adsterra chỉ bật lại nếu có xác nhận rõ ràng từ
+support đã xử lý sự cố, không chủ động thử lại.

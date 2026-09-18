@@ -74,15 +74,26 @@ body {
   padding: 24px 16px 64px;
 }
 
-/* Header */
+/* Header 2 hàng */
 .site-header {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
+  flex-direction: column;
+  gap: 12px;
   padding-bottom: 20px;
   margin-bottom: 20px;
   border-bottom: 1px solid var(--border);
+}
+
+.header-top-bar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  width: 100%;
+}
+
+.header-brand {
+  display: flex;
+  flex-direction: column;
 }
 
 .site-title {
@@ -105,7 +116,7 @@ body {
   overflow: hidden;
 }
 
-/* Cụm nút góc trên phải: chuyển theme + chuyển ngôn ngữ */
+/* Cụm nút góc trên phải */
 .header-actions {
   display: inline-flex;
   align-items: center;
@@ -156,6 +167,46 @@ body {
 .lang-toggle button.active {
   background: var(--accent);
   color: #fff;
+}
+
+/* Nút Đăng nhập / User Icon trên Header */
+.header-login-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: opacity 0.12s;
+  white-space: nowrap;
+}
+
+.header-login-btn:hover {
+  opacity: 0.88;
+}
+
+.header-user-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--muted);
+  text-decoration: none;
+  flex-shrink: 0;
+  transition: color 0.12s, border-color 0.12s;
+}
+
+.header-user-btn:hover {
+  color: var(--text);
+  border-color: var(--accent);
 }
 
 /* Nút ☰ ngoài cùng bên phải + menu sổ xuống */
@@ -276,7 +327,7 @@ body {
   color: var(--muted);
 }
 
-/* Hàng nút lọc theo nguồn + toggle sắp xếp (cùng kiểu pill) */
+/* Hàng nút lọc theo nguồn + toggle sắp xếp */
 .source-filter {
   display: flex;
   flex-wrap: wrap;
@@ -335,7 +386,7 @@ body {
   border-color: var(--accent);
 }
 
-/* Ô chọn phụ GitHub (nằm cạnh nút lọc trong .source-filter) */
+/* Ô chọn phụ GitHub */
 .github-sub-select {
   appearance: none;
   -webkit-appearance: none;
@@ -467,7 +518,7 @@ body {
   color: var(--muted);
 }
 
-/* Nhóm nút Lưu / Chia sẻ — kiểu "pill" bo tròn, nền đặc (tham chiếu YouTube). */
+/* Nhóm nút Lưu / Chia sẻ */
 .card-actions {
   margin-left: auto;
   display: flex;
@@ -488,7 +539,7 @@ body {
   font-weight: 600;
   color: var(--text);
   cursor: pointer;
-  transition: background-color 0.12s;
+  transition: background-color 0.12s, color 0.12s, opacity 0.12s;
   line-height: 1;
   white-space: nowrap;
   font-family: inherit;
@@ -502,64 +553,24 @@ body {
   flex-shrink: 0;
 }
 
-/* Nút Lưu + mũi tên nằm chung 1 viên pill, ngăn nhau bằng vạch mảnh. */
-.pill-group {
-  display: inline-flex;
-  align-items: center;
-  background-color: var(--chip);
-  border-radius: 999px;
-}
-
-.pill-group:hover {
-  background-color: var(--chip-hover);
-}
-
-.pill-group .pill {
-  background-color: transparent;
-}
-
-.pill-group .pill:hover {
-  background-color: transparent;
-}
-
-.pill-main {
-  padding-right: 10px;
-}
-
-.pill-caret {
-  padding: 7px 12px 7px 10px;
-  border-left: 1px solid var(--border);
-  color: var(--muted);
-}
-
-/* Khi đã lưu: đảo màu cho nổi bật, giống trạng thái bật của nút YouTube. */
-.pill-group.saved {
+/* Nút Lưu đơn lẻ khi đã lưu */
+.save-pill.saved {
   background-color: var(--text);
+  color: var(--card);
 }
 
-.pill-group.saved:hover {
+.save-pill.saved:hover {
   background-color: var(--text);
   opacity: 0.85;
 }
 
-.pill-group.saved .pill {
-  color: var(--card);
-}
-
-.pill-group.saved .pill-caret {
-  border-left-color: color-mix(in srgb, var(--card) 30%, transparent);
-}
-
-/* Ẩn chữ trên màn hình hẹp, chỉ chừa icon cho đỡ chật. */
+/* Ẩn chữ trên màn hình hẹp, chỉ chừa icon */
 @media (max-width: 460px) {
   .pill-label {
     display: none;
   }
   .pill {
     padding: 8px 12px;
-  }
-  .pill-main {
-    padding-right: 8px;
   }
 }
 
@@ -628,49 +639,13 @@ body {
 }
 
 /* Trang Đã lưu /da-luu */
-.saved-section {
-  margin-bottom: 2rem;
-}
-
-.saved-section-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 0.75rem;
-}
-
-.saved-section-title {
-  font-size: 1.05rem;
-  font-weight: 700;
-  margin: 0;
-}
-
-.saved-section-actions {
-  display: flex;
-  gap: 6px;
-  margin-left: auto;
-}
-
-.small-btn {
-  background: none;
+.saved-auth-prompt {
+  background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 3px 8px;
-  font-size: 0.75rem;
-  color: var(--muted);
-  cursor: pointer;
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
 }
-
-.small-btn:hover {
-  border-color: var(--accent);
-  color: var(--text);
-}
-
-.small-btn.danger:hover {
-  border-color: #ef4444;
-  color: #ef4444;
-}
-
 
 /* Chỉ báo tải thêm / hết tin (infinite scroll) */
 .loadmore {
@@ -722,4 +697,296 @@ body {
 
 .rename-banner-close:hover {
   opacity: 1;
+}
+
+/* ==========================================================================
+   CSS Cho các trang Auth (/dang-nhap, /dang-ky, /tai-khoan)
+   ========================================================================== */
+
+.auth-page-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 70vh;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 400px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: var(--shadow);
+}
+
+.auth-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  margin: 0 0 4px;
+}
+
+.auth-subtitle {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin: 0 0 20px;
+}
+
+.auth-error-banner {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid #ef4444;
+  color: #ef4444;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  margin-bottom: 16px;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.form-input {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.92rem;
+  outline: none;
+  transition: border-color 0.12s;
+  font-family: inherit;
+}
+
+.form-input:focus {
+  border-color: var(--accent);
+}
+
+.auth-btn-primary {
+  width: 100%;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.12s;
+  margin-top: 4px;
+}
+
+.auth-btn-primary:hover {
+  opacity: 0.9;
+}
+
+.auth-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 20px 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid var(--border);
+}
+
+.auth-divider span {
+  padding: 0 10px;
+}
+
+.auth-btn-google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.12s, border-color 0.12s;
+}
+
+.auth-btn-google:hover {
+  background: var(--chip);
+  border-color: var(--muted);
+}
+
+.auth-footer-link {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.auth-footer-link a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-footer-link a:hover {
+  text-decoration: underline;
+}
+
+.auth-success-box {
+  text-align: center;
+  padding: 10px 0;
+}
+
+.auth-success-icon {
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+}
+
+.auth-success-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 10px;
+}
+
+.auth-success-desc {
+  font-size: 0.9rem;
+  color: var(--muted);
+  line-height: 1.55;
+  margin-bottom: 20px;
+}
+
+/* Giao diện Trang Tài khoản */
+.account-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.account-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 4px;
+}
+
+.account-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+  background: var(--chip);
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.account-name {
+  font-size: 1.3rem;
+  font-weight: 800;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.account-email {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: 2px 0 0;
+  word-break: break-all;
+}
+
+.account-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  background: var(--chip);
+  border-radius: 8px;
+  font-size: 0.88rem;
+}
+
+.account-badge-label {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.account-badge {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.account-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.account-saved-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 0.12s, border-color 0.12s;
+}
+
+.account-saved-link:hover {
+  background: var(--chip);
+  border-color: var(--accent);
+}
+
+.account-saved-link .arrow-right {
+  margin-left: auto;
+  color: var(--muted);
+}
+
+.auth-btn-danger {
+  width: 100%;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: #ef4444;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.12s, border-color 0.12s;
+}
+
+.auth-btn-danger:hover {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: #ef4444;
 }

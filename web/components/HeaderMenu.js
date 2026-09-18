@@ -2,13 +2,13 @@
 
 import { useState, useRef, useEffect } from "react";
 import { t } from "../lib/i18n";
-import { MenuIcon, HomeIcon, GithubIcon, BookmarkIcon } from "./icons";
+import { MenuIcon, HomeIcon, GithubIcon, BookmarkIcon, UserIcon } from "./icons";
 
 /**
  * Nút ☰ ở góc phải header + menu sổ xuống dẫn tới các trang của web.
  * Đóng khi bấm ra ngoài hoặc nhấn Esc.
  */
-export default function HeaderMenu({ lang }) {
+export default function HeaderMenu({ lang, user }) {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef(null);
 
@@ -57,6 +57,14 @@ export default function HeaderMenu({ lang }) {
           <a href="/da-luu" role="menuitem" onClick={() => setOpen(false)}>
             <BookmarkIcon size={17} />
             {t(lang, "navSaved")}
+          </a>
+          <a
+            href={user ? "/tai-khoan" : "/dang-nhap"}
+            role="menuitem"
+            onClick={() => setOpen(false)}
+          >
+            <UserIcon size={17} />
+            {user ? t(lang, "navAccount") : t(lang, "login")}
           </a>
         </div>
       )}

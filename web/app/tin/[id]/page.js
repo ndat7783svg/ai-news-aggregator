@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { fetchItemById } from "../../../lib/supabaseServer";
 import { sourceMeta, relativeTime, formatStars } from "../../../lib/format";
@@ -32,5 +33,9 @@ export default async function TinDetailPage({ params }) {
   const item = await fetchItemById(params.id);
   if (!item) notFound();
 
-  return <DetailContent item={item} />;
+  return (
+    <Suspense fallback={<div className="detail-wrap"><p className="loadmore">...</p></div>}>
+      <DetailContent item={item} />
+    </Suspense>
+  );
 }

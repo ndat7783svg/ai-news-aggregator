@@ -6,6 +6,9 @@ import HeaderMenu from "./HeaderMenu";
 import HeaderAdBanner from "./HeaderAdBanner";
 import { t } from "../lib/i18n";
 import { SOURCE_FILTERS, PAGE_SIZE } from "../lib/filters";
+import { supabase } from "../lib/supabaseClient";
+import { fetchUserSavedItemIds } from "../lib/savedItems";
+import { UserIcon } from "./icons";
 
 function SunIcon() {
   return (
@@ -41,11 +44,60 @@ export default function Feed({
   const [items, setItems] = useState(initialItems);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState(null);
+  const [savedIds, setSavedIds] = useState(new Set());
 
   const offsetRef = useRef(initialItems.length); // số dòng đã lấy từ DB (cho phân trang)
   const seenIds = useRef(new Set(initialItems.map((i) => i.id))); // chống trùng khi nối
   const sentinelRef = useRef(null);
   const didMount = useRef(false); // bỏ qua lần fetch đầu cho "all" (đã có dữ liệu SSR)
+
+  // Lắng nghe trạng thái đăng nhập
+  useEffect(() => {
+    if (!supabase) return;
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user || null);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user || null);
+    });
+
+    return () => {
+      subscription?.unsubscribe();
+    };
+  }, []);
+
+  // Lấy danh sách ID các tin đã lưu của user khi đăng nhập
+  useEffect(() => {
+    if (!user) {
+      setSavedIds(new Set());
+      return;
+    }
+    fetchUserSavedItemIds().then((ids) => {
+      setSavedIds(new Set(ids));
+    });
+  }, [user]);
+
+  // Đồng bộ trạng thái lưu giữa các thẻ tin trong feed
+  useEffect(() => {
+    function handleSavedChange(e) {
+      if (e.detail) {
+        setSavedIds((prev) => {
+          const next = new Set(prev);
+          if (e.detail.saved) next.add(e.detail.itemId);
+          else next.delete(e.detail.itemId);
+          return next;
+        });
+      }
+    }
+    window.addEventListener("bai-saved-item-change", handleSavedChange);
+    return () => {
+      window.removeEventListener("bai-saved-item-change", handleSavedChange);
+    };
+  }, []);
 
   // Nhớ ngôn ngữ đã chọn — chỉ áp dụng cho route mặc định (trang chủ VI). Route ép ngôn ngữ
   // riêng (vd `/en`) không đọc localStorage lúc mount, tránh bị đổi ngược lại ngôn ngữ đã lưu
@@ -218,36 +270,58 @@ export default function Feed({
   return (
     <main className="wrap">
       <header className="site-header">
-        <div>
+        {/* Hàng trên cùng: các nút điều khiển & trạng thái tài khoản */}
+        <div className="header-top-bar">
+          <div className="header-actions">
+            <button
+              className="theme-toggle"
+              onClick={toggleTheme}
+              aria-label={t(lang, theme === "dark" ? "themeToLight" : "themeToDark")}
+              title={t(lang, theme === "dark" ? "themeToLight" : "themeToDark")}
+            >
+              {theme === "dark" ? <SunIcon /> : <MoonIcon />}
+            </button>
+
+            <div className="lang-toggle" role="group" aria-label="Language">
+              <button
+                className={lang === "vi" ? "active" : ""}
+                onClick={() => pick("vi")}
+                aria-pressed={lang === "vi"}
+              >
+                VI
+              </button>
+              <button
+                className={lang === "en" ? "active" : ""}
+                onClick={() => pick("en")}
+                aria-pressed={lang === "en"}
+              >
+                EN
+              </button>
+            </div>
+
+            {user ? (
+              <a
+                href="/tai-khoan"
+                className="header-user-btn"
+                aria-label={t(lang, "navAccount")}
+                title={t(lang, "navAccount")}
+              >
+                <UserIcon size={17} />
+              </a>
+            ) : (
+              <a href="/dang-nhap" className="header-login-btn">
+                {t(lang, "login")}
+              </a>
+            )}
+
+            <HeaderMenu lang={lang} user={user} />
+          </div>
+        </div>
+
+        {/* Hàng dưới: Tiêu đề thương hiệu + Tagline */}
+        <div className="header-brand">
           <h1 className="site-title">BAI News</h1>
           <p className="tagline">{t(lang, "tagline")}</p>
-        </div>
-        <div className="header-actions">
-          <button
-            className="theme-toggle"
-            onClick={toggleTheme}
-            aria-label={t(lang, theme === "dark" ? "themeToLight" : "themeToDark")}
-            title={t(lang, theme === "dark" ? "themeToLight" : "themeToDark")}
-          >
-            {theme === "dark" ? <SunIcon /> : <MoonIcon />}
-          </button>
-          <div className="lang-toggle" role="group" aria-label="Language">
-            <button
-              className={lang === "vi" ? "active" : ""}
-              onClick={() => pick("vi")}
-              aria-pressed={lang === "vi"}
-            >
-              VI
-            </button>
-            <button
-              className={lang === "en" ? "active" : ""}
-              onClick={() => pick("en")}
-              aria-pressed={lang === "en"}
-            >
-              EN
-            </button>
-          </div>
-          <HeaderMenu lang={lang} />
         </div>
       </header>
 
@@ -358,7 +432,12 @@ export default function Feed({
 
       <div className="feed">
         {items.map((it) => (
-          <NewsCard key={it.id} item={it} lang={lang} />
+          <NewsCard
+            key={it.id}
+            item={it}
+            lang={lang}
+            initialSaved={savedIds.has(it.id)}
+          />
         ))}
       </div>
 
@@ -372,8 +451,7 @@ export default function Feed({
       {/* Điểm mốc để phát hiện cuộn tới cuối */}
       <div ref={sentinelRef} aria-hidden="true" style={{ height: 1 }} />
 
-      {/* Link tới các trang khác đã chuyển lên menu ☰ ở header (giữ 1 link ở chân trang
-          cho người cuộn hết feed, và để Google có liên kết nội bộ trong HTML tĩnh). */}
+      {/* Link tới các trang khác đã chuyển lên menu ☰ ở header */}
       <footer className="site-footer">
         <a href={lang === "en" ? "/en/github-ai" : "/github-ai"}>
           {t(lang, "navGithubAi")} →

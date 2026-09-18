@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { formatStars, sourceMeta, relativeTime } from "../lib/format";
 import { t } from "../lib/i18n";
-import { isSaved, saveItem, removeItemFromAll } from "../lib/savedLists";
+import { saveUserItem, removeUserSavedItem } from "../lib/savedItems";
+import { supabase } from "../lib/supabaseClient";
 import { shareItem } from "../lib/share";
-import SaveListPopup from "./SaveListPopup";
-import { ShareIcon, BookmarkIcon, ChevronDownIcon } from "./icons";
+import { ShareIcon, BookmarkIcon } from "./icons";
 
 const LANGUAGE_COLORS = {
   Python: "#3572A5",
@@ -20,7 +20,7 @@ const LANGUAGE_COLORS = {
   Jupyter: "#DA5B0B",
 };
 
-export default function NewsCard({ item, lang }) {
+export default function NewsCard({ item, lang, initialSaved = false, onUnsave }) {
   const meta = sourceMeta(item.source, lang);
   const summary =
     lang === "vi"
@@ -31,28 +31,68 @@ export default function NewsCard({ item, lang }) {
   const language = isGithub ? item.extra?.language : null;
 
   // State lưu tin
-  const [saved, setSaved] = useState(false);
-  const [showPopup, setShowPopup] = useState(false);
+  const [saved, setSaved] = useState(initialSaved);
   // Toast thông báo copy link
   const [toast, setToast] = useState("");
 
   useEffect(() => {
-    setSaved(isSaved(item.id));
+    setSaved(initialSaved);
+  }, [initialSaved]);
+
+  useEffect(() => {
+    function handleSavedChange(e) {
+      if (e.detail && e.detail.itemId === item.id) {
+        setSaved(e.detail.saved);
+      }
+    }
+    window.addEventListener("bai-saved-item-change", handleSavedChange);
+    return () => {
+      window.removeEventListener("bai-saved-item-change", handleSavedChange);
+    };
   }, [item.id]);
 
-  function handleSave() {
-    if (saved) {
-      removeItemFromAll(item.id);
-      setSaved(false);
-    } else {
-      saveItem(item.id);
-      setSaved(true);
+  async function handleSave() {
+    if (!supabase) {
+      window.location.href = "/dang-nhap";
+      return;
+    }
+
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        const currentPath =
+          typeof window !== "undefined"
+            ? window.location.pathname + window.location.search
+            : "/";
+        window.location.href = `/dang-nhap?redirect=${encodeURIComponent(currentPath)}`;
+        return;
+      }
+
+      const nextSaved = !saved;
+      setSaved(nextSaved);
+
+      // Phát sự kiện đồng bộ giữa các thẻ tin
+      window.dispatchEvent(
+        new CustomEvent("bai-saved-item-change", {
+          detail: { itemId: item.id, saved: nextSaved },
+        })
+      );
+
+      if (nextSaved) {
+        const ok = await saveUserItem(item.id);
+        if (!ok) setSaved(false);
+      } else {
+        const ok = await removeUserSavedItem(item.id);
+        if (!ok) setSaved(true);
+        else onUnsave?.(item.id);
+      }
+    } catch {
+      setSaved(saved);
     }
   }
-
-  const handlePopupUpdate = useCallback(() => {
-    setSaved(isSaved(item.id));
-  }, [item.id]);
 
   async function handleShare() {
     const result = await shareItem(item, lang);
@@ -106,7 +146,7 @@ export default function NewsCard({ item, lang }) {
         </a>
         {item.author && <span className="author">· {item.author}</span>}
 
-        {/* Nút Chia sẻ + nhóm nút Lưu (kèm mũi tên mở popup danh sách) */}
+        {/* Nút Chia sẻ + Nút Lưu */}
         <span className="card-actions">
           <button
             className="pill share-pill"
@@ -118,45 +158,23 @@ export default function NewsCard({ item, lang }) {
             <span className="pill-label">{t(lang, "share")}</span>
           </button>
 
-          <span className={`pill-group${saved ? " saved" : ""}`}>
-            <button
-              className="pill pill-main"
-              onClick={handleSave}
-              title={saved ? t(lang, "unsave") : t(lang, "save")}
-              aria-label={saved ? t(lang, "unsave") : t(lang, "save")}
-              aria-pressed={saved}
-            >
-              <BookmarkIcon filled={saved} />
-              <span className="pill-label">
-                {saved ? t(lang, "saved") : t(lang, "save")}
-              </span>
-            </button>
-            <button
-              className="pill pill-caret"
-              onClick={() => setShowPopup(true)}
-              title={t(lang, "saveToList")}
-              aria-label={t(lang, "saveToList")}
-            >
-              <ChevronDownIcon />
-            </button>
-          </span>
+          <button
+            className={`pill save-pill${saved ? " saved" : ""}`}
+            onClick={handleSave}
+            title={saved ? t(lang, "unsave") : t(lang, "save")}
+            aria-label={saved ? t(lang, "unsave") : t(lang, "save")}
+            aria-pressed={saved}
+          >
+            <BookmarkIcon filled={saved} />
+            <span className="pill-label">
+              {saved ? t(lang, "saved") : t(lang, "save")}
+            </span>
+          </button>
         </span>
 
         {/* Toast thông báo copy link */}
-        {toast && (
-          <span className="copy-toast">{toast}</span>
-        )}
+        {toast && <span className="copy-toast">{toast}</span>}
       </div>
-
-      {/* Popup chọn danh sách */}
-      {showPopup && (
-        <SaveListPopup
-          itemId={item.id}
-          lang={lang}
-          onClose={() => setShowPopup(false)}
-          onUpdate={handlePopupUpdate}
-        />
-      )}
     </article>
   );
 }

@@ -1,81 +1,70 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { getState, renameList, deleteList } from "../../lib/savedLists";
+import { useState, useEffect, useCallback } from "react";
+import { fetchUserSavedItemIds } from "../../lib/savedItems";
+import { supabase } from "../../lib/supabaseClient";
 import { t } from "../../lib/i18n";
 import NewsCard from "../../components/NewsCard";
 
 export default function DaLuuPage() {
   const [lang, setLang] = useState("vi");
-  const [savedState, setSavedState] = useState(null);
-  const [itemsMap, setItemsMap] = useState({}); // id → item object
+  const [user, setUser] = useState(null);
+  const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  // Chỉnh sửa tên danh sách
-  const [editingListId, setEditingListId] = useState(null);
-  const [editingName, setEditingName] = useState("");
 
-  useEffect(() => {
-    // Đọc lang từ localStorage
-    try {
-      const saved = localStorage.getItem("lang");
-      if (saved === "vi" || saved === "en") setLang(saved);
-    } catch {
-      // giữ mặc định "vi"
-    }
-    loadData();
-  }, []);
-
-  async function loadData() {
-    const state = getState();
-    setSavedState(state);
-
-    const allIds = [...new Set(state.saved.map((s) => s.itemId))];
-    if (allIds.length === 0) {
+  const loadData = useCallback(async () => {
+    if (!supabase) {
       setLoading(false);
       return;
     }
 
     try {
-      const res = await fetch(`/api/saved-items?ids=${allIds.join(",")}`);
-      const json = await res.json();
-      const map = {};
-      for (const item of json.items || []) {
-        map[item.id] = item;
+      const {
+        data: { user: currentUser },
+      } = await supabase.auth.getUser();
+
+      if (!currentUser) {
+        setUser(null);
+        setLoading(false);
+        return;
       }
-      setItemsMap(map);
+
+      setUser(currentUser);
+      const ids = await fetchUserSavedItemIds();
+      if (ids.length === 0) {
+        setItems([]);
+        setLoading(false);
+        return;
+      }
+
+      const res = await fetch(`/api/saved-items?ids=${ids.join(",")}`);
+      const json = await res.json();
+      const rawItems = json.items || [];
+
+      // Sắp xếp các item theo đúng thứ tự mảng IDs (mới lưu nhất lên đầu)
+      const map = new Map(rawItems.map((item) => [item.id, item]));
+      const ordered = ids.map((id) => map.get(id)).filter(Boolean);
+
+      setItems(ordered);
     } catch {
-      // Lỗi mạng → itemsMap trống, hiện thông báo lỗi nhẹ
+      // Lỗi mạng
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-  }
+  }, []);
 
-  function refresh() {
-    setSavedState(getState());
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("lang");
+      if (saved === "vi" || saved === "en") setLang(saved);
+    } catch {}
+
     loadData();
+  }, [loadData]);
+
+  function handleUnsave(unSavedId) {
+    setItems((prev) => prev.filter((item) => item.id !== unSavedId));
   }
-
-  function startRename(listId, currentName) {
-    setEditingListId(listId);
-    setEditingName(currentName);
-  }
-
-  function confirmRename(listId) {
-    if (editingName.trim()) {
-      renameList(listId, editingName.trim());
-    }
-    setEditingListId(null);
-    setSavedState(getState());
-  }
-
-  function handleDeleteList(listId) {
-    deleteList(listId);
-    refresh();
-  }
-
-  if (!savedState) return null;
-
-  const lists = Object.entries(savedState.lists);
-  const totalSaved = savedState.saved.length;
 
   return (
     <main className="wrap">
@@ -102,82 +91,43 @@ export default function DaLuuPage() {
         <p style={{ color: "var(--muted)" }}>{t(lang, "loadingMore")}</p>
       )}
 
-      {!loading && totalSaved === 0 && (
+      {!loading && !user && (
+        <div className="saved-auth-prompt">
+          <p style={{ color: "var(--muted)", marginBottom: "1rem" }}>
+            {t(lang, "savedRequireLogin")}
+          </p>
+          <a
+            href="/dang-nhap?redirect=/da-luu"
+            className="auth-btn-primary"
+            style={{
+              display: "inline-block",
+              width: "auto",
+              padding: "8px 20px",
+              textDecoration: "none",
+            }}
+          >
+            {t(lang, "login")}
+          </a>
+        </div>
+      )}
+
+      {!loading && user && items.length === 0 && (
         <p style={{ color: "var(--muted)" }}>{t(lang, "savedEmpty")}</p>
       )}
 
-      {!loading && lists.map(([listId, listInfo]) => {
-        const listSaved = savedState.saved.filter((s) => s.listId === listId);
-        if (listSaved.length === 0) return null;
-
-        const items = listSaved
-          .map((s) => itemsMap[s.itemId])
-          .filter(Boolean);
-
-        return (
-          <section key={listId} className="saved-section">
-            <div className="saved-section-header">
-              {editingListId === listId ? (
-                <>
-                  <input
-                    value={editingName}
-                    onChange={(e) => setEditingName(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && confirmRename(listId)}
-                    autoFocus
-                    style={{
-                      border: "1px solid var(--accent)",
-                      borderRadius: 6,
-                      padding: "2px 8px",
-                      fontSize: "1rem",
-                      fontWeight: 700,
-                      background: "var(--bg)",
-                      color: "var(--text)",
-                    }}
-                  />
-                  <button className="small-btn" onClick={() => confirmRename(listId)}>✓</button>
-                  <button className="small-btn" onClick={() => setEditingListId(null)}>✕</button>
-                </>
-              ) : (
-                <>
-                  <h3 className="saved-section-title">
-                    {listInfo.name}
-                    <span style={{ fontWeight: 400, fontSize: "0.85rem", color: "var(--muted)", marginLeft: 8 }}>
-                      ({listSaved.length})
-                    </span>
-                  </h3>
-                  <div className="saved-section-actions">
-                    <button
-                      className="small-btn"
-                      onClick={() => startRename(listId, listInfo.name)}
-                    >
-                      {t(lang, "renameList")}
-                    </button>
-                    {listId !== "default" && (
-                      <button
-                        className="small-btn danger"
-                        onClick={() => handleDeleteList(listId)}
-                      >
-                        {t(lang, "deleteList")}
-                      </button>
-                    )}
-                  </div>
-                </>
-              )}
-            </div>
-
-            <div className="feed">
-              {items.map((item) => (
-                <NewsCard key={item.id} item={item} lang={lang} />
-              ))}
-              {listSaved.length > items.length && (
-                <p style={{ color: "var(--muted)", fontSize: "0.85rem" }}>
-                  {listSaved.length - items.length} {t(lang, "savedMissing")}
-                </p>
-              )}
-            </div>
-          </section>
-        );
-      })}
+      {!loading && user && items.length > 0 && (
+        <div className="feed">
+          {items.map((item) => (
+            <NewsCard
+              key={item.id}
+              item={item}
+              lang={lang}
+              initialSaved={true}
+              onUnsave={handleUnsave}
+            />
+          ))}
+        </div>
+      )}
     </main>
   );
 }

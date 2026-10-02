@@ -4,6 +4,7 @@
 // Trình bày giống thẻ tin trang chủ (cùng class CSS) nhưng không có nút Lưu/Chia sẻ.
 
 import { formatStars, sourceMeta, relativeTime, domainOf } from "../lib/format";
+import { trackProps } from "../lib/track";
 
 const LANGUAGE_COLORS = {
   Python: "#3572A5",
@@ -74,7 +75,7 @@ export default function GithubAiList({ items, lang }) {
               </div>
 
               <h2 className="story-title">
-                <a href={item.url} target="_blank" rel="noopener noreferrer">
+                <a href={item.url} target="_blank" rel="noopener noreferrer" {...trackProps(item, "github_page")}>
                   {title}
                 </a>
               </h2>
@@ -82,7 +83,7 @@ export default function GithubAiList({ items, lang }) {
               {summary && <p className="story-summary">{summary}</p>}
 
               <div className="story-foot">
-                <a className="story-link" href={item.url} target="_blank" rel="noopener noreferrer">
+                <a className="story-link" href={item.url} target="_blank" rel="noopener noreferrer" {...trackProps(item, "github_page")}>
                   {lang === "vi" ? "Xem trên" : "View on"} <strong>{domainOf(item.url) || "github.com"}</strong> ↗
                 </a>
               </div>

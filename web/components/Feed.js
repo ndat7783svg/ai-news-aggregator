@@ -1,7 +1,8 @@
 "use client";
 
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
-import NewsCard from "./NewsCard";
+import NewsCard, { pickText } from "./NewsCard";
+import { trackProps } from "../lib/track";
 import SiteHeader from "./SiteHeader";
 import SiteFooter from "./SiteFooter";
 import { t } from "../lib/i18n";
@@ -11,8 +12,8 @@ import { useLang, useAuthUser } from "../lib/useSiteState";
 import { dayKey, dayLabel, fullDate, formatStars } from "../lib/format";
 import { SearchIcon, CloseIcon, ArrowUpIcon } from "./icons";
 
-// Thứ tự tab chuyên mục: tin thời sự trước, nguồn chuyên sâu sau, GitHub cuối (tách khỏi "Tất cả").
-const TAB_ORDER = ["blog_labs", "blog_press", "hackernews", "arxiv", "blog_news", "reddit", "github"];
+// Thứ tự tab chuyên mục: GitHub đứng đầu (nội dung muốn hướng tới người đọc Việt nhất), rồi tin thời sự.
+const TAB_ORDER = ["github", "blog_labs", "blog_press", "hackernews", "arxiv", "blog_news", "reddit"];
 
 function SkeletonList({ count = 4 }) {
   return (
@@ -54,9 +55,50 @@ function BackToTop({ lang }) {
   );
 }
 
-/** Cột phải (chỉ hiện trên màn hình rộng): tin nổi bật tuần, repo GitHub đang lên, giới thiệu. */
-function Rail({ lang, topItems, githubItems }) {
-  const githubHref = lang === "en" ? "/en/github-ai" : "/github-ai";
+/**
+ * Khối "GitHub AI đang hot" ở đầu trang chủ (hiện cả trên điện thoại): repo trending tuần nhiều
+ * sao nhất. Điện thoại = vuốt ngang, máy tính = lưới 3 cột.
+ */
+function GithubStrip({ lang, items, onSeeAll }) {
+  if (!items.length) return null;
+  return (
+    <section className="gh-strip" aria-labelledby="gh-strip-title">
+      <div className="gh-strip-head">
+        <h2 id="gh-strip-title" className="gh-strip-title">
+          {t(lang, "railGithub")}
+        </h2>
+        <button type="button" className="gh-strip-more" onClick={onSeeAll}>
+          {t(lang, "railSeeAll")} →
+        </button>
+      </div>
+      <div className="gh-strip-list">
+        {items.map((it) => {
+          const summary = pickText(it, lang).summary;
+          return (
+            <a
+              key={it.id}
+              className="gh-card"
+              href={it.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              {...trackProps(it, "github_strip")}
+            >
+              <span className="gh-card-name">{it.title}</span>
+              {summary && <span className="gh-card-desc">{summary}</span>}
+              <span className="gh-card-meta">
+                ★ {formatStars(it.score)}
+                {it.extra?.language ? ` · ${it.extra.language}` : ""}
+              </span>
+            </a>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+/** Cột phải (chỉ hiện trên màn hình rộng): tin nổi bật tuần + giới thiệu. */
+function Rail({ lang, topItems }) {
   return (
     <aside className="rail">
       {topItems.length > 0 && (
@@ -66,7 +108,7 @@ function Rail({ lang, topItems, githubItems }) {
           <ol className="rail-list numbered">
             {topItems.map((it) => (
               <li key={it.id}>
-                <a href={it.url} target="_blank" rel="noopener noreferrer">
+                <a href={it.url} target="_blank" rel="noopener noreferrer" {...trackProps(it, "rail_top")}>
                   {lang === "vi" ? it.title_vi || it.title : it.title}
                 </a>
                 {typeof it.score === "number" && (
@@ -77,28 +119,6 @@ function Rail({ lang, topItems, githubItems }) {
               </li>
             ))}
           </ol>
-        </section>
-      )}
-
-      {githubItems.length > 0 && (
-        <section className="rail-block">
-          <h2 className="rail-title">{t(lang, "railGithub")}</h2>
-          <ul className="rail-list">
-            {githubItems.map((it) => (
-              <li key={it.id}>
-                <a href={it.url} target="_blank" rel="noopener noreferrer" className="mono">
-                  {it.title}
-                </a>
-                <span className="rail-meta">
-                  ★ {formatStars(it.score)}
-                  {it.extra?.language ? ` · ${it.extra.language}` : ""}
-                </span>
-              </li>
-            ))}
-          </ul>
-          <a className="rail-more" href={githubHref}>
-            {t(lang, "railSeeAll")} →
-          </a>
         </section>
       )}
 
@@ -139,6 +159,7 @@ export default function Feed({
   const offsetRef = useRef(initialItems.length); // số dòng đã lấy từ DB (cho phân trang)
   const seenIds = useRef(new Set(initialItems.map((i) => i.id))); // chống trùng khi nối
   const sentinelRef = useRef(null);
+  const tabsRef = useRef(null);
   const didMount = useRef(false); // bỏ qua lần fetch đầu cho "all" (đã có dữ liệu SSR)
   // Mỗi lần đổi bộ lọc tăng "thế hệ" → kết quả loadMore của bộ lọc cũ về muộn sẽ bị bỏ qua.
   const genRef = useRef(0);
@@ -325,9 +346,20 @@ export default function Feed({
 
         <div className="layout">
           <main className="main-col">
+            {showControls && !isGithubActive && !q && (
+              <GithubStrip
+                lang={lang}
+                items={githubItems}
+                onSeeAll={() => {
+                  setFilter("github");
+                  tabsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
+              />
+            )}
+
             {showControls && (
               <>
-                <div className="tabs-bar">
+                <div className="tabs-bar" ref={tabsRef}>
                   <div className="tabs" role="tablist" aria-label={t(lang, "sourceLabel")}>
                     <button
                       role="tab"
@@ -480,7 +512,7 @@ export default function Feed({
             <div ref={sentinelRef} aria-hidden="true" style={{ height: 1 }} />
           </main>
 
-          <Rail lang={lang} topItems={topItems} githubItems={githubItems} />
+          <Rail lang={lang} topItems={topItems} />
         </div>
       </div>
 

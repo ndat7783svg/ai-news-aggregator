@@ -11,6 +11,7 @@ import SiteFooter from "../../../components/SiteFooter";
 import StoryActions from "../../../components/StoryActions";
 import { StoryMeta, pickText } from "../../../components/NewsCard";
 import { ExternalIcon } from "../../../components/icons";
+import { trackProps } from "../../../lib/track";
 
 /**
  * Client component con của /tin/[id]/page.js.
@@ -60,7 +61,13 @@ export default function DetailContent({ item, related = [] }) {
           )}
 
           <div className="detail-cta">
-            <a href={item.url} target="_blank" rel="noopener noreferrer" className="btn-ink">
+            <a
+              href={item.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-ink"
+              {...trackProps(item, "detail")}
+            >
               {t(lang, "readAt")} {domain || t(lang, "readOriginal")}
               <ExternalIcon size={15} />
             </a>
@@ -75,7 +82,7 @@ export default function DetailContent({ item, related = [] }) {
               <ul className="rail-list">
                 {related.map((r) => (
                   <li key={r.id}>
-                    <a href={`/tin/${r.id}`}>{pickText(r, lang).title}</a>
+                    <a href={`/tin/${r.id}`} {...trackProps(r, "related")}>{pickText(r, lang).title}</a>
                     <span className="rail-meta" suppressHydrationWarning>
                       {domainOf(r.url)} · {relativeTime(r.published_at, lang)}
                     </span>

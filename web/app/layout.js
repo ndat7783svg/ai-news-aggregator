@@ -1,5 +1,6 @@
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
+import ClickTracker from "../components/ClickTracker";
 import { Be_Vietnam_Pro, Source_Serif_4 } from "next/font/google";
 
 // Chữ thân: Be Vietnam Pro (thiết kế riêng cho tiếng Việt, dấu đẹp, dễ đọc trên điện thoại).
@@ -74,6 +75,7 @@ export default function RootLayout({ children }) {
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
         {children}
         <Analytics />
+        <ClickTracker />
       </body>
     </html>
   );

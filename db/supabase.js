@@ -6,7 +6,7 @@ import { createClient } from "@supabase/supabase-js";
 const TABLE = "news_items";
 
 let client = null;
-function getClient() {
+export function getClient() {
   if (!client) {
     const rawUrl = process.env.SUPABASE_URL;
     const key = process.env.SUPABASE_SERVICE_ROLE_KEY;

@@ -42,3 +42,5 @@
   đổi, đợi hết credit Anthropic.
 - [Thiết kế lại giao diện kiểu báo](docs/handoff/ui-redesign-editorial.md) — bỏ phong cách "AI
   hoá", header/footer chung, tìm kiếm, chia theo ngày, cột Nổi bật, sửa open redirect.
+- [Đo lượt bấm + ưu tiên GitHub](docs/handoff/click-analytics-github-focus.md) — vì sao tự đo
+  click (Vercel Hobby không đo được), bảng `click_events`, tab GitHub lên đầu.

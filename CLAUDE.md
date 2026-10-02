@@ -38,6 +38,12 @@ X/Twitter **bỏ hẳn** (API đọc ~$100+/tháng, không hợp chi phí).
   (`/api/items?q=`), Mới nhất/Nổi bật, lọc thời gian, chia tin theo ngày (giờ VN), cột phải
   "Nổi bật tuần" + "GitHub đang lên" (≥1024px), infinite scroll 40 tin/lần. VI/EN và Sáng/Tối
   nhớ `localStorage` (hook `web/lib/useSiteState.js`).
+- **Đo lượt bấm theo loại tin (tự làm, miễn phí):** `ClickTracker.js` (gắn ở `layout.js`) bắt click
+  trên link có `data-track-*` (`web/lib/track.js`) → `/api/track` → bảng `click_events` (ẩn danh,
+  RLS chỉ cho anon INSERT). Xem số liệu: `npm run click-stats [số ngày]` ở gốc (service_role).
+  Vercel Analytics gói Hobby KHÔNG đo được click ra link ngoài nên mới phải tự làm.
+- **GitHub là nội dung ưu tiên:** tab GitHub đứng ngay sau "Tất cả"; khối "GitHub AI đang hot tuần
+  này" (6 repo trending tuần) ở đầu trang chủ, ẩn khi đang ở tab GitHub/đang tìm kiếm.
 - **GitHub:** 6 nguồn con (Release/Nhiều sao nhất/Trending hôm nay/tuần/tháng/Kinh điển) gộp vào 1 nút
   "GitHub" + `<select>` phụ, **đã tách hẳn khỏi feed "Tất cả"** (trang chủ mặc định chỉ hiện tin
   thời sự/báo/blog/arXiv/HN). "Nổi bật nhất" trong phạm vi GitHub sắp theo số sao.
@@ -85,6 +91,9 @@ X/Twitter **bỏ hẳn** (API đọc ~$100+/tháng, không hợp chi phí).
     **Infolinks** là lựa chọn an toàn hơn nếu AdSense không thành (không phải popup, nhưng doanh
     thu rất thấp) — CHƯA triển khai, chỉ mới xác định là phương án dự phòng.
   Chi tiết đầy đủ: `docs/handoff/adsense-monetization.md`.
+- **Bảng `click_events` cần tạo tay trên Supabase** (SQL: `web/supabase/migrations/20261002_create_click_events.sql`)
+  — chưa tạo thì web vẫn chạy, chỉ là không ghi được lượt bấm. Sau 1-2 tuần chạy `npm run
+  click-stats` để quyết định có biến GitHub thành nội dung chính hay không.
 - **SEO nội dung dài hạn — mới có GitHub AI.** Chưa mở rộng trang chuyên đề sang chủ đề khác
   (blog hãng, arXiv), chưa đo được hiệu quả traffic/index thật (mới deploy, cần đợi vài tuần rồi
   xem Google Search Console + Analytics).

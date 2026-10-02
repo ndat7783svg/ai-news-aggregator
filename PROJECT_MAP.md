@@ -59,6 +59,11 @@ lịch sử/diễn biến theo ngày: xem `HANDOFF.md`.
 | `web/components/SiteHeader.js` | Client — header dùng chung mọi trang (logo, nav ngang/☰, Sáng/Tối, VI/EN, tài khoản). Điều khiển ngôn ngữ từ ngoài (`lang`+`onLangChange`), hoặc `langLinks` cho trang server ép ngôn ngữ, hoặc tự quản. |
 | `web/components/SiteFooter.js` | Chân trang dùng chung (dùng được trong Server Component). |
 | `web/components/StoryActions.js` | Client — nút Chia sẻ + Lưu dùng chung (thẻ tin + trang chi tiết), đồng bộ qua sự kiện `bai-saved-item-change`. |
+| `web/components/ClickTracker.js` | Client, gắn 1 lần ở `layout.js`: bắt click trên link có `data-track-*` → `sendBeacon('/api/track')`. |
+| `web/lib/track.js` | `trackProps(item, placement)` (thuộc tính data-* cho link tin, dùng được cả server component), `categoryOf(source)`, danh sách `PLACEMENTS`. |
+| `web/app/api/track/route.js` | Nhận lượt bấm, lọc bot, ghi bảng `click_events` qua `logClick()` (supabaseServer.js). |
+| `web/supabase/migrations/20261002_create_click_events.sql` | SQL tạo bảng `click_events` (ẩn danh, RLS chỉ cho INSERT). |
+| `click-stats.js` | `npm run click-stats [ngày]`: thống kê lượt bấm theo loại tin/vị trí/thiết bị + top 10 tin (service_role). |
 | `web/lib/useSiteState.js` | Hook client `useLang` / `useTheme` / `useAuthUser` (đồng bộ ngôn ngữ giữa header và trang qua sự kiện `bai-lang-change`). |
 | `web/lib/supabaseServer.js` | Truy vấn Supabase (anon, chỉ đọc) DÙNG CHUNG cho page.js + API + trang SEO. `fetchRailData()` cho cột phải. `fetchItems({filter,sort,time,offset,limit,q})` (`q` = tìm kiếm ilike, làm sạch bởi `cleanSearch`): loại 6 nguồn GitHub khỏi `filter="all"`; sắp xếp theo sao cho nguồn thuần GitHub; cửa sổ candidate + dedupe 6 nguồn cho `filter="github"`. |
 | `web/app/api/items/route.js` | API phân trang cho infinite scroll: nhận `filter/sort/time/offset/limit`. |

@@ -529,6 +529,91 @@ select {
   color: var(--danger);
 }
 
+/* Khối "GitHub AI đang hot" đầu trang chủ */
+.gh-strip {
+  margin-bottom: 26px;
+}
+
+.gh-strip-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 2px solid var(--rule);
+  margin-bottom: 12px;
+}
+
+.gh-strip-title {
+  margin: 0;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.gh-strip-more {
+  border: 0;
+  padding: 0;
+  background-color: transparent;
+  color: var(--accent);
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.gh-strip-more:hover {
+  text-decoration: underline;
+}
+
+.gh-strip-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.gh-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background-color: var(--surface);
+  color: var(--text);
+  text-decoration: none;
+  transition: border-color 0.12s;
+}
+
+.gh-card:hover {
+  border-color: var(--text);
+}
+
+.gh-card-name {
+  font-family: ui-monospace, "SF Mono", Consolas, monospace;
+  font-size: 0.86rem;
+  font-weight: 600;
+  word-break: break-word;
+}
+
+.gh-card-desc {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: var(--text-2);
+}
+
+.gh-card-meta {
+  margin-top: auto;
+  font-size: 0.76rem;
+  color: var(--muted);
+}
+
 /* ==========================================================================
    Danh sách tin
    ========================================================================== */
@@ -1500,6 +1585,22 @@ select {
   }
   .search {
     flex-basis: 100%;
+  }
+  /* Điện thoại: thẻ GitHub vuốt ngang */
+  .gh-strip-list {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    margin: 0 -16px;
+    padding: 0 16px 4px;
+  }
+  .gh-strip-list::-webkit-scrollbar {
+    display: none;
+  }
+  .gh-card {
+    flex: 0 0 76%;
+    scroll-snap-align: start;
   }
   .back-to-top {
     right: 16px;

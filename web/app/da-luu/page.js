@@ -102,6 +102,7 @@ export default function DaLuuPage() {
                 item={item}
                 lang={lang}
                 initialSaved={true}
+                placement="saved"
                 onUnsave={handleUnsave}
               />
             ))}

@@ -7,6 +7,7 @@ import { formatStars, sourceMeta, relativeTime, domainOf } from "../lib/format";
 import { t } from "../lib/i18n";
 import StoryActions from "./StoryActions";
 import { ExternalIcon } from "./icons";
+import { trackProps } from "../lib/track";
 
 export const LANGUAGE_COLORS = {
   Python: "#3572A5",
@@ -70,16 +71,17 @@ export function pickText(item, lang) {
   return { title, summary };
 }
 
-export default function NewsCard({ item, lang, initialSaved = false, onUnsave }) {
+export default function NewsCard({ item, lang, initialSaved = false, onUnsave, placement = "feed" }) {
   const { title, summary } = pickText(item, lang);
   const domain = domainOf(item.url);
+  const track = trackProps(item, placement);
 
   return (
     <article className="story">
       <StoryMeta item={item} lang={lang} />
 
       <h2 className="story-title">
-        <a href={item.url} target="_blank" rel="noopener noreferrer">
+        <a href={item.url} target="_blank" rel="noopener noreferrer" {...track}>
           {title}
         </a>
       </h2>
@@ -87,7 +89,7 @@ export default function NewsCard({ item, lang, initialSaved = false, onUnsave })
       {summary && <p className="story-summary">{summary}</p>}
 
       <div className="story-foot">
-        <a className="story-link" href={item.url} target="_blank" rel="noopener noreferrer">
+        <a className="story-link" href={item.url} target="_blank" rel="noopener noreferrer" {...track}>
           {t(lang, "readAt")} <strong>{domain || t(lang, "readOriginal")}</strong>
           <ExternalIcon />
         </a>

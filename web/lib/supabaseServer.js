@@ -267,13 +267,21 @@ export async function fetchItemsByIds(ids) {
 }
 
 /**
- * Dữ liệu cột phải trang chủ: 5 tin HN điểm cao nhất tuần + 5 repo trending tuần nhiều sao nhất.
+ * Dữ liệu cột phải trang chủ: 5 tin HN điểm cao nhất tuần + 6 repo trending tuần nhiều sao nhất.
  * Lỗi thì trả mảng rỗng (cột phải chỉ là phụ, không được làm hỏng trang chủ).
  */
 export async function fetchRailData() {
   const [top, github] = await Promise.all([
     fetchItems({ filter: "hackernews", sort: "hot", time: "week", limit: 5 }),
-    fetchItems({ filter: "github_trending_weekly", sort: "hot", time: "week", limit: 5 }),
+    fetchItems({ filter: "github_trending_weekly", sort: "hot", time: "week", limit: 6 }),
   ]);
   return { topItems: top.items || [], githubItems: github.items || [] };
+}
+
+/** Ghi 1 lượt bấm vào tin (bảng click_events, chỉ INSERT qua RLS). Lỗi thì bỏ qua. */
+export async function logClick(row) {
+  const supabase = getClient();
+  if (!supabase) return;
+  const { error } = await supabase.from("click_events").insert(row);
+  if (error) console.error("[track]", error.message);
 }

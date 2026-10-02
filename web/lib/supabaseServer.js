@@ -99,8 +99,30 @@ function dedupeGithubTrendingFamily(rows) {
 }
 
 /**
- * Lấy 1 trang tin, kết hợp lọc nguồn + lọc thời gian + chế độ sắp xếp.
- * @param {{ filter?: string, sort?: "new"|"hot", time?: string, offset?: number, limit?: number }} opts
+ * Làm sạch từ khoá tìm kiếm trước khi ghép vào bộ lọc `or(...)` của PostgREST: bỏ các ký tự
+ * có nghĩa cú pháp (dấu phẩy, ngoặc, wildcard...), gộp khoảng trắng, giới hạn độ dài.
+ */
+export function cleanSearch(raw) {
+  if (!raw) return "";
+  return String(raw)
+    .replace(/[,()*%\\:."'`]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 80);
+}
+
+// Tìm theo tiêu đề (gốc + tiếng Việt) và tóm tắt (VI + EN), không phân biệt hoa thường.
+function applySearch(q, search) {
+  if (!search) return q;
+  const p = `*${search}*`;
+  return q.or(
+    `title.ilike.${p},title_vi.ilike.${p},summary_vi.ilike.${p},summary_en.ilike.${p}`
+  );
+}
+
+/**
+ * Lấy 1 trang tin, kết hợp lọc nguồn + lọc thời gian + chế độ sắp xếp (+ tìm kiếm tuỳ chọn).
+ * @param {{ filter?: string, sort?: "new"|"hot", time?: string, offset?: number, limit?: number, q?: string }} opts
  * @returns {Promise<{items: Array, hasMore: boolean, configMissing?: boolean, error?: string}>}
  */
 export async function fetchItems({
@@ -109,9 +131,11 @@ export async function fetchItems({
   time = "all",
   offset = 0,
   limit = 40,
+  q: rawSearch = "",
 } = {}) {
   const supabase = getClient();
   if (!supabase) return { items: [], hasMore: false, configMissing: true };
+  const search = cleanSearch(rawSearch);
 
   const sources = sourcesForFilter(filter);
   const cutoff = timeCutoffISO(time);
@@ -126,6 +150,7 @@ export async function fetchItems({
       .limit(GITHUB_WINDOW);
     if (sources && sources.length) q = q.in("source", sources);
     if (cutoff) q = q.gte("published_at", cutoff);
+    q = applySearch(q, search);
 
     const { data, error } = await q;
     if (error) return { items: [], hasMore: false, error: error.message };
@@ -154,6 +179,7 @@ export async function fetchItems({
     }
 
     if (cutoff) q = q.gte("published_at", cutoff);
+    q = applySearch(q, search);
 
     const { data, error } = await q;
     if (error) return { items: [], hasMore: false, error: error.message };
@@ -183,6 +209,7 @@ export async function fetchItems({
   }
 
   if (cutoff) q = q.gte("published_at", cutoff);
+  q = applySearch(q, search);
 
   const { data, error } = await q;
   if (error) return { items: [], hasMore: false, error: error.message };
@@ -237,4 +264,16 @@ export async function fetchItemsByIds(ids) {
     .in("id", ids.map(Number));
   if (error || !data) return [];
   return data;
+}
+
+/**
+ * Dữ liệu cột phải trang chủ: 5 tin HN điểm cao nhất tuần + 5 repo trending tuần nhiều sao nhất.
+ * Lỗi thì trả mảng rỗng (cột phải chỉ là phụ, không được làm hỏng trang chủ).
+ */
+export async function fetchRailData() {
+  const [top, github] = await Promise.all([
+    fetchItems({ filter: "hackernews", sort: "hot", time: "week", limit: 5 }),
+    fetchItems({ filter: "github_trending_weekly", sort: "hot", time: "week", limit: 5 }),
+  ]);
+  return { topItems: top.items || [], githubItems: github.items || [] };
 }

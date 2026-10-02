@@ -40,3 +40,5 @@
   nhỏ (đổi quyết định cũ), bài học `next/script` không tĩnh, đã xác minh quyền sở hữu.
 - [Cân nhắc đổi model tóm tắt](docs/handoff/cost-model-switch.md) — Haiku vs GPT-5.6 Luna, chưa
   đổi, đợi hết credit Anthropic.
+- [Thiết kế lại giao diện kiểu báo](docs/handoff/ui-redesign-editorial.md) — bỏ phong cách "AI
+  hoá", header/footer chung, tìm kiếm, chia theo ngày, cột Nổi bật, sửa open redirect.

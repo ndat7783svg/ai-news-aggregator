@@ -8,7 +8,8 @@
  * Trả về "shared" | "copied" | "error".
  */
 export async function shareItem(item, lang) {
-  const url = `https://bainews.site/tin/${item.id}`;
+  // Kèm ?lang= để người nhận thấy đúng ngôn ngữ người chia sẻ đang đọc (trang chi tiết ưu tiên tham số này).
+  const url = `https://bainews.site/tin/${item.id}?lang=${lang === "en" ? "en" : "vi"}`;
   const title = lang === "vi" ? item.title_vi || item.title : item.title;
   const text = (
     lang === "vi" ? item.summary_vi : item.summary_en

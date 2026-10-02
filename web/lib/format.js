@@ -20,9 +20,9 @@ export const SOURCE_META = {
   thegradient: { label: "The Gradient", color: "#3f51b5" },
   github_release: { label: "GitHub Release", color: "#6e40c9" },
   github_trending: { label: "GitHub Trending", labelKey: "githubSubStars", color: "#24292e" },
-  github_trending_daily: { label: "🔥 Trending (ngày)", labelKey: "githubSubDaily", color: "#f97316" },
-  github_trending_weekly: { label: "🔥 Trending (tuần)", labelKey: "githubSubWeekly", color: "#ea580c" },
-  github_trending_monthly: { label: "🔥 Trending (tháng)", labelKey: "githubSubMonthly", color: "#c2410c" },
+  github_trending_daily: { label: "Trending hôm nay", labelKey: "githubSubDaily", color: "#f97316" },
+  github_trending_weekly: { label: "Trending tuần", labelKey: "githubSubWeekly", color: "#ea580c" },
+  github_trending_monthly: { label: "Trending tháng", labelKey: "githubSubMonthly", color: "#c2410c" },
   github_classics: { label: "Kinh điển", labelKey: "githubSubClassics", color: "#475569" },
   reddit: { label: "Reddit", color: "#ff4500" },
 };
@@ -62,4 +62,57 @@ export function relativeTime(iso, lang) {
     }
   }
   return lang === "vi" ? "vừa xong" : "just now";
+}
+
+/** Tên miền gọn của link bài gốc (bỏ "www."), dùng hiện "Đọc tại techcrunch.com". */
+export function domainOf(url) {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return "";
+  }
+}
+
+// Chia tin theo NGÀY luôn tính theo giờ Việt Nam — server (UTC) và trình duyệt cho cùng kết quả,
+// tránh lệch nội dung lúc hydrate.
+const VN_TZ = "Asia/Ho_Chi_Minh";
+
+/** Khoá ngày "YYYY-MM-DD" theo giờ Việt Nam. */
+export function dayKey(iso) {
+  const d = iso ? new Date(iso) : null;
+  if (!d || isNaN(d.getTime())) return "unknown";
+  return new Intl.DateTimeFormat("en-CA", { timeZone: VN_TZ }).format(d);
+}
+
+/** Ngày đầy đủ, vd "Thứ Năm, 2 tháng 10, 2026" / "Thursday, October 2, 2026". */
+export function fullDate(dateOrIso, lang) {
+  const d = new Date(dateOrIso);
+  if (isNaN(d.getTime())) return "";
+  return new Intl.DateTimeFormat(lang === "en" ? "en-US" : "vi-VN", {
+    timeZone: VN_TZ,
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(d);
+}
+
+/**
+ * Nhãn cho 1 nhóm ngày trong feed. `todayKey` = dayKey(hiện tại); truyền null (lúc render
+ * server/hydrate) thì chỉ hiện ngày tuyệt đối để hai phía khớp nhau.
+ */
+export function dayLabel(key, lang, todayKey) {
+  if (key === "unknown") return lang === "en" ? "Undated" : "Không rõ ngày";
+  const d = new Date(`${key}T12:00:00+07:00`);
+  if (todayKey) {
+    const diff = Math.round((new Date(`${todayKey}T12:00:00+07:00`) - d) / 86400000);
+    if (diff === 0) return t(lang, "today");
+    if (diff === 1) return t(lang, "yesterday");
+  }
+  return new Intl.DateTimeFormat(lang === "en" ? "en-US" : "vi-VN", {
+    timeZone: VN_TZ,
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  }).format(d);
 }

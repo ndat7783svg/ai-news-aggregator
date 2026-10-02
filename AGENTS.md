@@ -7,6 +7,11 @@
 > **Khi cập nhật file này:** chỉ ghi **trạng thái hiện tại** (không ngày tháng, không kể chuyện
 > điều tra/nguyên nhân). Mọi diễn biến, lý do quyết định, bug đã sửa → ghi vào `HANDOFF.md`. Nếu
 > 1 gạch đầu dòng sắp vượt 3-4 dòng, đó là dấu hiệu nó thuộc về HANDOFF.md, không phải ở đây.
+>
+> **Trước khi bắt tay vào 1 nhiệm vụ mới, LUÔN hỏi user trước: để Claude làm hay để AI khác
+> (Codex/Antigravity...) làm?** User chủ động chia việc cho nhiều AI để tiết kiệm token — đừng tự
+> ý bắt tay vào việc lớn/tốn token mà chưa hỏi. Việc nhỏ, rõ ràng, ít bước (sửa 1-2 dòng, trả lời
+> câu hỏi, đọc/kiểm tra file) thì cứ làm luôn không cần hỏi.
 
 ## 1. Tổng quan
 Website tổng hợp & **tóm tắt** tin AI (mô hình Techmeme/TLDR): thu tin nhiều nguồn → tóm tắt
@@ -25,28 +30,30 @@ X/Twitter **bỏ hẳn** (API đọc ~$100+/tháng, không hợp chi phí).
 
 ## 2. Trạng thái hiện tại — ĐÃ CHẠY THẬT trên production
 - **Brand hiển thị: "BAI News"** (tagline trung lập "Tổng hợp & tóm tắt tin tức, kèm nguồn").
-  Tên project hạ tầng (Vercel/GitHub/Supabase) giữ nguyên `ai-news-aggregator`. Banner thông báo
-  đổi tên tự ẩn sau 30/07/2026, không cần deploy lại.
-- **Giao diện:** feed thẻ kiểu Techmeme/TLDR; VI/EN (nhớ `localStorage`); Sáng/Tối (theo hệ
-  thống hoặc chọn tay, nhớ `localStorage`); lọc theo nguồn (Tất cả + từng nguồn, 13 blog gộp 3
-  nhóm: Blog hãng AI/Báo công nghệ/Newsletter); sắp xếp Mới nhất/Nổi bật; lọc thời gian (Hôm
-  nay/Tuần/Tháng/Năm/Mọi lúc); infinite scroll (`/api/items`, 40 tin/lần).
-- **GitHub:** 6 nguồn con (Release/Trending nhiều sao/🔥 ngày/tuần/tháng/Kinh điển) gộp vào 1 nút
+  Tên project hạ tầng (Vercel/GitHub/Supabase) giữ nguyên `ai-news-aggregator`.
+- **Giao diện kiểu trang báo (editorial):** nền giấy ấm, 1 màu nhấn đỏ son, tiêu đề serif
+  (Source Serif 4) + chữ thân Be Vietnam Pro (`next/font`), tin ngăn bằng đường kẻ — KHÔNG quay lại
+  thẻ bo tròn/bóng đổ/pill xanh (bị chê "AI hoá"). Header + footer dùng chung mọi trang
+  (`SiteHeader.js`/`SiteFooter.js`). Trang chủ: tab chuyên mục cố định khi cuộn, ô tìm kiếm
+  (`/api/items?q=`), Mới nhất/Nổi bật, lọc thời gian, chia tin theo ngày (giờ VN), cột phải
+  "Nổi bật tuần" + "GitHub đang lên" (≥1024px), infinite scroll 40 tin/lần. VI/EN và Sáng/Tối
+  nhớ `localStorage` (hook `web/lib/useSiteState.js`).
+- **GitHub:** 6 nguồn con (Release/Nhiều sao nhất/Trending hôm nay/tuần/tháng/Kinh điển) gộp vào 1 nút
   "GitHub" + `<select>` phụ, **đã tách hẳn khỏi feed "Tất cả"** (trang chủ mặc định chỉ hiện tin
   thời sự/báo/blog/arXiv/HN). "Nổi bật nhất" trong phạm vi GitHub sắp theo số sao.
   Thẻ hiển thị ★ + số rút gọn + badge ngôn ngữ lập trình.
 - **Tiêu đề dịch (`title_vi`):** chế độ VI hiện tiêu đề tiếng Việt, EN giữ gốc — sinh trong bước
   tóm tắt (`summarizer.js`).
 - **SEO:** `robots.js`/`sitemap.js`/`icon.svg`/metadata mở rộng (`layout.js`). Trang chủ tiếng Anh `/en` (metadata + Open Graph + hreflang tiếng Anh độc lập). 2 trang chuyên đề song ngữ **"GitHub AI nổi bật"**: `/github-ai` (VI) + `/en/github-ai` (EN), server-rendered ISR 5 phút, hreflang liên kết chéo (`GithubAiList.js`, KHÔNG dùng chung `NewsCard.js`).
-- **Lưu tin + Chia sẻ (chỉ trang chủ, chưa có ở `/github-ai`):** nút 🔖 lưu vào danh sách
-  `localStorage` (khoá `bai_saved_lists`, module `web/lib/savedLists.js`) — bấm là lưu ngay vào
-  "Đã lưu" mặc định, mũi tên mở popup chọn/tạo danh sách khác (`SaveListPopup.js`). Nút Chia sẻ
-  (`web/lib/share.js`) dùng `navigator.share()`/fallback copy link, **luôn trỏ về
-  `bainews.site/tin/{id}`** (trang chi tiết `web/app/tin/[id]/`, không chia sẻ thẳng link gốc).
-  Trang "Đã lưu" ở `/da-luu` (luôn gọi `/api/saved-items?ids=...`, không cache cũ). Cả 2 nút vẽ
-  kiểu pill bo tròn (icon SVG, `web/components/icons.js`), không dùng emoji.
-- **Menu ☰ ở header** (`HeaderMenu.js`, ngoài cùng bên phải): Trang chủ / GitHub AI nổi bật / Tin
-  đã lưu.
+- **Tài khoản (Supabase Auth):** đăng ký/đăng nhập email+mật khẩu hoặc Google (`/dang-nhap`,
+  `/dang-ky`, `/tai-khoan`); `?redirect=` chỉ nhận đường dẫn nội bộ.
+- **Lưu tin + Chia sẻ** (trang chủ, `/da-luu`, `/tin/[id]` — chưa có ở `/github-ai`): Lưu theo
+  tài khoản (bảng `saved_items`, `web/lib/savedItems.js`; chưa đăng nhập → chuyển tới đăng nhập).
+  Nút dùng chung `StoryActions.js`. Chia sẻ (`web/lib/share.js`) **luôn trỏ về
+  `bainews.site/tin/{id}?lang=..`** (không chia sẻ thẳng link gốc). Trang chi tiết có mục "Tin
+  mới khác" để giữ người đọc.
+- **Điều hướng:** máy tính = link ngang trong header (Tin mới / GitHub AI / Tin đã lưu); điện thoại
+  (≤760px) = menu ☰ (`HeaderMenu.js`).
 - **Vercel Web Analytics** đã bật, xem ở Vercel dashboard → tab Analytics. Traffic hiện phụ thuộc
   gần hoàn toàn kênh Facebook, gần như 0% từ tìm kiếm (chi tiết + số liệu: `HANDOFF.md`).
 - **DB:** Supabase bảng `news_items`, RLS đọc-công-khai/ghi-chỉ-service_role, ~170+ tin.
@@ -65,8 +72,19 @@ X/Twitter **bỏ hẳn** (API đọc ~$100+/tháng, không hợp chi phí).
 - Supabase project ref: **huqbirxwvrprqkhrwnsl** (`https://huqbirxwvrprqkhrwnsl.supabase.co`)
 
 ## 3. CHƯA làm / dang dở (đừng tưởng đã có)
-- **Quảng cáo: CHƯA bật.** Traffic hiện quá nhỏ/bấp bênh (phụ thuộc 1 kênh Facebook). Mốc để cân
-  nhắc lại: traffic ổn định vài trăm–1000+/ngày *liên tục*. Đừng đề xuất trước khi đạt mốc này.
+- **Quảng cáo: chưa có quảng cáo nào hiển thị thật trên site.**
+  - **AdSense:** tài khoản gốc (`ndat7783@gmail.com`) đã bị vô hiệu hoá (lý do: liên kết tới 1
+    tài khoản khác từng vi phạm — không phải do nội dung site), đã khiếu nại, chưa có kết quả.
+    Đã đổi sang tài khoản AdSense đứng tên em gái (`ca-pub-4228692528546788`, mã xác minh domain
+    đã gắn trong `web/app/layout.js`) — **đang chờ Google xác minh quyền sở hữu domain**, chưa
+    bấm "Yêu cầu xem xét". Domain đã đổi qua 3 tài khoản AdSense trong vài ngày, tránh đổi thêm.
+  - **Adsterra:** đã XÁC NHẬN gây hành vi độc hại thật (popup/chuyển hướng lạ khi bấm link, có
+    bằng chứng người dùng bị nhảy sang link Shopee lạ) — đã gỡ hẳn code khỏi site, quyết định
+    không dùng lại.
+  - **Đã tìm mạng thay thế:** Monetag bị loại (cùng nhóm "remnant"/popunder rủi ro như Adsterra).
+    **Infolinks** là lựa chọn an toàn hơn nếu AdSense không thành (không phải popup, nhưng doanh
+    thu rất thấp) — CHƯA triển khai, chỉ mới xác định là phương án dự phòng.
+  Chi tiết đầy đủ: `docs/handoff/adsense-monetization.md`.
 - **SEO nội dung dài hạn — mới có GitHub AI.** Chưa mở rộng trang chuyên đề sang chủ đề khác
   (blog hãng, arXiv), chưa đo được hiệu quả traffic/index thật (mới deploy, cần đợi vài tuần rồi
   xem Google Search Console + Analytics).
@@ -93,8 +111,10 @@ X/Twitter **bỏ hẳn** (API đọc ~$100+/tháng, không hợp chi phí).
   Dự án phụ trợ video quảng bá: xem mục 8.
 - **Dedupe theo (source, source_id), KHÔNG theo URL.** Mỗi nguồn có ID ổn định; URL hay đổi
   (tracking/redirect) dễ sót; cùng 1 bài ở 2 nguồn thì giữ cả 2 (thể hiện độ nóng).
-- **Dùng Claude Haiku (`claude-haiku-4-5`), không đổi sang Gemini/GPT.** Rất rẻ, chất lượng tóm
-  tắt 2-4 câu VI+EN đã kiểm tra tốt, structured outputs cho JSON sạch, giữ đồng bộ hệ Claude.
+- **Dùng GPT-5.6 Luna (OpenAI) để tóm tắt, KHÔNG còn dùng Claude Haiku.** Đổi ngày 15/08/2026 sau
+  khi Anthropic hết credit thật (gián đoạn 6 ngày). Rẻ hơn Haiku ~4-5 lần, chất lượng tóm tắt
+  2-4 câu VI+EN đã kiểm tra tương đương, structured outputs (`response_format: json_schema`) cho
+  JSON sạch. Chi tiết đổi + bù tin: `docs/handoff/cost-model-switch.md`.
 - **Chưa làm login/thanh toán:** ưu tiên chạy ổn định; code đã tách module (collect/summarize/
   db/web) để gắn thêm sau mà không viết lại.
 - **Giao diện feed thẻ (Techmeme/TLDR), KHÔNG làm kiểu swipe/TikTok.** Hợp mô hình "tóm tắt + dẫn
@@ -122,6 +142,14 @@ X/Twitter **bỏ hẳn** (API đọc ~$100+/tháng, không hợp chi phí).
   kết quả theo từng URL filter/sort/time. Chi tiết: memory `ai-news-nextjs-data-cache-filter`.
 - **CSS: phần tử có nền đổi theo `data-theme` + có `transition` → LUÔN dùng `background-color`,
   KHÔNG dùng shorthand `background`** (shorthand không nội suy đúng khi biến CSS đổi động).
+- **Script xác minh quyền sở hữu domain (AdSense, Search Console...) phải dùng thẻ `<script>` HTML
+  thuần trong `<head>` của `web/app/layout.js`, KHÔNG dùng component `next/script`** — kể cả
+  `strategy="beforeInteractive"` — vì Next.js chèn qua cơ chế JS runtime
+  (`self.__next_s.push(...)`/RSC payload), không ra `<script src=...>` tĩnh trong HTML gốc, nên
+  bot xác minh bên thứ 3 không đọc được. Chi tiết: `docs/handoff/adsense-monetization.md`.
+- **Biến CSS `--font-sans`/`--font-serif` là của `next/font` (gắn lên `<html>` ở `layout.js`)** —
+  đừng khai báo lại trong `globals.css` (sẽ đè mất font, dấu tiếng Việt bị tách rời); site dùng
+  `--ff-sans`/`--ff-serif`.
 - **Khung trình duyệt tự động của Claude không compositing frame** → click mô phỏng,
   IntersectionObserver, CSS `transition` đều không chạy trong đó. Kiểm tra bằng `dispatchEvent` +
   tắt transition tạm thời (`<style>*{transition:none!important}</style>`) khi cần đo màu/hiệu
@@ -129,16 +157,23 @@ X/Twitter **bỏ hẳn** (API đọc ~$100+/tháng, không hợp chi phí).
 - **Lọc theo từ khoá AI phải dùng ranh giới từ (`\bkeyword\b`), KHÔNG "chứa chuỗi con"** — vd
   `rag` dính vào *storage*/*fragment*/*dragon* làm lọt repo không liên quan.
 - **Ngưỡng `github_trending` (Search API) là 500 sao — đã cân nhắc kỹ, đừng hạ.**
+- **`next/og` (`ImageResponse`) KHÔNG dùng được trên máy Windows này** (lỗi `ERR_INVALID_URL` khi
+  load font mặc định) — **quy ước file tĩnh `opengraph-image.png` cũng KHÔNG hoạt động** (Next.js
+  dev không đăng ký route dù đúng tên/định dạng, chưa rõ nguyên nhân). Ảnh OG hiện dùng: file tĩnh
+  ở `web/public/og-banner.png` + khai báo thẳng URL trong `openGraph.images` của
+  `generateMetadata` — đây là cách CHẮC CHẮN hoạt động, đừng thử lại 2 cách trên.
 - Chạy web cục bộ: `cd web && npm run dev` (cần `web/.env.local` — mẫu `.env.local.example`,
   lấy `anon` key ở Supabase Dashboard → Settings → API Keys → tab "Legacy"). Pipeline cục bộ:
   `npm run pipeline` (cần `.env` ở gốc, mẫu `.env.example`).
 
 ## 6. Chi phí thực tế
-- **Anthropic tới giờ:** ước tính < $1.50 (tóm tắt ~170+ tin + backfill + vài lô mở rộng nguồn).
-  Số thật xem ở console.anthropic.com → Usage/Billing.
-- **Vận hành hàng tháng:** ước ~$1–3/tháng (chỉ tóm tắt tin MỚI mỗi lần chạy 15', dedupe theo
-  source+source_id nên không lặp phí). Supabase/Vercel/GitHub Actions/cron-job.org miễn phí ở
-  quy mô này.
+- **Anthropic (đã ngừng dùng từ 15/08/2026):** tổng chi tiêu cũ ước < $1.50 trước khi hết credit.
+  Số thật xem ở console.anthropic.com → Usage/Billing (tài khoản vẫn còn, không xoá).
+- **OpenAI (GPT-5.6 Luna, đang dùng):** nạp $5, KHÔNG bật auto-reload (chủ động tắt, tự nạp tay
+  khi cần — xem `docs/handoff/cost-model-switch.md`). Giá rẻ hơn Haiku ~4-5 lần, ước vận hành
+  hàng tháng < $1/tháng (tóm tắt tin MỚI mỗi lần chạy 15', dedupe theo source+source_id nên không
+  lặp phí). Số thật xem ở platform.openai.com → Billing → Usage.
+- Supabase/Vercel/GitHub Actions/cron-job.org miễn phí ở quy mô này.
 
 ## 7. Bước tiếp theo nên đề xuất (nếu hỏi "giờ làm gì tiếp")
 0. **Dự án video (mục 8) đã setup xong, chưa chạy thử** — nếu user nhắc tới, gợi ý mở chat mới ở
@@ -166,6 +201,20 @@ YouTube Shorts/TikTok/Facebook Reels để có thêm kênh quảng bá ngoài Fa
 
 **Trạng thái:** đã setup xong tài liệu/quy trình (xem `D:\bai-news-video-project\CLAUDE.md`),
 kênh YouTube "AisuoG" + tài khoản NotebookLM đã có — **CHƯA chạy thử làm video lần nào**.
+
+## 9. Dự án phụ trợ: bot đăng Facebook tự động
+Dự án **RIÊNG BIỆT** tại `D:\bai-news-facebook-bot` (cùng mô hình liên kết qua Supabase dùng
+chung, chỉ đọc, như mục 8) — tự động đăng tin lên Trang Facebook "BAI News"
+(`facebook.com/thungumon`), dùng `title_vi`/`summary_vi` có sẵn làm caption, link về
+`bainews.site/tin/{id}?lang=vi` (đã có ảnh preview `og-banner.png` — xem mục 5 phần OG image;
+tham số `?lang=vi` do trang `/tin/[id]` ưu tiên đọc từ URL trước `localStorage`, xem
+`web/app/tin/[id]/DetailContent.js`).
+
+**Trạng thái:** repo GitHub `github.com/ndat7783svg/bai-news-facebook-bot`, code + secrets đầy
+đủ, **đã đăng thật thành công lên Trang ít nhất 1 lần**. Đang ổn định lại
+`FB_PAGE_ACCESS_TOKEN` (hay hết hạn nếu lấy sai quy trình) trước khi bật lịch cron-job.org tự
+động — chi tiết đầy đủ ở `D:\bai-news-facebook-bot\CLAUDE.md` + `HANDOFF.md`, đọc trước khi làm
+tiếp.
 
 Bài học điều phối nhiều AI (Codex/Antigravity) làm task — đã đúc kết vào skill `app-web-sk`
 mục 8, áp dụng cho mọi project, không lặp lại ở đây.

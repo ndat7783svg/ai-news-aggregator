@@ -5,8 +5,8 @@ import { t } from "../lib/i18n";
 import { MenuIcon, HomeIcon, GithubIcon, BookmarkIcon, UserIcon } from "./icons";
 
 /**
- * Nút ☰ ở góc phải header + menu sổ xuống dẫn tới các trang của web.
- * Đóng khi bấm ra ngoài hoặc nhấn Esc.
+ * Nút ☰ (chỉ hiện trên màn hình hẹp — trên máy tính đã có thanh điều hướng ngang)
+ * + menu sổ xuống dẫn tới các trang của web. Đóng khi bấm ra ngoài hoặc nhấn Esc.
  */
 export default function HeaderMenu({ lang, user }) {
   const [open, setOpen] = useState(false);
@@ -34,7 +34,7 @@ export default function HeaderMenu({ lang, user }) {
   return (
     <div className="header-menu" ref={wrapRef}>
       <button
-        className={`header-menu-btn${open ? " open" : ""}`}
+        className={`icon-btn header-menu-btn${open ? " open" : ""}`}
         onClick={() => setOpen((v) => !v)}
         aria-label={t(lang, "menu")}
         title={t(lang, "menu")}
@@ -46,7 +46,7 @@ export default function HeaderMenu({ lang, user }) {
 
       {open && (
         <div className="header-menu-panel" role="menu">
-          <a href="/" role="menuitem" onClick={() => setOpen(false)}>
+          <a href={lang === "en" ? "/en" : "/"} role="menuitem" onClick={() => setOpen(false)}>
             <HomeIcon />
             {t(lang, "navHome")}
           </a>

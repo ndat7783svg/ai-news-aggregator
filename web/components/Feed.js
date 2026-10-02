@@ -1,29 +1,113 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import NewsCard from "./NewsCard";
-import HeaderMenu from "./HeaderMenu";
-import HeaderAdBanner from "./HeaderAdBanner";
+import SiteHeader from "./SiteHeader";
+import SiteFooter from "./SiteFooter";
 import { t } from "../lib/i18n";
 import { SOURCE_FILTERS, PAGE_SIZE } from "../lib/filters";
-import { supabase } from "../lib/supabaseClient";
 import { fetchUserSavedItemIds } from "../lib/savedItems";
-import { UserIcon } from "./icons";
+import { useLang, useAuthUser } from "../lib/useSiteState";
+import { dayKey, dayLabel, fullDate, formatStars } from "../lib/format";
+import { SearchIcon, CloseIcon, ArrowUpIcon } from "./icons";
 
-function SunIcon() {
+// Thứ tự tab chuyên mục: tin thời sự trước, nguồn chuyên sâu sau, GitHub cuối (tách khỏi "Tất cả").
+const TAB_ORDER = ["blog_labs", "blog_press", "hackernews", "arxiv", "blog_news", "reddit", "github"];
+
+function SkeletonList({ count = 4 }) {
   return (
-    <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <circle cx="12" cy="12" r="4" />
-      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
-    </svg>
+    <div aria-hidden="true">
+      {Array.from({ length: count }).map((_, i) => (
+        <div key={i} className="story skeleton">
+          <span className="sk sk-meta" />
+          <span className="sk sk-title" />
+          <span className="sk sk-title short" />
+          <span className="sk sk-line" />
+          <span className="sk sk-line" />
+          <span className="sk sk-line short" />
+        </div>
+      ))}
+    </div>
   );
 }
 
-function MoonIcon() {
+function BackToTop({ lang }) {
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    function onScroll() {
+      setShow(window.scrollY > 1400);
+    }
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  if (!show) return null;
   return (
-    <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-    </svg>
+    <button
+      className="back-to-top"
+      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+      aria-label={t(lang, "backToTop")}
+      title={t(lang, "backToTop")}
+    >
+      <ArrowUpIcon />
+    </button>
+  );
+}
+
+/** Cột phải (chỉ hiện trên màn hình rộng): tin nổi bật tuần, repo GitHub đang lên, giới thiệu. */
+function Rail({ lang, topItems, githubItems }) {
+  const githubHref = lang === "en" ? "/en/github-ai" : "/github-ai";
+  return (
+    <aside className="rail">
+      {topItems.length > 0 && (
+        <section className="rail-block">
+          <h2 className="rail-title">{t(lang, "railTop")}</h2>
+          <p className="rail-hint">{t(lang, "railTopHint")}</p>
+          <ol className="rail-list numbered">
+            {topItems.map((it) => (
+              <li key={it.id}>
+                <a href={it.url} target="_blank" rel="noopener noreferrer">
+                  {lang === "vi" ? it.title_vi || it.title : it.title}
+                </a>
+                {typeof it.score === "number" && (
+                  <span className="rail-meta">
+                    ▲ {it.score} {t(lang, "points")}
+                  </span>
+                )}
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
+
+      {githubItems.length > 0 && (
+        <section className="rail-block">
+          <h2 className="rail-title">{t(lang, "railGithub")}</h2>
+          <ul className="rail-list">
+            {githubItems.map((it) => (
+              <li key={it.id}>
+                <a href={it.url} target="_blank" rel="noopener noreferrer" className="mono">
+                  {it.title}
+                </a>
+                <span className="rail-meta">
+                  ★ {formatStars(it.score)}
+                  {it.extra?.language ? ` · ${it.extra.language}` : ""}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <a className="rail-more" href={githubHref}>
+            {t(lang, "railSeeAll")} →
+          </a>
+        </section>
+      )}
+
+      <section className="rail-block rail-about">
+        <h2 className="rail-title">{t(lang, "railAboutTitle")}</h2>
+        <p>{t(lang, "railAboutBody")}</p>
+        <p className="rail-hint">{t(lang, "railAboutUpdate")}</p>
+      </section>
+    </aside>
   );
 }
 
@@ -31,122 +115,68 @@ export default function Feed({
   initialItems,
   initialHasMore,
   availableSources = [],
+  topItems = [],
+  githubItems = [],
   error,
   configMissing,
   initialLang = "vi",
   respectStoredLang = true,
 }) {
-  const [lang, setLang] = useState(initialLang);
-  const [theme, setTheme] = useState("light"); // "light" | "dark" (thực tế set sau khi mount)
+  const [lang, setLang] = useLang(initialLang, respectStoredLang);
+  const user = useAuthUser();
   const [filter, setFilter] = useState("all");
   const [sort, setSort] = useState("new"); // "new" = Mới nhất, "hot" = Nổi bật nhất
   const [time, setTime] = useState("all"); // all | today | week | month | year
+  const [query, setQuery] = useState(""); // chữ đang gõ trong ô tìm kiếm
+  const [q, setQ] = useState(""); // từ khoá đã áp dụng (sau debounce)
   const [items, setItems] = useState(initialItems);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [loading, setLoading] = useState(false);
-  const [user, setUser] = useState(null);
+  const [fetchError, setFetchError] = useState(false);
   const [savedIds, setSavedIds] = useState(new Set());
+  const [todayKey, setTodayKey] = useState(null); // chỉ có sau khi mount (tránh lệch hydrate)
 
   const offsetRef = useRef(initialItems.length); // số dòng đã lấy từ DB (cho phân trang)
   const seenIds = useRef(new Set(initialItems.map((i) => i.id))); // chống trùng khi nối
   const sentinelRef = useRef(null);
   const didMount = useRef(false); // bỏ qua lần fetch đầu cho "all" (đã có dữ liệu SSR)
+  // Mỗi lần đổi bộ lọc tăng "thế hệ" → kết quả loadMore của bộ lọc cũ về muộn sẽ bị bỏ qua.
+  const genRef = useRef(0);
 
-  // Lắng nghe trạng thái đăng nhập
   useEffect(() => {
-    if (!supabase) return;
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user || null);
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user || null);
-    });
-
-    return () => {
-      subscription?.unsubscribe();
-    };
+    setTodayKey(dayKey(new Date().toISOString()));
   }, []);
 
-  // Lấy danh sách ID các tin đã lưu của user khi đăng nhập
+  // Lấy danh sách ID các tin đã lưu khi đã đăng nhập.
   useEffect(() => {
     if (!user) {
       setSavedIds(new Set());
       return;
     }
-    fetchUserSavedItemIds().then((ids) => {
-      setSavedIds(new Set(ids));
-    });
+    fetchUserSavedItemIds().then((ids) => setSavedIds(new Set(ids)));
   }, [user]);
 
-  // Đồng bộ trạng thái lưu giữa các thẻ tin trong feed
+  // Đồng bộ trạng thái lưu giữa các thẻ tin trong feed.
   useEffect(() => {
     function handleSavedChange(e) {
-      if (e.detail) {
-        setSavedIds((prev) => {
-          const next = new Set(prev);
-          if (e.detail.saved) next.add(e.detail.itemId);
-          else next.delete(e.detail.itemId);
-          return next;
-        });
-      }
+      if (!e.detail) return;
+      setSavedIds((prev) => {
+        const next = new Set(prev);
+        if (e.detail.saved) next.add(e.detail.itemId);
+        else next.delete(e.detail.itemId);
+        return next;
+      });
     }
     window.addEventListener("bai-saved-item-change", handleSavedChange);
-    return () => {
-      window.removeEventListener("bai-saved-item-change", handleSavedChange);
-    };
+    return () => window.removeEventListener("bai-saved-item-change", handleSavedChange);
   }, []);
 
-  // Nhớ ngôn ngữ đã chọn — chỉ áp dụng cho route mặc định (trang chủ VI). Route ép ngôn ngữ
-  // riêng (vd `/en`) không đọc localStorage lúc mount, tránh bị đổi ngược lại ngôn ngữ đã lưu
-  // từ lần ghé trang khác, phá mục đích SEO/URL tường minh của route đó.
+  // Debounce ô tìm kiếm: gõ xong 350ms mới tìm.
   useEffect(() => {
-    if (!respectStoredLang) return;
-    try {
-      const saved = localStorage.getItem("lang");
-      if (saved === "vi" || saved === "en") setLang(saved);
-    } catch {}
-  }, [respectStoredLang]);
+    const id = setTimeout(() => setQ(query.trim()), 350);
+    return () => clearTimeout(id);
+  }, [query]);
 
-  function pick(l) {
-    setLang(l);
-    try {
-      localStorage.setItem("lang", l);
-      // Báo cho các component ngoài cây React (RenameBanner) đổi ngôn ngữ ngay, không cần tải lại trang.
-      window.dispatchEvent(new CustomEvent("bai-lang-change", { detail: l }));
-    } catch {}
-  }
-
-  // Đồng bộ trạng thái theme: đọc thẳng từ localStorage (nguồn đáng tin cậy nhất) thay vì chỉ
-  // dựa vào thuộc tính script inline (layout.js) đã đặt trên <html> — thuộc tính đó có thể bị
-  // React dọn mất lúc hydrate vì JSX gốc không khai báo `data-theme`. Ghi lại thuộc tính ở đây
-  // để chắc chắn giao diện luôn khớp lựa chọn đã lưu, kể cả khi bước đặt trước hydrate bị mất.
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem("theme");
-      const t =
-        saved === "dark" || saved === "light"
-          ? saved
-          : document.documentElement.dataset.theme;
-      if (t === "dark" || t === "light") {
-        setTheme(t);
-        document.documentElement.dataset.theme = t;
-      }
-    } catch {}
-  }, []);
-
-  function toggleTheme() {
-    const next = theme === "dark" ? "light" : "dark";
-    setTheme(next);
-    try {
-      document.documentElement.dataset.theme = next;
-      localStorage.setItem("theme", next); // nhớ cho lần sau ghé lại
-    } catch {}
-  }
-
-  // Lọc ra các hạng mục chống trùng theo id.
   function dedupe(list) {
     const out = [];
     for (const it of list) {
@@ -157,7 +187,7 @@ export default function Feed({
     return out;
   }
 
-  // Dựng URL API kèm đủ bộ lọc nguồn + sắp xếp + thời gian đang chọn.
+  // Dựng URL API kèm đủ bộ lọc nguồn + sắp xếp + thời gian + từ khoá.
   function itemsUrl(off) {
     const p = new URLSearchParams({
       filter,
@@ -166,17 +196,19 @@ export default function Feed({
       offset: String(off),
       limit: String(PAGE_SIZE),
     });
+    if (q) p.set("q", q);
     return `/api/items?${p.toString()}`;
   }
 
-  // Đổi bất kỳ bộ lọc/sắp xếp nào → tải lại trang đầu (bỏ qua lần đầu vì đã có SSR).
+  // Đổi bất kỳ bộ lọc/sắp xếp/từ khoá nào → tải lại trang đầu (bỏ qua lần đầu vì đã có SSR).
   useEffect(() => {
     if (!didMount.current) {
       didMount.current = true;
       return;
     }
-    let cancelled = false;
+    const gen = ++genRef.current;
     setLoading(true);
+    setFetchError(false);
     seenIds.current = new Set();
     offsetRef.current = 0;
     setItems([]);
@@ -185,40 +217,42 @@ export default function Feed({
     fetch(itemsUrl(0))
       .then((r) => r.json())
       .then((d) => {
-        if (cancelled) return;
+        if (gen !== genRef.current) return;
+        if (d.error) setFetchError(true);
         const raw = d.items || [];
         offsetRef.current = raw.length;
         setItems(dedupe(raw));
         setHasMore(!!d.hasMore);
       })
       .catch(() => {
-        if (!cancelled) setHasMore(false);
+        if (gen !== genRef.current) return;
+        setFetchError(true);
+        setHasMore(false);
       })
       .finally(() => {
-        if (!cancelled) setLoading(false);
+        if (gen === genRef.current) setLoading(false);
       });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [filter, sort, time]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter, sort, time, q]);
 
   // Tải thêm batch tiếp theo (nối vào cuối).
   async function loadMore() {
     if (loading || !hasMore || configMissing || error) return;
+    const gen = genRef.current;
     setLoading(true);
     try {
       const res = await fetch(itemsUrl(offsetRef.current));
       const d = await res.json();
+      if (gen !== genRef.current) return; // bộ lọc đã đổi trong lúc chờ → bỏ kết quả cũ
       const raw = d.items || [];
       offsetRef.current += raw.length;
       const fresh = dedupe(raw);
       if (fresh.length) setItems((prev) => [...prev, ...fresh]);
       setHasMore(!!d.hasMore);
     } catch {
-      setHasMore(false);
+      if (gen === genRef.current) setHasMore(false);
     } finally {
-      setLoading(false);
+      if (gen === genRef.current) setLoading(false);
     }
   }
 
@@ -234,229 +268,224 @@ export default function Feed({
       (entries) => {
         if (entries[0].isIntersecting) loadMoreRef.current();
       },
-      { rootMargin: "500px" }
+      { rootMargin: "600px" }
     );
     obs.observe(el);
     return () => obs.disconnect();
   }, []);
 
-  // Hiện nút lọc dựa trên các nguồn THỰC CÓ trong DB (không phụ thuộc trang đầu),
-  // hoặc nếu đang chọn chính nó (để nút không biến mất khi đang lọc).
-  // Chỉ lấy entry KHÔNG có `parent` để 4 nút con GitHub không hiện trên hàng chính.
-  const availableFilters = SOURCE_FILTERS.filter(
-    (f) =>
-      !f.parent &&
-      (filter === f.key || f.sources.some((s) => availableSources.includes(s)))
+  // Tab chuyên mục chỉ hiện nguồn THỰC CÓ trong DB (hoặc đang chọn chính nó).
+  // Bỏ entry có `parent` để 6 bộ lọc con GitHub không hiện thành tab riêng.
+  const tabs = useMemo(
+    () =>
+      SOURCE_FILTERS.filter(
+        (f) =>
+          !f.parent &&
+          (filter === f.key || f.sources.some((s) => availableSources.includes(s)))
+      ).sort((a, b) => TAB_ORDER.indexOf(a.key) - TAB_ORDER.indexOf(b.key)),
+    [availableSources, filter]
   );
 
-  // Entry con GitHub có dữ liệu thực tế trong DB.
   const githubSubFilters = SOURCE_FILTERS.filter(
-    (f) =>
-      f.parent === "github" &&
-      f.sources.some((s) => availableSources.includes(s))
+    (f) => f.parent === "github" && f.sources.some((s) => availableSources.includes(s))
   );
 
-  // Kiểm tra filter đang chọn thuộc nhóm GitHub (cha hoặc con).
   const isGithubActive =
-    filter === "github" ||
-    SOURCE_FILTERS.find((x) => x.key === filter)?.parent === "github";
+    filter === "github" || SOURCE_FILTERS.find((x) => x.key === filter)?.parent === "github";
 
   const filterLabel = (f) => (f?.labelKey ? t(lang, f.labelKey) : f?.label);
-  const activeFilterLabel =
-    filter === "all"
-      ? t(lang, "all")
-      : filterLabel(SOURCE_FILTERS.find((f) => f.key === filter));
+
+  // Chia tin theo ngày khi xem "Mới nhất" (kiểu trang báo); "Nổi bật" thì để liền 1 danh sách.
+  const groups = useMemo(() => {
+    if (sort !== "new") return [{ key: "all", items }];
+    const out = [];
+    for (const it of items) {
+      const k = dayKey(it.published_at);
+      const last = out[out.length - 1];
+      if (last && last.key === k) last.items.push(it);
+      else out.push({ key: k, items: [it] });
+    }
+    return out;
+  }, [items, sort]);
+
+  const showControls = !configMissing && !error;
+  const isEmpty = !error && !configMissing && !loading && items.length === 0;
 
   return (
-    <main className="wrap">
-      <header className="site-header">
-        {/* Hàng trên cùng: các nút điều khiển & trạng thái tài khoản */}
-        <div className="header-top-bar">
-          <div className="header-actions">
-            <button
-              className="theme-toggle"
-              onClick={toggleTheme}
-              aria-label={t(lang, theme === "dark" ? "themeToLight" : "themeToDark")}
-              title={t(lang, theme === "dark" ? "themeToLight" : "themeToDark")}
-            >
-              {theme === "dark" ? <SunIcon /> : <MoonIcon />}
-            </button>
+    <>
+      <SiteHeader lang={lang} onLangChange={setLang} active="home" />
 
-            <div className="lang-toggle" role="group" aria-label="Language">
-              <button
-                className={lang === "vi" ? "active" : ""}
-                onClick={() => pick("vi")}
-                aria-pressed={lang === "vi"}
-              >
-                VI
-              </button>
-              <button
-                className={lang === "en" ? "active" : ""}
-                onClick={() => pick("en")}
-                aria-pressed={lang === "en"}
-              >
-                EN
-              </button>
-            </div>
+      <div className="page">
+        <div className="masthead">
+          <p className="masthead-date" suppressHydrationWarning>
+            {fullDate(new Date(), lang)}
+          </p>
+          <h1 className="masthead-title">{t(lang, "tagline")}</h1>
+        </div>
 
-            {user ? (
-              <a
-                href="/tai-khoan"
-                className="header-user-btn"
-                aria-label={t(lang, "navAccount")}
-                title={t(lang, "navAccount")}
-              >
-                <UserIcon size={17} />
-              </a>
-            ) : (
-              <a href="/dang-nhap" className="header-login-btn">
-                {t(lang, "login")}
-              </a>
+        <div className="layout">
+          <main className="main-col">
+            {showControls && (
+              <>
+                <div className="tabs-bar">
+                  <div className="tabs" role="tablist" aria-label={t(lang, "sourceLabel")}>
+                    <button
+                      role="tab"
+                      aria-selected={filter === "all"}
+                      className={filter === "all" ? "active" : ""}
+                      onClick={() => setFilter("all")}
+                    >
+                      {t(lang, "all")}
+                    </button>
+                    {tabs.map((f) => {
+                      const isActive = f.key === "github" ? isGithubActive : filter === f.key;
+                      return (
+                        <button
+                          key={f.key}
+                          role="tab"
+                          aria-selected={isActive}
+                          className={isActive ? "active" : ""}
+                          onClick={() => setFilter(f.key)}
+                        >
+                          {filterLabel(f)}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="toolbar">
+                  <form
+                    className="search"
+                    role="search"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      setQ(query.trim());
+                    }}
+                  >
+                    <SearchIcon size={16} />
+                    <input
+                      type="search"
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      placeholder={t(lang, "searchPlaceholder")}
+                      aria-label={t(lang, "searchLabel")}
+                      maxLength={80}
+                    />
+                    {query && (
+                      <button
+                        type="button"
+                        className="search-clear"
+                        onClick={() => {
+                          setQuery("");
+                          setQ("");
+                        }}
+                        aria-label={t(lang, "searchClear")}
+                        title={t(lang, "searchClear")}
+                      >
+                        <CloseIcon size={14} />
+                      </button>
+                    )}
+                  </form>
+
+                  <div className="toolbar-right">
+                    {isGithubActive && githubSubFilters.length > 0 && (
+                      <select
+                        className="select"
+                        value={filter !== "github" ? filter : "github"}
+                        onChange={(e) => setFilter(e.target.value)}
+                        aria-label="GitHub"
+                      >
+                        <option value="github">{t(lang, "githubSubAll")}</option>
+                        {githubSubFilters.map((f) => (
+                          <option key={f.key} value={f.key}>
+                            {filterLabel(f)}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+
+                    <div className="segmented" role="group" aria-label={t(lang, "sortLabel")}>
+                      <button
+                        className={sort === "new" ? "active" : ""}
+                        onClick={() => setSort("new")}
+                        aria-pressed={sort === "new"}
+                      >
+                        {t(lang, "sortNew")}
+                      </button>
+                      <button
+                        className={sort === "hot" ? "active" : ""}
+                        onClick={() => setSort("hot")}
+                        aria-pressed={sort === "hot"}
+                      >
+                        {t(lang, "sortHot")}
+                      </button>
+                    </div>
+
+                    <select
+                      className="select"
+                      value={time}
+                      onChange={(e) => setTime(e.target.value)}
+                      aria-label={t(lang, "timeLabel")}
+                    >
+                      <option value="all">{t(lang, "timeAll")}</option>
+                      <option value="today">{t(lang, "timeToday")}</option>
+                      <option value="week">{t(lang, "timeWeek")}</option>
+                      <option value="month">{t(lang, "timeMonth")}</option>
+                      <option value="year">{t(lang, "timeYear")}</option>
+                    </select>
+                  </div>
+                </div>
+              </>
             )}
 
-            <HeaderMenu lang={lang} user={user} />
-          </div>
-        </div>
+            {q && (
+              <p className="results-line">
+                {t(lang, "resultsFor")} <strong>“{q}”</strong>
+              </p>
+            )}
 
-        {/* Hàng dưới: Tiêu đề thương hiệu + Tagline */}
-        <div className="header-brand">
-          <h1 className="site-title">BAI News</h1>
-          <p className="tagline">{t(lang, "tagline")}</p>
-        </div>
-      </header>
+            {configMissing && <p className="notice">{t(lang, "configHint")}</p>}
+            {(error || fetchError) && !configMissing && (
+              <p className="notice error">
+                {t(lang, "errorPrefix")}
+                {error ? `: ${error}` : ""}
+              </p>
+            )}
+            {isEmpty && !fetchError && (
+              <p className="notice">{q ? t(lang, "noResults") : t(lang, "empty")}</p>
+            )}
 
-      {/* TẮT TẠM: quảng cáo Adsterra bị người dùng phản ánh gây bung quảng cáo/popup khi bấm
-          link trên trang — xem docs/handoff/adsense-monetization.md để biết diễn biến trước khi
-          bật lại (đổi network khác hoặc kiểm tra lại cấu hình ad unit). */}
-      {false && <HeaderAdBanner />}
-
-      {!configMissing && !error && availableFilters.length > 0 && (
-        <div className="controls">
-          <div className="control-group">
-            <span className="control-label">{t(lang, "sourceLabel")}</span>
-            <div className="source-filter" role="group" aria-label="Filter by source">
-              <button
-                className={filter === "all" ? "active" : ""}
-                onClick={() => setFilter("all")}
-                aria-pressed={filter === "all"}
-              >
-                {t(lang, "all")}
-              </button>
-              {availableFilters.map((f) => (
-                <button
-                  key={f.key}
-                  className={f.key === "github" && isGithubActive ? "active" : filter === f.key ? "active" : ""}
-                  onClick={() => setFilter(f.key)}
-                  aria-pressed={f.key === "github" ? isGithubActive : filter === f.key}
-                >
-                  {filterLabel(f)}
-                </button>
-              ))}
-
-              {/* Ô chọn phụ GitHub — chỉ hiện khi đang lọc nhóm GitHub */}
-              {isGithubActive && githubSubFilters.length > 0 && (
-                <select
-                  className="github-sub-select"
-                  value={isGithubActive && filter !== "github" ? filter : "github"}
-                  onChange={(e) => setFilter(e.target.value)}
-                  aria-label="GitHub sub-filter"
-                >
-                  <option value="github">{t(lang, "githubSubAll")}</option>
-                  {githubSubFilters.map((f) => (
-                    <option key={f.key} value={f.key}>
-                      {filterLabel(f)}
-                    </option>
+            <div className="feed">
+              {groups.map((g) => (
+                <Fragment key={g.key}>
+                  {sort === "new" && (
+                    <h2 className="day-heading" suppressHydrationWarning>
+                      {dayLabel(g.key, lang, todayKey)}
+                    </h2>
+                  )}
+                  {g.items.map((it) => (
+                    <NewsCard key={it.id} item={it} lang={lang} initialSaved={savedIds.has(it.id)} />
                   ))}
-                </select>
-              )}
-            </div>
-          </div>
-
-          <div className="control-row">
-            <div className="control-group">
-              <span className="control-label">{t(lang, "sortLabel")}</span>
-              <div className="pill-toggle" role="group" aria-label={t(lang, "sortLabel")}>
-                <button
-                  className={sort === "new" ? "active" : ""}
-                  onClick={() => setSort("new")}
-                  aria-pressed={sort === "new"}
-                >
-                  {t(lang, "sortNew")}
-                </button>
-                <button
-                  className={sort === "hot" ? "active" : ""}
-                  onClick={() => setSort("hot")}
-                  aria-pressed={sort === "hot"}
-                >
-                  {t(lang, "sortHot")}
-                </button>
-              </div>
+                </Fragment>
+              ))}
             </div>
 
-            <div className="control-group">
-              <span className="control-label">{t(lang, "timeLabel")}</span>
-              <select
-                className="time-select"
-                value={time}
-                onChange={(e) => setTime(e.target.value)}
-                aria-label={t(lang, "timeLabel")}
-              >
-                <option value="all">{t(lang, "timeAll")}</option>
-                <option value="today">{t(lang, "timeToday")}</option>
-                <option value="week">{t(lang, "timeWeek")}</option>
-                <option value="month">{t(lang, "timeMonth")}</option>
-                <option value="year">{t(lang, "timeYear")}</option>
-              </select>
-            </div>
-          </div>
+            {loading && <SkeletonList count={items.length === 0 ? 5 : 2} />}
+            {!loading && !hasMore && items.length > 0 && (
+              <p className="feed-end">{t(lang, "end")}</p>
+            )}
+
+            {/* Điểm mốc để phát hiện cuộn tới cuối */}
+            <div ref={sentinelRef} aria-hidden="true" style={{ height: 1 }} />
+          </main>
+
+          <Rail lang={lang} topItems={topItems} githubItems={githubItems} />
         </div>
-      )}
-
-      {configMissing && <p className="notice">{t(lang, "configHint")}</p>}
-      {error && !configMissing && (
-        <p className="notice error">
-          {t(lang, "errorPrefix")}: {error}
-        </p>
-      )}
-      {!error && !configMissing && !loading && items.length === 0 && (
-        <p className="notice">{t(lang, "empty")}</p>
-      )}
-
-      {items.length > 0 && (
-        <p className="count">
-          {items.length}
-          {hasMore ? "+" : ""} {t(lang, "itemsSuffix")}
-          {filter !== "all" && activeFilterLabel ? ` · ${activeFilterLabel}` : ""}
-        </p>
-      )}
-
-      <div className="feed">
-        {items.map((it) => (
-          <NewsCard
-            key={it.id}
-            item={it}
-            lang={lang}
-            initialSaved={savedIds.has(it.id)}
-          />
-        ))}
       </div>
 
-      {loading && (
-        <p className="loadmore">{t(lang, "loadingMore")}</p>
-      )}
-      {!loading && !hasMore && items.length > 0 && (
-        <p className="loadmore end">{t(lang, "end")}</p>
-      )}
-
-      {/* Điểm mốc để phát hiện cuộn tới cuối */}
-      <div ref={sentinelRef} aria-hidden="true" style={{ height: 1 }} />
-
-      {/* Link tới các trang khác đã chuyển lên menu ☰ ở header */}
-      <footer className="site-footer">
-        <a href={lang === "en" ? "/en/github-ai" : "/github-ai"}>
-          {t(lang, "navGithubAi")} →
-        </a>
-      </footer>
-    </main>
+      <SiteFooter lang={lang} />
+      <BackToTop lang={lang} />
+    </>
   );
 }

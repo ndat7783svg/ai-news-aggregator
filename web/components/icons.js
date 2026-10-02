@@ -15,9 +15,10 @@ export function ShareIcon({ size = 17 }) {
       strokeLinejoin="round"
       aria-hidden="true"
     >
-      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-      <polyline points="15 3 21 3 21 9" />
-      <line x1="10" y1="14" x2="21" y2="3" />
+      <circle cx="18" cy="5" r="3" />
+      <circle cx="6" cy="12" r="3" />
+      <circle cx="18" cy="19" r="3" />
+      <path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4" />
     </svg>
   );
 }
@@ -139,5 +140,74 @@ export function GoogleIcon({ size = 18 }) {
         d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
       />
     </svg>
+  );
+}
+
+// Khung chung cho các icon nét (stroke) bên dưới.
+function StrokeIcon({ size, children, strokeWidth = 2 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={strokeWidth}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      {children}
+    </svg>
+  );
+}
+
+export function SearchIcon({ size = 17 }) {
+  return (
+    <StrokeIcon size={size}>
+      <circle cx="11" cy="11" r="7" />
+      <path d="M20 20l-3.5-3.5" />
+    </StrokeIcon>
+  );
+}
+
+export function CloseIcon({ size = 16 }) {
+  return (
+    <StrokeIcon size={size}>
+      <path d="M18 6L6 18M6 6l12 12" />
+    </StrokeIcon>
+  );
+}
+
+export function SunIcon({ size = 17 }) {
+  return (
+    <StrokeIcon size={size}>
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+    </StrokeIcon>
+  );
+}
+
+export function MoonIcon({ size = 17 }) {
+  return (
+    <StrokeIcon size={size}>
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+    </StrokeIcon>
+  );
+}
+
+export function ArrowUpIcon({ size = 18 }) {
+  return (
+    <StrokeIcon size={size}>
+      <path d="M12 19V5M5 12l7-7 7 7" />
+    </StrokeIcon>
+  );
+}
+
+export function ExternalIcon({ size = 14 }) {
+  return (
+    <StrokeIcon size={size}>
+      <path d="M7 17L17 7M9 7h8v8" />
+    </StrokeIcon>
   );
 }

@@ -24,6 +24,8 @@ export async function GET(request) {
     Math.max(1, parseInt(searchParams.get("limit") || String(PAGE_SIZE), 10) || PAGE_SIZE)
   );
 
-  const result = await fetchItems({ filter, sort, time, offset, limit });
+  const q = (searchParams.get("q") || "").slice(0, 120);
+
+  const result = await fetchItems({ filter, sort, time, offset, limit, q });
   return Response.json(result);
 }

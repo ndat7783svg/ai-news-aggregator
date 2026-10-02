@@ -4,14 +4,23 @@ import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "../../lib/supabaseClient";
 import { t } from "../../lib/i18n";
+import { useLang } from "../../lib/useSiteState";
+import SiteHeader from "../../components/SiteHeader";
+import SiteFooter from "../../components/SiteFooter";
 import { GoogleIcon } from "../../components/icons";
 
 function DangKyForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectPath = searchParams.get("redirect") || "/";
+  // Chỉ chấp nhận đường dẫn NỘI BỘ ("/..."), chặn "//domain" hoặc "https://..." để không bị
+  // lợi dụng chuyển người dùng sang trang lạ sau khi đăng nhập (open redirect).
+  const rawRedirect = searchParams.get("redirect") || "/";
+  const redirectPath =
+    rawRedirect.startsWith("/") && !rawRedirect.startsWith("//") && !rawRedirect.startsWith("/\\")
+      ? rawRedirect
+      : "/";
 
-  const [lang, setLang] = useState("vi");
+  const [lang] = useLang();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -21,11 +30,6 @@ function DangKyForm() {
   const [successMsg, setSuccessMsg] = useState(false);
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem("lang");
-      if (saved === "vi" || saved === "en") setLang(saved);
-    } catch {}
-
     if (supabase) {
       supabase.auth.getUser().then(({ data: { user } }) => {
         if (user) {
@@ -149,6 +153,8 @@ function DangKyForm() {
   }
 
   return (
+    <>
+    <SiteHeader />
     <main className="wrap auth-page-wrap">
       <div className="auth-card">
         <a href="/" className="detail-back">
@@ -262,6 +268,8 @@ function DangKyForm() {
         )}
       </div>
     </main>
+    <SiteFooter lang={lang} />
+    </>
   );
 }
 

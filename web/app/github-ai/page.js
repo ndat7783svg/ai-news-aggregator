@@ -1,5 +1,9 @@
 import { fetchItems } from "../../lib/supabaseServer";
 import GithubAiList from "../../components/GithubAiList";
+import SiteHeader from "../../components/SiteHeader";
+import SiteFooter from "../../components/SiteFooter";
+
+const LANG_LINKS = { vi: "/github-ai", en: "/en/github-ai" };
 
 export const revalidate = 300;
 
@@ -26,30 +30,22 @@ export default async function GithubAiPageVI() {
   });
 
   return (
-    <main className="wrap">
-      <header className="site-header">
-        <div>
-          <h1 className="site-title">
-            <a href="/" style={{ textDecoration: "none", color: "inherit" }}>
-              BAI News
-            </a>
-          </h1>
-          <p className="tagline">Tổng hợp &amp; tóm tắt tin tức, kèm nguồn.</p>
-        </div>
-      </header>
-
-      <section style={{ marginBottom: "1.5rem" }}>
-        <h2 style={{ fontSize: "1.35rem", fontWeight: 700, marginBottom: "0.5rem" }}>
-          GitHub AI nổi bật
-        </h2>
-        <p style={{ color: "var(--muted)", lineHeight: 1.6, margin: 0 }}>
-          Tổng hợp các repo AI nổi bật trên GitHub — bao gồm GitHub trending AI hàng ngày, hàng
+    <>
+      <SiteHeader lang="vi" langLinks={LANG_LINKS} active="github" />
+      <main className="page-narrow">
+        <div className="page-head">
+          <p className="page-kicker">Mã nguồn mở</p>
+          <h1 className="page-title">GitHub AI nổi bật</h1>
+          <p className="page-desc">
+            Tổng hợp các repo AI nổi bật trên GitHub — bao gồm GitHub trending AI hàng ngày, hàng
           tuần, hàng tháng và các dự án mã nguồn mở kinh điển được cộng đồng đánh dấu sao nhiều
           nhất. Nội dung được tóm tắt tự động bằng AI, cập nhật liên tục.
-        </p>
-      </section>
+          </p>
+        </div>
 
-      <GithubAiList items={items} lang="vi" />
-    </main>
+        <GithubAiList items={items} lang="vi" />
+      </main>
+      <SiteFooter lang="vi" />
+    </>
   );
 }

@@ -5,21 +5,19 @@ import { useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabaseClient";
 import { fetchUserSavedItemIds } from "../../lib/savedItems";
 import { t } from "../../lib/i18n";
+import { useLang } from "../../lib/useSiteState";
+import SiteHeader from "../../components/SiteHeader";
+import SiteFooter from "../../components/SiteFooter";
 import { BookmarkIcon, UserIcon } from "../../components/icons";
 
 export default function TaiKhoanPage() {
   const router = useRouter();
-  const [lang, setLang] = useState("vi");
+  const [lang] = useLang();
   const [user, setUser] = useState(null);
   const [savedCount, setSavedCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem("lang");
-      if (saved === "vi" || saved === "en") setLang(saved);
-    } catch {}
-
     if (!supabase) {
       setLoading(false);
       return;
@@ -45,9 +43,12 @@ export default function TaiKhoanPage() {
 
   if (loading) {
     return (
-      <main className="wrap auth-page-wrap">
-        <p className="loadmore">{t(lang, "loadingMore")}</p>
-      </main>
+      <>
+        <SiteHeader />
+        <main className="wrap auth-page-wrap">
+          <p className="loadmore">{t(lang, "loadingMore")}</p>
+        </main>
+      </>
     );
   }
 
@@ -60,6 +61,8 @@ export default function TaiKhoanPage() {
     "User";
 
   return (
+    <>
+    <SiteHeader />
     <main className="wrap auth-page-wrap">
       <div className="auth-card account-card">
         <a href="/" className="detail-back">
@@ -100,5 +103,7 @@ export default function TaiKhoanPage() {
         </div>
       </div>
     </main>
+    <SiteFooter lang={lang} />
+    </>
   );
 }

@@ -30,28 +30,30 @@ X/Twitter **bỏ hẳn** (API đọc ~$100+/tháng, không hợp chi phí).
 
 ## 2. Trạng thái hiện tại — ĐÃ CHẠY THẬT trên production
 - **Brand hiển thị: "BAI News"** (tagline trung lập "Tổng hợp & tóm tắt tin tức, kèm nguồn").
-  Tên project hạ tầng (Vercel/GitHub/Supabase) giữ nguyên `ai-news-aggregator`. Banner thông báo
-  đổi tên tự ẩn sau 30/07/2026, không cần deploy lại.
-- **Giao diện:** feed thẻ kiểu Techmeme/TLDR; VI/EN (nhớ `localStorage`); Sáng/Tối (theo hệ
-  thống hoặc chọn tay, nhớ `localStorage`); lọc theo nguồn (Tất cả + từng nguồn, 13 blog gộp 3
-  nhóm: Blog hãng AI/Báo công nghệ/Newsletter); sắp xếp Mới nhất/Nổi bật; lọc thời gian (Hôm
-  nay/Tuần/Tháng/Năm/Mọi lúc); infinite scroll (`/api/items`, 40 tin/lần).
-- **GitHub:** 6 nguồn con (Release/Trending nhiều sao/🔥 ngày/tuần/tháng/Kinh điển) gộp vào 1 nút
+  Tên project hạ tầng (Vercel/GitHub/Supabase) giữ nguyên `ai-news-aggregator`.
+- **Giao diện kiểu trang báo (editorial):** nền giấy ấm, 1 màu nhấn đỏ son, tiêu đề serif
+  (Source Serif 4) + chữ thân Be Vietnam Pro (`next/font`), tin ngăn bằng đường kẻ — KHÔNG quay lại
+  thẻ bo tròn/bóng đổ/pill xanh (bị chê "AI hoá"). Header + footer dùng chung mọi trang
+  (`SiteHeader.js`/`SiteFooter.js`). Trang chủ: tab chuyên mục cố định khi cuộn, ô tìm kiếm
+  (`/api/items?q=`), Mới nhất/Nổi bật, lọc thời gian, chia tin theo ngày (giờ VN), cột phải
+  "Nổi bật tuần" + "GitHub đang lên" (≥1024px), infinite scroll 40 tin/lần. VI/EN và Sáng/Tối
+  nhớ `localStorage` (hook `web/lib/useSiteState.js`).
+- **GitHub:** 6 nguồn con (Release/Nhiều sao nhất/Trending hôm nay/tuần/tháng/Kinh điển) gộp vào 1 nút
   "GitHub" + `<select>` phụ, **đã tách hẳn khỏi feed "Tất cả"** (trang chủ mặc định chỉ hiện tin
   thời sự/báo/blog/arXiv/HN). "Nổi bật nhất" trong phạm vi GitHub sắp theo số sao.
   Thẻ hiển thị ★ + số rút gọn + badge ngôn ngữ lập trình.
 - **Tiêu đề dịch (`title_vi`):** chế độ VI hiện tiêu đề tiếng Việt, EN giữ gốc — sinh trong bước
   tóm tắt (`summarizer.js`).
 - **SEO:** `robots.js`/`sitemap.js`/`icon.svg`/metadata mở rộng (`layout.js`). Trang chủ tiếng Anh `/en` (metadata + Open Graph + hreflang tiếng Anh độc lập). 2 trang chuyên đề song ngữ **"GitHub AI nổi bật"**: `/github-ai` (VI) + `/en/github-ai` (EN), server-rendered ISR 5 phút, hreflang liên kết chéo (`GithubAiList.js`, KHÔNG dùng chung `NewsCard.js`).
-- **Lưu tin + Chia sẻ (chỉ trang chủ, chưa có ở `/github-ai`):** nút 🔖 lưu vào danh sách
-  `localStorage` (khoá `bai_saved_lists`, module `web/lib/savedLists.js`) — bấm là lưu ngay vào
-  "Đã lưu" mặc định, mũi tên mở popup chọn/tạo danh sách khác (`SaveListPopup.js`). Nút Chia sẻ
-  (`web/lib/share.js`) dùng `navigator.share()`/fallback copy link, **luôn trỏ về
-  `bainews.site/tin/{id}`** (trang chi tiết `web/app/tin/[id]/`, không chia sẻ thẳng link gốc).
-  Trang "Đã lưu" ở `/da-luu` (luôn gọi `/api/saved-items?ids=...`, không cache cũ). Cả 2 nút vẽ
-  kiểu pill bo tròn (icon SVG, `web/components/icons.js`), không dùng emoji.
-- **Menu ☰ ở header** (`HeaderMenu.js`, ngoài cùng bên phải): Trang chủ / GitHub AI nổi bật / Tin
-  đã lưu.
+- **Tài khoản (Supabase Auth):** đăng ký/đăng nhập email+mật khẩu hoặc Google (`/dang-nhap`,
+  `/dang-ky`, `/tai-khoan`); `?redirect=` chỉ nhận đường dẫn nội bộ.
+- **Lưu tin + Chia sẻ** (trang chủ, `/da-luu`, `/tin/[id]` — chưa có ở `/github-ai`): Lưu theo
+  tài khoản (bảng `saved_items`, `web/lib/savedItems.js`; chưa đăng nhập → chuyển tới đăng nhập).
+  Nút dùng chung `StoryActions.js`. Chia sẻ (`web/lib/share.js`) **luôn trỏ về
+  `bainews.site/tin/{id}?lang=..`** (không chia sẻ thẳng link gốc). Trang chi tiết có mục "Tin
+  mới khác" để giữ người đọc.
+- **Điều hướng:** máy tính = link ngang trong header (Tin mới / GitHub AI / Tin đã lưu); điện thoại
+  (≤760px) = menu ☰ (`HeaderMenu.js`).
 - **Vercel Web Analytics** đã bật, xem ở Vercel dashboard → tab Analytics. Traffic hiện phụ thuộc
   gần hoàn toàn kênh Facebook, gần như 0% từ tìm kiếm (chi tiết + số liệu: `HANDOFF.md`).
 - **DB:** Supabase bảng `news_items`, RLS đọc-công-khai/ghi-chỉ-service_role, ~170+ tin.
@@ -77,8 +79,8 @@ X/Twitter **bỏ hẳn** (API đọc ~$100+/tháng, không hợp chi phí).
     đã gắn trong `web/app/layout.js`) — **đang chờ Google xác minh quyền sở hữu domain**, chưa
     bấm "Yêu cầu xem xét". Domain đã đổi qua 3 tài khoản AdSense trong vài ngày, tránh đổi thêm.
   - **Adsterra:** đã XÁC NHẬN gây hành vi độc hại thật (popup/chuyển hướng lạ khi bấm link, có
-    bằng chứng người dùng bị nhảy sang link Shopee lạ) — đã tắt hẳn trong `web/components/Feed.js`
-    (`{false && <HeaderAdBanner />}`), quyết định không dùng lại.
+    bằng chứng người dùng bị nhảy sang link Shopee lạ) — đã gỡ hẳn code khỏi site, quyết định
+    không dùng lại.
   - **Đã tìm mạng thay thế:** Monetag bị loại (cùng nhóm "remnant"/popunder rủi ro như Adsterra).
     **Infolinks** là lựa chọn an toàn hơn nếu AdSense không thành (không phải popup, nhưng doanh
     thu rất thấp) — CHƯA triển khai, chỉ mới xác định là phương án dự phòng.
@@ -145,6 +147,9 @@ X/Twitter **bỏ hẳn** (API đọc ~$100+/tháng, không hợp chi phí).
   `strategy="beforeInteractive"` — vì Next.js chèn qua cơ chế JS runtime
   (`self.__next_s.push(...)`/RSC payload), không ra `<script src=...>` tĩnh trong HTML gốc, nên
   bot xác minh bên thứ 3 không đọc được. Chi tiết: `docs/handoff/adsense-monetization.md`.
+- **Biến CSS `--font-sans`/`--font-serif` là của `next/font` (gắn lên `<html>` ở `layout.js`)** —
+  đừng khai báo lại trong `globals.css` (sẽ đè mất font, dấu tiếng Việt bị tách rời); site dùng
+  `--ff-sans`/`--ff-serif`.
 - **Khung trình duyệt tự động của Claude không compositing frame** → click mô phỏng,
   IntersectionObserver, CSS `transition` đều không chạy trong đó. Kiểm tra bằng `dispatchEvent` +
   tắt transition tạm thời (`<style>*{transition:none!important}</style>`) khi cần đo màu/hiệu

@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { fetchItemById } from "../../../lib/supabaseServer";
-import { sourceMeta, relativeTime, formatStars } from "../../../lib/format";
+import { fetchItemById, fetchItems } from "../../../lib/supabaseServer";
 import DetailContent from "./DetailContent";
 
 export const revalidate = 300;
@@ -30,12 +29,17 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function TinDetailPage({ params }) {
-  const item = await fetchItemById(params.id);
+  const [item, latest] = await Promise.all([
+    fetchItemById(params.id),
+    fetchItems({ filter: "all", sort: "new", limit: 7 }),
+  ]);
   if (!item) notFound();
+  // "Tin mới khác": tin mới nhất (bỏ chính tin đang xem) → giữ người đọc từ Facebook ở lại trang.
+  const related = (latest.items || []).filter((r) => r.id !== item.id).slice(0, 6);
 
   return (
-    <Suspense fallback={<div className="detail-wrap"><p className="loadmore">...</p></div>}>
-      <DetailContent item={item} />
+    <Suspense fallback={<div className="detail"><p className="loadmore">...</p></div>}>
+      <DetailContent item={item} related={related} />
     </Suspense>
   );
 }
